@@ -1,0 +1,36 @@
+-- Gestão de Serviços · banco de dados (Supabase / PostgreSQL)
+-- JÁ APLICADO no projeto "gestao-vale-animal". Guardado aqui só como registro/cópia.
+
+create table if not exists public.docs (
+  collection text        not null,
+  id         text        not null,
+  data       jsonb       not null,
+  updated_at timestamptz not null default now(),
+  primary key (collection, id)
+);
+create index if not exists docs_collection_idx on public.docs (collection);
+alter table public.docs enable row level security;
+
+-- Lista de e-mails autorizados (fora da API pública). Só quem está nela lê/grava.
+create schema if not exists private;
+create table if not exists private.allowed_users (email text primary key);
+alter table private.allowed_users enable row level security;
+create or replace function private.is_allowed() returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from private.allowed_users u where lower(u.email) = lower(coalesce(auth.jwt() ->> 'email','')));
+$$;
+revoke all on function private.is_allowed() from public, anon;
+grant usage on schema private to authenticated;
+grant execute on function private.is_allowed() to authenticated;
+
+drop policy if exists "usuarios autorizados" on public.docs;
+create policy "usuarios autorizados" on public.docs for all to authenticated
+  using ((select private.is_allowed())) with check ((select private.is_allowed()));
+
+do $$ begin
+  alter publication supabase_realtime add table public.docs;
+exception when duplicate_object then null;
+end $$;
+
+-- Para autorizar alguém (depois de criar o usuário em Authentication > Users):
+-- insert into private.allowed_users (email) values ('pessoa@exemplo.com');

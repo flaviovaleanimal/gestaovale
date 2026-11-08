@@ -1,18 +1,14 @@
-/* Conexão com a API na nuvem (Netlify + Neon) + tela de login.
-   Oferece ao app a mesma interface do banco do protótipo: collection(c).doc(id).set/delete e collection(c).onSnapshot. */
+/* Conexão com o banco na nuvem (Supabase) + tela de login.
+   Imita a mesma interface do banco usado no protótipo: collection(c).doc(id).set/delete e collection(c).onSnapshot. */
 (function(){
-  const API='/.netlify/functions/api',TK='gs-token',POLL=10000;
-  const tok=()=>{try{return localStorage.getItem(TK)}catch(e){return null}};
-  const setTok=v=>{try{v?localStorage.setItem(TK,v):localStorage.removeItem(TK)}catch(e){}};
-  async function call(body){
-    let r;
-    try{r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(tok()||'')},body:JSON.stringify(body)})}
-    catch(e){throw {code:'unavailable',message:'rede'}}
-    let j={};try{j=await r.json()}catch(e){}
-    if(r.status===401&&body.action!=='login'){setTok(null);location.reload();throw {code:'invalid_argument'}}
-    if(!r.ok)throw {code:r.status>=500?'unavailable':'invalid_argument',status:r.status,erro:j.erro};
-    return j;
-  }
+  const cfg=window.GS_CONFIG||{};
+  const ok=cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY&&!/COLE_AQUI/.test(cfg.SUPABASE_URL+cfg.SUPABASE_ANON_KEY)&&window.supabase;
+  let sb=null;
+  const wrap=e=>{
+    const msg=String((e&&e.message)||''),st=e&&e.status;
+    const net=!st&&/fetch|network|failed|load/i.test(msg);
+    return {code:net?'unavailable':(st===401||st===403||(e&&e.code==='42501')?'invalid_argument':'error'),message:msg};
+  };
   function css(){
     const s=document.createElement('style');
     s.textContent=`#gs-login{position:fixed;inset:0;z-index:9999;background:var(--head,#12285a);display:grid;place-items:center;padding:16px;font-family:var(--f-body,system-ui)}
@@ -36,45 +32,45 @@
       const f=d.querySelector('form'),er=d.querySelector('.err'),b=d.querySelector('button');
       f.addEventListener('submit',async e=>{
         e.preventDefault();er.textContent='';b.disabled=true;b.textContent='Entrando…';
-        try{const j=await call({action:'login',email:d.querySelector('#gs-e').value,password:d.querySelector('#gs-p').value});
-          setTok(j.token);d.remove();res()}
-        catch(x){er.textContent=x.status===401?'E-mail ou senha incorretos.':'Não foi possível entrar. Verifique a internet e tente de novo.'}
+        const {error}=await sb.auth.signInWithPassword({email:d.querySelector('#gs-e').value.trim(),password:d.querySelector('#gs-p').value});
         b.disabled=false;b.textContent='Entrar';
+        if(error){er.textContent=/invalid/i.test(error.message)?'E-mail ou senha incorretos.':'Não foi possível entrar. Verifique a internet e tente de novo.';return}
+        d.remove();res();
       });
     });
   }
-  /* uma única consulta periódica alimenta todas as coleções */
-  const subs=[];let timer=null,pend=null,busy=false;
-  async function poll(){
-    if(busy)return;busy=true;
-    try{
-      const all=await call({action:'all'});
-      subs.forEach(s=>{const arr=all[s.c]||[],k=JSON.stringify(arr);if(k!==s.last){s.last=k;s.ok({docs:arr.map(x=>({data:()=>x})),metadata:{fromCache:false}})}});
-    }catch(e){subs.forEach(s=>s.err&&s.err(e))}
-    busy=false;
-  }
-  const soon=()=>{clearTimeout(pend);pend=setTimeout(poll,400)};
   function makeDB(){
     return {collection:c=>({
       doc:id=>({
-        set:async data=>{await call({action:'set',collection:c,id,data});soon()},
-        delete:async()=>{await call({action:'del',collection:c,id});soon()}
+        set:async data=>{const {error}=await sb.from('docs').upsert({collection:c,id,data,updated_at:new Date().toISOString()});if(error)throw wrap(error)},
+        delete:async()=>{const {error}=await sb.from('docs').delete().eq('collection',c).eq('id',id);if(error)throw wrap(error)}
       }),
-      onSnapshot:(ok,err)=>{
-        subs.push({c,ok,err,last:null});
-        if(!timer)timer=setInterval(()=>{if(!document.hidden)poll()},POLL);
-        soon();
-        return()=>{}
+      onSnapshot:(onOk,onErr)=>{
+        let t=null,dead=false;
+        const load=async()=>{
+          const {data,error}=await sb.from('docs').select('data').eq('collection',c);
+          if(dead)return;
+          if(error){onErr&&onErr(wrap(error));return}
+          onOk({docs:data.map(r=>({data:()=>r.data})),metadata:{fromCache:false}});
+        };
+        load();
+        const ch=sb.channel('docs-'+c+'-'+Math.random().toString(36).slice(2))
+          .on('postgres_changes',{event:'*',schema:'public',table:'docs',filter:'collection=eq.'+c},()=>{clearTimeout(t);t=setTimeout(load,250)})
+          .subscribe();
+        return()=>{dead=true;sb.removeChannel(ch)};
       }
     })};
   }
   window.GS_CLOUD={
-    enabled:location.protocol!=='file:',
+    enabled:!!ok,
     async connect(){
-      if(tok()){try{await call({action:'me'})}catch(e){if(e.code!=='unavailable')setTok(null)}}
-      if(!tok())await askLogin();
+      if(!ok)return null;
+      sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+      const {data}=await sb.auth.getSession();
+      if(!data.session)await askLogin();
+      sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT')location.reload()});
       return makeDB();
     },
-    logout(){setTok(null);location.reload()}
+    async logout(){if(sb)await sb.auth.signOut();location.reload()}
   };
 })();

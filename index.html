@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="pt-BR"><head>
+<meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gestão de Serviços</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -99,6 +100,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .btn.sm{padding:4px 9px;font-size:12.5px}
 :focus-visible{outline:2px solid var(--head);outline-offset:2px}
 .side :focus-visible,.hdr :focus-visible{outline-color:#fff}
+.wa{color:var(--in);font-weight:600;text-decoration:none;white-space:nowrap} .wa:hover{text-decoration:underline} .waic{vertical-align:-3px}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
 .pill{display:inline-block;border-radius:99px;padding:2px 9px;font-size:12px;font-weight:600;white-space:nowrap}
 .pill.in{background:var(--in-bg);color:var(--in)} .pill.out{background:var(--out-bg);color:var(--out)}
@@ -189,6 +191,67 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 @media(prefers-reduced-motion:reduce){.kids,.chev{transition:none}}
 @media(prefers-reduced-motion:no-preference){.ov{animation:fd .15s ease-out}@keyframes fd{from{opacity:0}}}
 
+.tw.cmp table{font-size:12.5px}.tw.cmp th,.tw.cmp td{padding:9px 6px;white-space:nowrap}.tw.cmp th{letter-spacing:.02em;font-size:11px}
+
+.paper.land table{min-width:0;width:100%;font-size:11px}.paper.land th,.paper.land td{padding:6px 4px;white-space:normal}.paper.land th{font-size:9.5px;letter-spacing:.01em}
+
+.form.svc3{grid-template-columns:130px minmax(0,2fr) minmax(0,1fr)}@media(max-width:640px){.form.svc3{grid-template-columns:100px minmax(0,1fr)}.form.svc3>:last-child{grid-column:1/-1}}
+
+.ag-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.ag-title{font-size:19px;font-weight:700;margin:0 6px;flex:1 1 180px;min-width:0}
+.ag-seg{display:inline-flex;gap:0}.ag-seg .btn{border-radius:0;margin-left:-1px}.ag-seg .btn:first-child{border-radius:8px 0 0 8px;margin-left:0}.ag-seg .btn:last-child{border-radius:0 8px 8px 0}
+.ag-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.ag-wd{padding:6px 2px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-transform:uppercase}
+.ag-day{min-height:108px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;overflow:hidden;min-width:0}
+.ag-chip[draggable],.ag-ev[draggable]{cursor:grab}.ag-dragging{opacity:.45}.ag-over{background:var(--navy-soft);outline:2px dashed var(--navy);outline-offset:-2px}
+.ag-day:hover{background:var(--navy-soft)}
+.ag-day.out .ag-num{color:var(--muted);font-weight:500}
+.ag-num{display:inline-flex;min-width:26px;height:26px;align-items:center;justify-content:center;border-radius:13px;font-size:13px;font-weight:600;border:0;background:none;color:var(--ink);cursor:pointer;padding:0 4px}
+.ag-num.today{background:var(--navy);color:var(--navy-ink)}
+.ag-chip{display:block;width:100%;text-align:left;border:0;border-radius:4px;padding:1px 6px;margin-top:2px;font-size:10.5px;line-height:1.5;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;font-family:inherit}
+.ag-chip.t{background:none;color:var(--ink)}.ag-chip.t:hover{background:var(--navy-soft)}
+.ag-chip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
+.ag-wrap{overflow-x:auto}.ag-wrap>div{min-width:620px}
+.ag-gridrow{display:grid;grid-template-columns:52px repeat(var(--n),minmax(0,1fr))}
+.ag-hd{text-align:center;padding:6px 2px;border-left:1px solid var(--line);font-size:12px;color:var(--muted);text-transform:uppercase}
+.ag-hd .ag-num{display:flex;margin:2px auto 0;width:36px;height:36px;border-radius:18px;font-size:19px;font-weight:500}
+.ag-ad{border-left:1px solid var(--line);padding:2px;min-height:26px;min-width:0}
+.ag-scroll{max-height:calc(100vh - 330px);min-height:340px;overflow:auto;border-top:1px solid var(--line)}
+.ag-col{position:relative;border-left:1px solid var(--line)}
+.ag-slot{height:48px;border-bottom:1px solid var(--line);box-sizing:border-box;cursor:pointer}.ag-slot:hover{background:var(--navy-soft)}
+.ag-hr{height:48px;font-size:11px;color:var(--muted);text-align:right;padding-right:6px;box-sizing:border-box;position:relative}.ag-hr span{position:relative;top:-7px}
+.ag-ev{position:absolute;border-radius:5px;padding:2px 5px;font-size:10.5px;color:#fff;overflow:hidden;border:1px solid var(--surface);text-align:left;cursor:pointer;line-height:1.25;box-sizing:border-box;font-family:inherit;z-index:1}
+.ag-ev b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-ev span{display:block;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-now{position:absolute;left:0;right:0;height:2px;background:#d93025;z-index:2;pointer-events:none}
+.ag-list-d{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ag-list-h{flex:0 0 120px;font-weight:700}.ag-list-h small{display:block;color:var(--muted);font-weight:500;text-transform:capitalize}
+.ag-li{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:5px 6px;border-radius:6px;cursor:pointer;font-family:inherit;color:var(--ink);font-size:13px}.ag-li:hover{background:var(--navy-soft)}
+.ag-li i{width:10px;height:10px;border-radius:50%;flex:0 0 auto}.ag-li em{font-style:normal;color:var(--muted);min-width:96px}
+.ag-cols{display:flex;gap:8px;flex-wrap:wrap}.ag-cols label{cursor:pointer}.ag-cols input{position:absolute;opacity:0;width:0;height:0}
+.ag-cols span{display:block;width:28px;height:28px;border-radius:50%;border:3px solid transparent;box-sizing:border-box}
+.ag-cols input:checked+span{border-color:var(--ink);box-shadow:0 0 0 2px var(--surface) inset}.ag-cols input:focus-visible+span{outline:2px solid var(--head);outline-offset:2px}
+@media(max-width:640px){.ag-day{min-height:78px}.ag-chip{font-size:10px;padding:0 4px}.ag-title{flex-basis:100%;order:-1}}
+
+.ini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.ini-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;align-items:start}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.kpi .k-l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .k-n{font-size:40px;font-weight:700;line-height:1.1;margin:0 0 4px;color:var(--ink)}
+.kpi .k-s{font-size:12.5px;color:var(--muted)}
+.ini-row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}
+.ini-row:last-child{border-bottom:0}.ini-row small{display:block;color:var(--muted)}
+.ini-ev{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:8px 6px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--ink);font-size:14px}.ini-ev:hover{background:var(--navy-soft)}
+.ini-ev i{width:10px;height:10px;border-radius:50%;flex:0 0 auto}.ini-ev small{display:block;color:var(--muted)}
+
+.ch{display:flex;align-items:flex-end;gap:6px;height:190px;border-bottom:1px solid var(--line);padding-top:22px}
+.ch-c{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.ch-v{font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.ch-b{width:100%;max-width:42px;background:var(--navy);border-radius:4px 4px 0 0;min-height:2px;transition:opacity .15s}.ch-c:hover .ch-b{opacity:.75}.ch-c.now .ch-b{background:#5b8def}
+.ch-x{display:flex;gap:6px;margin-top:6px}.ch-x span{flex:1;min-width:0;text-align:center;font-size:11px;color:var(--muted)}.ch-x span.now{color:var(--ink);font-weight:700}
+
+@page land{size:A4 landscape;margin:10mm}
 @media print{
   @page{size:A4;margin:12mm}
   html,body{height:auto!important;overflow:visible!important;background:#fff!important}
@@ -197,6 +260,8 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
   .modal{max-width:none!important;padding:0!important;margin:0!important;background:none!important;border-radius:0!important}
   .modal>h3,.modal>.mf,.modal>p{display:none!important}
   .paper{border:0!important}
+  .paper.land{page:land}
+  .paper.land table{font-size:11px}
   .paper-b{overflow:visible!important;padding:12px 0!important}
   .paper table{min-width:0!important}
   .paper-h,.paper th,.paper tfoot td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -213,6 +278,8 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 <div id="toast" hidden></div>
 <div id="modal-root"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
 <script src="cloud.js"></script>
 <script>
 const KEY='gs-semen-v1';
@@ -222,6 +289,8 @@ const CAPS=[12,20,34,47];
 const UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 const LOW=20;
 
+const PROTS=[7,8,9];
+const addDays=(iso,n)=>{if(!iso)return '';const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fmt=n=>Number(n).toLocaleString('pt-BR');
 const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -255,15 +324,15 @@ function seed(){
       {id:'n4',tank:'t3',kind:'medicao',date:'2026-11-01',level:31,liters:0,total:0,note:''}]};
 }
 /* ---------- armazenamento: banco compartilhado (db) ou, sem ele, este navegador ---------- */
-const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[]});
+const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[]});
 let S=emptyS();
 let DB=null,dbState='conectando',slowT=null,busy=false,q=[],needRender=false;
-const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{}},lastSnap={},held={},got={};
+const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{}},lastSnap={},held={},got={};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const loadLocal=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}};
-function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários (atualiza a cada poucos segundos).',
+function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários.',
   conectando:'Conectando ao banco de dados…',lento:'Não foi possível alcançar o banco de dados agora. Os dados podem estar desatualizados.',
-  erro:'O banco de dados recusou o acesso. Saia e entre de novo.',local:'Modo de teste: os dados ficam salvos só neste navegador.'}[dbState]}
+  erro:'O banco de dados recusou o acesso. Saia e entre de novo.',local:'Sem conexão com a nuvem: os dados ficam salvos só neste navegador. Confira o arquivo config.js.'}[dbState]}
 function save(){
   if(!DB){
     if(dbState==='conectando'){toast('Aguarde: conectando ao banco de dados…');return}
@@ -313,14 +382,34 @@ async function init(){
   Object.keys(synced).forEach(c=>DB.collection(c).onSnapshot(sn=>onSnap(c,sn),e=>{dbState=(e&&e.code==='unavailable')?'lento':'erro';render()}));
 }
 
+const ATIVS=['IMPLANTADAS','RETIRADAS','INSEMINADAS','DIAGNÓSTICO DA IATF','DIAGNÓSTICO FINAL','EXAME DE ANDROLÓGICO','EXAME DE BRUCELOSE','DIÁRIA VETERINÁRIA','PROCEDIMENTO CIRÚRGICO'];
+const tc=v=>String(v||'').trim().toLowerCase().replace(/(^|[\s\-\/])([^\s\-\/])/g,(m,a,b)=>a+b.toUpperCase());
+const CIDADES=['ÁGUA BOA','BARRA DO GARÇAS','NOVA XAVANTINA','NOVA NAZARÉ','COCALINHO','RIBEIRÃO CASCALHEIRA','CANARANA','CAMPINÁPOLIS','NOVO SÃO JOAQUIM','PARANATINGA','ARAGUAIANA','SÃO JOSÉ XINGU'].map(tc).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x=>[x,x]);
+const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
+const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{semen:true,movs:true,cad:true,prod:true,iatf:true},tab:'painel',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{semen:true,movs:true,cad:true,prod:true,iatf:true,fin:true},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
 /* ---------- cálculo: o saldo nunca é digitado, vem das movimentações ---------- */
 const B=id=>S.breeders.find(x=>x.id===id)||{name:'?',breed:''};
 const F=id=>S.farms.find(x=>x.id===id)||{name:'?'};
+const TIPOS=['Cliente ativo','Cliente inativo','Fornecedor','Lead'];
+const canonCity=c=>{if(!c)return c||'';const k=CIDADES.find(x=>x.toLowerCase()===String(c).trim().toLowerCase());return k||tc(c)};
+function normData(){let ch=false;const fix=(o,k,fn)=>{if(o[k]){const v=fn(o[k]);if(v!==o[k]){o[k]=v;ch=true}}};
+  S.farms.forEach(f=>{fix(f,'city',canonCity);if(f.segment&&!(f.segment in OLDSEG))fix(f,'segment',tc)});
+  S.contacts.forEach(c=>{fix(c,'city',canonCity);fix(c,'role',tc)});
+  S.estacoes.forEach(e=>fix(e,'city',canonCity));S.ordens.forEach(o=>fix(o,'city',canonCity));
+  if(ch&&DB&&dbState!=='conectando')save();}
+const OLDSEG={'CLIENTE ATIVO':'Cliente ativo','CLIENTE INATIVO':'Cliente inativo','FORNECEDOR':'Fornecedor','OUTRO':''};
+const tipoOf=f=>f.tipo||OLDSEG[f.segment]||'Cliente ativo';
+const segTxt=f=>f.segment&&!(f.segment in OLDSEG)?f.segment:'';
+const isAtivo=f=>tipoOf(f)==='Cliente ativo';
+const TIPOCLS={'Cliente ativo':'in','Cliente inativo':'out','Fornecedor':'warn','Lead':'ok'};
+const tipoPill=t=>`<span class="pill ${TIPOCLS[t]||'ok'}">${esc(t)}</span>`;
+const FZ=sel=>S.farms.filter(f=>isAtivo(f)||(sel&&f.id===sel));
 const T=id=>S.tanks.find(x=>x.id===id)||{name:'?'};
 const sg=m=>m.type==='entrada'?m.qty:-m.qty;
 const tankStock=id=>S.movs.filter(m=>m.tank===id).reduce((a,m)=>a+sg(m),0);
@@ -396,18 +485,208 @@ function vCadastro(){
   </tbody></table>`:empty('Nenhum reprodutor cadastrado.')}</div></div>`;
 }
 
+const nrm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const searchBox=k=>`<div class="fld" style="max-width:340px;flex:1 1 240px"><label>Pesquisar</label><input type="search" data-q="${k}" value="${esc(ui.q[k])}" placeholder="Digite para pesquisar…" autocomplete="off"></div>`;
+const qHide=(k,txt)=>ui.q[k]&&!nrm(txt).includes(nrm(ui.q[k]))?' style="display:none"':'';
+const fmtFone=v=>{let d=String(v||'').replace(/\D/g,'');if(d.startsWith('55')&&d.length>11)d=d.slice(2);d=d.slice(0,11);
+  if(d.length<=2)return d?'('+d:'';if(d.length<=6)return`(${d.slice(0,2)}) ${d.slice(2)}`;
+  return d.length<=10?`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`:`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`};
+const foneHtml=v=>{if(!v)return'—';let d=String(v).replace(/\D/g,'');if(d.length<10)return esc(v);if(!d.startsWith('55')||d.length<12)d='55'+d;
+  return`<a class="wa" href="https://wa.me/${d}" target="_blank" rel="noopener noreferrer" title="Abrir no WhatsApp">${esc(fmtFone(v))} <svg class="waic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#25a55f"/><path fill="#fff" transform="translate(4.8 4.8) scale(.6)" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>`};
+const farmsFilt=()=>{const e=ui.ef;return [...S.farms].filter(f=>(!e.seg||nrm(segTxt(f))===nrm(e.seg))&&(!e.city||f.city===e.city)&&(!e.tipo||tipoOf(f)===e.tipo)).sort((a,b)=>a.name.localeCompare(b.name))};
+const farmTxt=f=>[f.name,segTxt(f),f.city,CIDADES.includes(f.city)?'MT':f.state,tipoOf(f)].join(' ');
+const FIN={diarias:{col:'diarias',title:'Diárias Técnicas',dl:'Data Serviço',ql:'Quantidade',btn:'Lançar diária',one:'diária técnica',pre:'d'},
+  kms:{col:'kms',title:'Km Rodado',dl:'Data Viagem',ql:'Total Km',btn:'Lançar km rodado',one:'km rodado',pre:'k'}};
+const FTIT={'f-diarias':'Diárias Técnicas','f-kms':'Km Rodado','f-comis':'Comissões Vendedores'};
+const SITS=['Aberta','Paga'];
+const brl=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const r2=n=>Math.round((Number(n)||0)*100)/100;
+const fnum=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:2});
+const finTot=r=>r2((Number(r.qty)||0)*(Number(r.unit)||0));
+const tecVA=()=>[...new Set(S.contacts.filter(c=>nrm(c.role)==='tecnico vale animal').map(c=>c.name))].sort((a,b)=>a.localeCompare(b));
+const VALDIA=[150,250];
+function finRead(form){const fd=new FormData(form),n=form.querySelectorAll('[name^="date."]').length,rows=[];
+  for(let i=0;i<n;i++)rows.push({date:fd.get('date.'+i)||'',sit:fd.get('sit.'+i)||'Aberta',prest:fd.get('prest.'+i)||'',farm:fd.get('farm.'+i)||'',qty:fd.get('qty.'+i)??'',unit:fd.get('unit.'+i)??''});return rows}
+function finCollect(){const f=document.querySelector('form[data-form=fin]');if(f&&ui.modal&&ui.modal.rows)ui.modal.rows=finRead(f).map((r,i)=>({...ui.modal.rows[i],...r}))}
+function finList(k){const f=ui.ff[k],q=nrm(f.q);
+  return S[FIN[k].col].filter(r=>((r.sit==='Paga')===(ui.fa[k]==='p'))&&(!f.from||r.date>=f.from)&&(!f.to||r.date<=f.to)&&(!f.prest||r.prest===f.prest)&&(!f.farm||r.farm===f.farm)
+    &&(!q||nrm([dt(r.date),r.sit,r.prest,F(r.farm).name,fnum(r.qty),brl(r.unit),brl(finTot(r))].join(' ')).includes(q)))
+    .sort((a,b)=>(b.date||'').localeCompare(a.date||''))}
+function finTable(k){
+  const c=FIN[k],arq=ui.fa[k]==='p',list=finList(k),tot=r2(list.reduce((s,r)=>s+finTot(r),0));
+  const sum=`<p style="margin:0 0 10px"><b>${list.length}</b> ${list.length===1?'lançamento':'lançamentos'} · ${arq?'Total pago':'Total a pagar'} <b class="${arq?'in-t':'out-t'}">${brl(tot)}</b></p>`;
+  if(!list.length)return sum+empty(S[c.col].some(r=>(r.sit==='Paga')===arq)?'Nenhum lançamento com esses filtros.':(arq?'Nenhuma diária arquivada ainda. Ao marcar como paga, ela vem para cá.':'Nenhum lançamento em aberto. Clique em '+c.btn+'.').replace('Nenhuma diária',k==='kms'?'Nenhum km':'Nenhuma diária'));
+  return sum+`<div class="tw"><table><thead><tr><th>${c.dl}</th><th>Situação</th>${arq?'<th>Data Pagamento</th>':''}<th>Prestador</th><th>Fazenda</th><th class="num">${c.ql}</th><th class="num">Valor Unitário</th><th class="num">Valor Total</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(r=>`<tr><td>${dt(r.date)}</td><td><span class="pill ${r.sit==='Paga'?'in':'warn'}">${esc(r.sit||'Aberta')}</span></td>${arq?`<td>${r.paidAt?dt(r.paidAt):'—'}</td>`:''}<td>${esc(r.prest||'—')}</td><td>${esc(F(r.farm).name)}</td><td class="num">${fnum(r.qty)}</td><td class="num">${brl(r.unit)}</td><td class="num"><b>${brl(finTot(r))}</b></td>
+   <td><div class="acts"><button class="btn sm" data-a="finPay" data-v="${k}:${r.id}">${r.sit==='Paga'?'Reabrir':'Marcar paga'}</button><button class="btn sm" data-a="finEdit" data-v="${k}:${r.id}">Editar</button><button class="btn sm dng" data-a="finDel" data-v="${k}:${r.id}">Excluir</button></div></td></tr>`).join('')}
+  </tbody><tfoot><tr><td colspan="${arq?7:6}">Total</td><td class="num">${brl(tot)}</td><td></td></tr></tfoot></table></div>`}
+function vFin(k){
+  const c=FIN[k],f=ui.ff[k],recs=S[c.col];
+  const prests=[...new Set(recs.map(r=>r.prest).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),fz=[...new Set(recs.map(r=>r.farm).filter(Boolean))].map(id=>[id,F(id).name]).sort((a,b)=>a[1].localeCompare(b[1]));
+  const nA=recs.filter(r=>r.sit!=='Paga').length,nP=recs.length-nA,tabs=`<div class="acts" style="margin-bottom:12px"><button class="btn ${ui.fa[k]==='a'?'pri':''}" data-a="finTab" data-v="${k}:a">Em aberto (${nA})</button><button class="btn ${ui.fa[k]==='p'?'pri':''}" data-a="finTab" data-v="${k}:p">Arquivadas (${nP})</button></div>`;
+  return `<div class="card"><div class="card-h"><h3>${c.title}</h3><div class="acts"><button class="btn" data-a="finPrint" data-v="${k}">Imprimir</button><button class="btn pri" data-a="finNew" data-v="${k}">${c.btn}</button></div></div>
+  ${tabs}<div class="filters" style="margin-bottom:12px">
+   <div class="fld" style="max-width:300px;flex:1 1 220px"><label>Pesquisar</label><input type="search" data-fq="${k}" value="${esc(f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>
+   ${fldHtml('Data Inicial',`<input type="date" data-ff="${k}.from" value="${esc(f.from)}">`)}
+   ${fldHtml('Data Final',`<input type="date" data-ff="${k}.to" value="${esc(f.to)}">`)}
+   ${fldHtml('Prestador',`<select data-ff="${k}.prest">${opts(prests.map(x=>[x,x]),f.prest,'Todos')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-ff="${k}.farm">${opts(fz,f.farm,'Todas')}</select>`)}
+   <div class="fld"><label>&nbsp;</label><button class="btn" data-a="finClear" data-v="${k}">Limpar filtros</button></div>
+  </div>
+  <div id="fin-tbl">${finTable(k)}</div></div>`}
+function vComis(){return `<div class="card"><div class="card-h"><h3>Comissões Vendedores</h3></div>${empty('Esta tela ainda será criada. Em breve.')}</div>`}
+const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const WDS=['dom','seg','ter','qua','qui','sex','sáb'],WDL=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+const EVCOL=['#3b6fd4','#1d8f5a','#c9561a','#c0392b','#8e44ad','#0b8a8f','#a8741a','#546e7a'];
+const pad2=n=>String(n).padStart(2,'0');
+const Dt=x=>new Date(x+'T12:00:00');
+const isoD=d=>d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+const weekStart=x=>addDays(x,-Dt(x).getDay());
+const tmin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[2]):0};
+const evFarm=e=>(S.farms.find(f=>f.id===e.farm)||{}).name||'';
+const AGTEC=['Flávio','Hiago','Joaquim'],AGTECF=['Flávio Alves','Hiago Miguel','Joaquim Gomes'];
+const evTec=(e,t)=>(e.tecs||[]).some(x=>nrm(x).includes(nrm(t)))||nrm(e.team).includes(nrm(t));
+const agMatch=e=>{const f=ui.ag.f;return (!f.farm||e.farm===f.farm)&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
+const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
+const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tec&&'Técnico: '+ui.ag.tec,f.farm&&'Fazenda: '+farmShort(f.farm),f.title&&'Serviço: '+f.title,f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
+const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tec||evTec(e,ui.ag.tec))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
+const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Indução','Andrológico'];
+const PERIODOS=['Manhã','Tarde','Dia Inteiro'],EVCATS=['Novilhas Nelore','Novilhas F1 Angus','Vacas Solteiras','Vacas Paridas','Touros'],PERH={'Manhã':['07:00','12:00'],'Tarde':['13:00','18:00']};
+const perOf=e=>e.periodo||(e.allday!==false?'Dia Inteiro':(tmin(e.start)<720?'Manhã':'Tarde'));
+const tcTeam=v=>tc(v).replace(/\sE\s/g,' e ');
+const evProto=(im,p)=>{const re=addDays(im,p),ia=addDays(re,2);return {re,ia,res:addDays(ia,30)}};
+const farmShort=id=>tc(evFarm({farm:id}).replace(/^\s*fazenda\s+/i,''));
+const firstNames=t=>String(t||'').split(/[,;\/]|\se\s/i).map(x=>tc(x.trim().split(/\s+/)[0])).filter(Boolean).join(', ');
+const evLabel=e=>[farmShort(e.farm),(e.title||'')+(e.lote?` (${e.lote})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
+const evpPrev=(im,p,rs)=>{p=Number(p)||0;if(!p)return 'Escolha o protocolo para ver as datas.';const d=evProto(im,p);return `RE: <b>${dt(d.re)}</b> · IA: <b>${dt(d.ia)}</b>${rs?` · RES: <b>${dt(d.res)}</b>`:''}`};
+const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – '+e.etime:''));
+const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
+  if(view==='day')return `${WDL[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
+  if(view==='week'){const a=Dt(weekStart(date)),b=Dt(addDays(weekStart(date),6));
+    return a.getMonth()===b.getMonth()?`${a.getDate()} – ${b.getDate()} de ${MESES[a.getMonth()]} de ${b.getFullYear()}`:`${a.getDate()} de ${MESES[a.getMonth()].slice(0,3)} – ${b.getDate()} de ${MESES[b.getMonth()].slice(0,3)} de ${b.getFullYear()}`}
+  if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
+  return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
+const evChip=e=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e))}</button>`;
+function agMonth(){
+  const d=Dt(ui.ag.date),first=isoD(new Date(d.getFullYear(),d.getMonth(),1)),st=weekStart(first),td=today();
+  const n=Math.ceil((Dt(first).getDay()+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
+  let h=WDS.map(w=>`<div class="ag-wd">${w}</div>`).join('');
+  for(let i=0;i<n;i++){const x=addDays(st,i),dd=Dt(x),ev=evOn(x),out=dd.getMonth()!==d.getMonth();
+    h+=`<div class="ag-day${out?' out':''}" data-a="agNew" data-v="${x}" data-drop="${x}"><button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}" aria-label="Ver dia ${dt(x)}">${dd.getDate()===1?dd.getDate()+' '+MESES[dd.getMonth()].slice(0,3):dd.getDate()}</button>
+    ${ev.slice(0,3).map(evChip).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agGoDay" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
+  return `<div class="ag-month">${h}</div>`}
+function agLanes(list){const out={};let cl=[],cend=-1;
+  const flush=()=>{const L=cl.reduce((m,e)=>Math.max(m,out[e.id].lane+1),1);cl.forEach(e=>out[e.id].n=L);cl=[]};
+  const lanes=[];
+  list.forEach(e=>{const s0=tmin(e.start),e0=Math.max(tmin(e.etime),s0+30);
+    if(cl.length&&s0>=cend){flush();lanes.length=0}
+    let l=lanes.findIndex(x=>x<=s0);if(l<0){l=lanes.length;lanes.push(0)}lanes[l]=e0;cend=Math.max(cl.length?cend:0,e0);
+    out[e.id]={lane:l,s:s0,e:e0};cl.push(e)});
+  if(cl.length)flush();return out}
+function agWeek(days){
+  const td=today(),n=days.length,hrs=Array.from({length:24},(_,h)=>h);
+  const head=days.map(x=>{const dd=Dt(x);return `<div class="ag-hd">${WDS[dd.getDay()]}<button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}">${dd.getDate()}</button></div>`}).join('');
+  const ad=days.map(x=>`<div class="ag-ad" data-drop="${x}">${evOn(x).filter(e=>e.allday).map(evChip).join('')}</div>`).join('');
+  const cols=days.map(x=>{const ev=evOn(x).filter(e=>!e.allday).sort((a,b)=>tmin(a.start)-tmin(b.start)||tmin(a.etime)-tmin(b.etime)),L=agLanes(ev);
+    const now=new Date(),nowLine=x===td?`<div class="ag-now" style="top:${(now.getHours()*60+now.getMinutes())*48/60}px"></div>`:'';
+    return `<div class="ag-col">${hrs.map(h=>`<div class="ag-slot" data-a="agNew" data-v="${x}|${h}" data-drop="${x}|${h}"></div>`).join('')}${nowLine}
+    ${ev.map(e=>{const l=L[e.id],top=l.s*48/60,ht=Math.max(20,(l.e-l.s)*48/60),w=100/l.n;
+      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}"><b>${esc(evLabel(e))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}</button>`}).join('')}</div>`}).join('');
+  return `<div class="ag-wrap"><div style="--n:${n}">
+   <div class="ag-gridrow"><div></div>${head}</div>
+   <div class="ag-gridrow"><div class="ag-hr" style="height:auto;font-size:10px;padding-top:8px">dia todo</div>${ad}</div>
+   <div class="ag-scroll"><div class="ag-gridrow"><div>${hrs.map(h=>`<div class="ag-hr">${h?`<span>${pad2(h)}:00</span>`:''}</div>`).join('')}</div>${cols}</div></div></div></div>`}
+function agRange(){const a=ui.ag.lf||ui.ag.date;let e=ui.ag.lt||addDays(a,59);if(e<a)e=a;const n=Math.min(731,Math.round((Dt(e)-Dt(a))/864e5)+1);return [a,n]}
+function agList(){
+  let h='',any=false;const [a0,n0]=agRange();
+  for(let i=0;i<n0;i++){const x=addDays(a0,i),ev=evOn(x);if(!ev.length)continue;any=true;const dd=Dt(x);
+    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button>`).join('')}</div></div>`}
+  return any?h:empty('Nenhum evento neste período.')}
+function vAgenda(){
+  const {view,date}=ui.ag,vb=(v,l)=>`<button class="btn ${view===v?'pri':''}" data-a="agView" data-v="${v}">${l}</button>`;
+  const body=view==='month'?agMonth():view==='week'?agWeek(Array.from({length:7},(_,i)=>addDays(weekStart(date),i))):view==='day'?agWeek([date]):`<div class="filters" style="margin-bottom:12px"><div class="fld" style="max-width:300px;flex:1 1 220px"><label>Pesquisar</label><input type="search" data-agq="1" value="${esc(ui.ag.f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>${fldHtml('Data Inicial',`<input type="date" data-agd="lf" value="${esc(ui.ag.lf)}">`)}${fldHtml('Data Final',`<input type="date" data-agd="lt" value="${esc(ui.ag.lt)}">`)}</div><div id="ag-list">${agList()}</div>`;
+  return `<div class="card"><div class="ag-bar"><button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
+   <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('day','Dia')}${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}</span><button class="btn" data-a="agPrint">Imprimir</button><button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button></div>
+   <div class="ag-bar" style="margin-top:-2px"><b style="font-size:13px">Agenda Técnico</b><span class="ag-seg"><button class="btn sm ${ui.ag.tec?'':'pri'}" data-a="agTec" data-v="">Todos</button>${AGTEC.map(t=>`<button class="btn sm ${ui.ag.tec===t?'pri':''}" data-a="agTec" data-v="${t}">${t}</button>`).join('')}</span>
+   <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
+   ${agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
+function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8)}
+let dragId=null;
+document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-ev]');if(!b)return;dragId=b.dataset.ev;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',dragId)}catch(_){}b.classList.add('ag-dragging')});
+document.addEventListener('dragend',()=>{dragId=null;document.querySelectorAll('.ag-dragging,.ag-over').forEach(x=>x.classList.remove('ag-dragging','ag-over'))});
+document.addEventListener('dragover',e=>{const t=dragId&&e.target.closest&&e.target.closest('[data-drop]');if(!t)return;e.preventDefault();e.dataTransfer.dropEffect='move';if(!t.classList.contains('ag-over')){document.querySelectorAll('.ag-over').forEach(x=>x.classList.remove('ag-over'));t.classList.add('ag-over')}});
+document.addEventListener('drop',e=>{const t=dragId&&e.target.closest&&e.target.closest('[data-drop]');if(!t)return;e.preventDefault();
+  const ev=S.eventos.find(x=>x.id===dragId);dragId=null;document.querySelectorAll('.ag-over,.ag-dragging').forEach(x=>x.classList.remove('ag-over','ag-dragging'));if(!ev)return;
+  const [d,h]=t.dataset.drop.split('|'),diff=Math.round((Dt(d)-Dt(ev.date))/864e5),H=h===undefined?null:+h;
+  let ch=false;
+  if(diff){ev.end=addDays(ev.end||ev.date,diff);ev.date=d;ch=true}
+  if(H!==null&&!ev.allday){const dur=Math.max(30,tmin(ev.etime)-tmin(ev.start)),s0=H*60,e0=Math.min(1439,s0+dur);
+    if(s0!==tmin(ev.start)){ev.start=pad2(H)+':00';ev.etime=pad2(Math.floor(e0/60))+':'+pad2(e0%60);ev.periodo=H<12?'Manhã':'Tarde';ch=true}}
+  if(ch){save();render();toast('Evento movido'+(diff?' para '+dt(d):'')+'.')}});
+document.addEventListener('scroll',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('ag-scroll'))ui.agST=e.target.scrollTop},true);
+const iatfDone=l=>(l.ins!==undefined&&l.ins!==''&&l.ins!==null)||!!(l.ia&&l.ia<=today());
+const loteTemServico=l=>S.lancs.some(x=>x.lote===l.id)||S.eventos.some(e=>e.farm===l.farm&&e.lote&&nrm(e.lote)===nrm(l.name));
+function iatfChart(done){
+  const t=Dt(today()),ms=[];for(let k=11;k>=0;k--){const d=new Date(t.getFullYear(),t.getMonth()-k,1);ms.push({k:d.getFullYear()+'-'+pad2(d.getMonth()+1),m:d.getMonth(),y:d.getFullYear(),n:[0,0,0]})}
+  let sem=0;done.forEach(l=>{if(!l.ia){sem++;return}const b=ms.find(x=>x.k===l.ia.slice(0,7));if(b)b.n[Math.min(2,Math.max(0,(l.etapa||1)-1))]++});
+  const tot=x=>x.n[0]+x.n[1]+x.n[2],mx=Math.max(1,...ms.map(tot)),sum=ms.reduce((a,x)=>a+tot(x),0),cur=ms[11].k;
+  const lab=x=>tc(MESES[x.m]).slice(0,3)+(x.m===0||x===ms[0]?'/'+String(x.y).slice(2):'');
+  return `<div class="card"><div class="card-h"><h3>IATFs por mês</h3><span class="muted" style="font-size:13px">Últimos 12 meses · ${fmt(sum)} ${sum===1?'IATF':'IATFs'}${sem?` · ${sem} sem data de IA`:''}</span></div>
+   ${sum?`<div class="ch" role="img" aria-label="Gráfico de barras: IATFs realizadas por mês nos últimos 12 meses">${ms.map(x=>{const n=tot(x);return `<div class="ch-c${x.k===cur?' now':''}" title="${esc(tc(MESES[x.m])+'/'+x.y+': '+n+' '+(n===1?'IATF':'IATFs')+' (IATF 1: '+x.n[0]+' · IATF 2: '+x.n[1]+' · IATF 3: '+x.n[2]+')')}"><span class="ch-v">${n?n:''}</span><div class="ch-b" style="height:${n?Math.max(4,Math.round(n/mx*140)):0}px"></div></div>`}).join('')}</div>
+   <div class="ch-x">${ms.map(x=>`<span class="${x.k===cur?'now':''}">${lab(x)}</span>`).join('')}</div>`:empty('Nenhuma IATF com data de IA nos últimos 12 meses.')}</div>`}
+function vIatfPainel(){
+  const td=today(),done=S.lancs.filter(iatfDone);
+  const faz=new Set([...S.fichas.map(f=>f.farm),...S.ordens.map(o=>o.farm),...S.estacoes.filter(e=>S.lancs.some(l=>l.est===e.id)).map(e=>e.farm),...S.eventos.filter(e=>e.date<=td).map(e=>e.farm)].filter(Boolean));
+  const dg=S.lancs.filter(l=>l.pren!==undefined&&l.ins!==undefined),ins=sumL(dg,'ins'),pren=sumL(dg,'pren');
+  return `<div class="ini-grid">
+   <div class="kpi"><div class="k-n">${fmt(faz.size)}</div><div class="k-l">Fazendas atendidas</div></div>
+   <div class="kpi"><div class="k-n">${fmt(done.length)}</div><div class="k-l">Total IATFs</div></div>
+   <div class="kpi"><div class="k-n">${ins?pct(pren,ins):'—'}</div><div class="k-l">Taxa de concepção</div></div>
+  </div>
+  ${iatfChart(done)}`}
+function vInicio(){
+  const td=today(),dd=Dt(td);
+  const fazAt=new Set([...S.fichas.map(f=>f.farm),...S.ordens.map(o=>o.farm),...S.estacoes.filter(e=>S.lancs.some(l=>l.est===e.id)).map(e=>e.farm),...S.eventos.filter(e=>e.date<=td).map(e=>e.farm)].filter(Boolean));
+  const ativos=S.farms.filter(isAtivo).length;
+  const done=S.lancs.filter(iatfDone),byE=[1,2,3].map(i=>done.filter(l=>l.etapa===i).length),ins=done.reduce((a,l)=>a+(Number(l.ins)||0),0);
+  const abertos=S.lotes.filter(l=>l.status!=='Arquivado'),pend=abertos.filter(l=>!loteTemServico(l));
+  abertos.sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));pend.sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));
+  const hoje=S.eventos.filter(e=>e.date<=td&&(e.end||e.date)>=td).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||''));
+  return `<div class="ini-grid">
+   <div class="kpi"><div class="k-n">${fmt(fazAt.size)}</div><div class="k-l">Fazendas atendidas</div></div>
+   <div class="kpi"><div class="k-n">${fmt(done.length)}</div><div class="k-l">IATFs realizadas</div></div>
+   <div class="kpi"><div class="k-n">${fmt(hoje.length)}</div><div class="k-l">Eventos de hoje</div></div>
+   <div class="kpi"><div class="k-n">${fmt(pend.length)}</div><div class="k-l">Lotes para agendar serviço</div></div>
+  </div>
+  <div class="ini-two">
+   <div class="card"><div class="card-h"><h3>Eventos de hoje</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Agenda</button></div>
+    ${hoje.length?hoje.map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><span><b>${esc(evLabel(e))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
+   <div class="card"><div class="card-h"><h3>Lotes para agendar serviço <small class="muted">(em aberto: ${abertos.length})</small></h3><button class="btn sm" data-a="go" data-v="i-lotes">Agendar Lotes</button></div>
+    ${abertos.length?abertos.map(l=>`<div class="ini-row"><div><b>${esc(farmShort(l.farm)||F(l.farm).name)}</b> / ${esc(l.name)}<small>${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${l.start?' · parição '+dt(l.start)+' a '+dt(l.end):''}</small></div><span style="display:flex;gap:8px;align-items:center">${loteTemServico(l)?'<span class="muted" style="font-size:12px">✓ Com serviço</span>':'<span style="font-size:12px;font-weight:600">Falta agendar</span>'}<button class="btn sm ${loteTemServico(l)?'':'pri'}" data-a="iniAgendar" data-v="${l.id}">Agendar</button></span></div>`).join(''):empty('Nenhum lote em aberto.')}</div>
+  </div>`}
 function vFazendas(){
-  const rows=[...S.farms].sort((a,b)=>a.name.localeCompare(b.name)).map(f=>`<tr><td><b>${esc(f.name)}</b></td><td>${esc(f.owner||'—')}</td><td>${esc(f.city||'—')}</td><td>${esc(f.state||'—')}</td>
-   <td class="num">${f.matrices!=null?fmt(f.matrices):'—'}</td>
-   <td><div class="acts"><button class="btn sm" data-a="editFarm" data-v="${f.id}">Editar</button><button class="btn sm dng" data-a="delFarm" data-v="${f.id}">Excluir</button></div></td></tr>`).join('');
-  return `<div class="card"><div class="card-h"><h3>Fazendas</h3><button class="btn pri" data-a="newFarm">Cadastrar fazenda</button></div>
-  <div class="tw">${S.farms.length?`<table><thead><tr><th>Nome Fazenda</th><th>Proprietário</th><th>Localidade</th><th>Estado</th><th class="num">Total Matrizes</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>`:empty('Nenhuma fazenda cadastrada.')}</div></div>`;
+  const nC=id=>S.contacts.filter(c=>c.farm===id).length;
+  const segs=[...new Set(S.farms.map(f=>segTxt(f)).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),cids=[...new Set(S.farms.map(f=>f.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const rows=farmsFilt().map(f=>`<tr${qHide('fz',farmTxt(f))}><td><b>${esc(f.name)}</b></td><td>${esc(segTxt(f)||'—')}</td><td>${esc(f.city||'—')}</td><td>${esc((CIDADES.includes(f.city)?'MT':f.state)||'—')}</td><td>${tipoPill(tipoOf(f))}</td>
+   <td><div class="acts"><button class="btn sm" data-a="empContacts" data-v="${f.id}">Contatos (${nC(f.id)})</button><button class="btn sm" data-a="editFarm" data-v="${f.id}">Editar</button><button class="btn sm dng" data-a="delFarm" data-v="${f.id}">Excluir</button></div></td></tr>`).join('');
+  return `<div class="card"><div class="card-h"><h3>Empresas</h3><div class="acts"><button class="btn" data-a="printFarms">Imprimir</button><button class="btn pri" data-a="newFarm">Cadastrar empresa</button></div></div>
+  ${S.farms.length?`<div class="filters" style="margin-bottom:12px">${searchBox('fz')}${fldHtml('Segmento',`<select data-ef="seg">${opts(segs.map(x=>[x,x]),ui.ef.seg,'Todos')}</select>`)}${fldHtml('Cidade',`<select data-ef="city">${opts(cids.map(x=>[x,x]),ui.ef.city,'Todas')}</select>`)}${fldHtml('Tipo de Empresa',`<select data-ef="tipo">${opts(TIPOS.map(x=>[x,x]),ui.ef.tipo,'Todos')}</select>`)}</div>`:''}
+  <div class="tw">${S.farms.length?`<table><thead><tr><th>Nome Empresa</th><th>Segmento</th><th>Cidade</th><th>Estado</th><th>Tipo de Empresa</th><th>Ações</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">Nenhuma empresa com esses filtros.</td></tr>'}</tbody></table>`:empty('Nenhuma empresa cadastrada.')}</div></div>`;
+}
+function vContatos(){
+  const f=ui.cf,list=S.contacts.filter(c=>!f.farm||c.farm===f.farm).sort((a,b)=>a.name.localeCompare(b.name));
+  return `<div class="card"><div class="card-h"><h3>Contatos</h3><button class="btn pri" data-a="newContact">Cadastrar contato</button></div>
+  <div class="filters" style="margin-bottom:12px">${searchBox('ct')}</div>
+  <div class="tw">${list.length?`<table><thead><tr><th>Nome Contato</th><th>Empresa</th><th>E-mail</th><th>Telefone</th><th>Cargo</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(c=>`<tr${qHide('ct',[c.name,F(c.farm).name,c.email,c.phone,c.role].join(' '))}><td><b>${esc(c.name)}</b></td><td>${esc(F(c.farm).name)}</td><td>${esc(c.email||'—')}</td><td>${foneHtml(c.phone)}</td><td>${esc(c.role||'—')}</td>
+   <td><div class="acts"><button class="btn sm" data-a="editContact" data-v="${c.id}">Editar</button><button class="btn sm dng" data-a="delContact" data-v="${c.id}">Excluir</button></div></td></tr>`).join('')}
+  </tbody></table>`:empty(S.contacts.length?'Nenhum contato desta empresa.':'Nenhum contato cadastrado. Clique em Cadastrar contato.')}</div></div>`;
 }
 
 function vEstoque(){
   if(!ui.farm){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
-    ${S.farms.map(f=>`<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(farmTotal(f.id))} doses</div></div><button class="btn" data-a="farm" data-v="${f.id}">Ver estoque</button></div>`).join('')}
+    ${FZ().map(f=>`<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(farmTotal(f.id))} doses</div></div><button class="btn" data-a="farm" data-v="${f.id}">Ver estoque</button></div>`).join('')}
     <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
   const f=F(ui.farm), flt={breed:ui.fBreed,ind:ui.fInd}, list=items(ui.farm,flt);
@@ -467,7 +746,7 @@ function vHist(){
    <div class="acts"><button class="btn" data-a="pdfHist">Imprimir PDF</button>${ab?`<button class="btn pri" data-a="refill" data-v="${h.tank}">Novo abastecimento</button>`:`<button class="btn pri" data-a="meas" data-v="${h.tank}">Nova medição</button>`}</div></div>
   <div class="filters" style="margin-bottom:12px">
    ${fldHtml('Botijão',`<select data-h="tank">${opts(S.tanks.map(t=>[t.id,t.name]),h.tank,'Todos')}</select>`)}
-   ${fldHtml('Fazenda',`<select data-h="farm">${opts(S.farms.map(t=>[t.id,t.name]),h.farm,'Todas')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-h="farm">${opts(FZ().map(t=>[t.id,t.name]),h.farm,'Todas')}</select>`)}
   </div>
   <div class="tw">${list.length?`<table><thead><tr><th>Data</th><th>Botijão</th><th class="num">Nível</th>${ab?'<th class="num">Litros abastecidos</th><th class="num">Valor total</th>':''}<th>Observação</th><th>Ações</th></tr></thead><tbody>
   ${list.map(x=>`<tr><td>${dt(x.date)}</td><td>${esc(T(x.tank).name)}</td><td class="num">${x.level} cm</td>
@@ -494,7 +773,7 @@ function entradaFields(){
   const f=ui.f.entrada;if(!f.rows||!f.rows.length)f.rows=[{}];
   return `<div class="form">
    ${fldHtml('Data da entrada',fi('entrada','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('entrada','farm',S.farms.map(x=>[x.id,x.name]),'Selecione…'))}
+   ${fldHtml('Nome da fazenda',fs('entrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…'))}
   </div>${f.rows.map((r,i)=>entradaRow(r,i,f.rows.length)).join('')}`;
 }
 function bItems(fid){
@@ -526,7 +805,7 @@ function saidaFields(){
   const its=f.farm?bItems(f.farm):[];
   return `<div class="form">
    ${fldHtml('Data da saída',fi('saida','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('saida','farm',S.farms.map(x=>[x.id,x.name]),'Selecione…',true))}
+   ${fldHtml('Nome da fazenda',fs('saida','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,k)=>saidaRow(r,k,f.rows.length,its,f.farm)).join('')}`;
 }
 function movList(){
@@ -546,7 +825,7 @@ function vMovs(){
    ${fldHtml('Data inicial',`<input type="date" data-m="from" value="${h.from}">`)}
    ${fldHtml('Data final',`<input type="date" data-m="to" value="${h.to}">`)}
    ${sub==='hist'?fldHtml('Tipo',`<select data-m="type">${opts([['entrada','Entrada'],['saida','Saída']],h.type,'Todos')}</select>`):''}
-   ${fldHtml('Fazenda',`<select data-m="farm">${opts(S.farms.map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-m="farm">${opts(FZ().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
    ${fldHtml('Reprodutor',`<select data-m="breeder">${opts(S.breeders.map(x=>[x.id,x.name]),h.breeder,'Todos')}</select>`)}
   </div><div class="tw">${movTable(list,true)}</div></div>`;
 }
@@ -569,9 +848,171 @@ function modalHtml(){
     body=`<h3>${b.id?'Editar reprodutor':'Novo reprodutor'}</h3>${err}<form data-form="breeder" data-id="${b.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do reprodutor',`<input name="name" value="${esc(b.name)}" required>`)}
     ${fldHtml('Raça',`<select name="breed" required>${opts(BREEDS.map(x=>[x,x]),b.breed,'Selecione…')}</select>`)}</div>${foot('Salvar')}</form>`}
+  if(m.type==='estacao'){const e=m.data||{};
+    body=`<h3>${e.id?'Editar estação':'Nova estação'}</h3>${err}<form data-form="estacao" data-id="${e.id||''}" novalidate><div class="form">
+    ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
+    ${fldHtml('Cidade',`<select name="city">${opts(cityOpts(e.city),e.city,'Cidade da fazenda')}</select>`)}
+    ${fldHtml('Início EM',`<input name="start" type="date" value="${e.start||''}" required>`)}
+    ${fldHtml('Final EM',`<input name="end" type="date" value="${e.end||''}" required>`)}</div>${foot('Salvar')}</form>`}
+  if(m.type==='ev'){const e=m.data||{},per=e.id||e.periodo||e.allday!==undefined?perOf(e):'Dia Inteiro',tits=[...EVTIT,...(e.title&&!EVTIT.includes(e.title)?[e.title]:[])];
+    body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form">
+    ${fldHtml('Data Serviço',`<input name="date" type="date" value="${esc(e.date||today())}" required>`)}
+    ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
+    ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,x]),e.title,'Selecione…')}</select>`)}
+    ${fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" autocomplete="off" style="text-transform:uppercase">`)}
+    ${fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`)}
+    ${fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),e.cat,'Selecione…')}</select>`)}
+    ${fldHtml('Equipe',`<input name="team" value="${esc(e.team||'')}" autocomplete="off" placeholder="Digite o nome da equipe">`)}
+    ${fldHtml('Agenda Técnico',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`,'wide')}
+    ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`,'wide')}
+    ${fldHtml('Observação',`<textarea name="desc" rows="3">${esc(e.desc||'')}</textarea>`,'wide')}
+    </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
+  if(m.type==='agfil'){const f=ui.ag.f;
+    body=`<h3>Filtrar Agenda</h3><form data-form="agfil" novalidate><div class="form">
+    ${fldHtml('Técnico',`<select name="tec">${opts(AGTEC.map(x=>[x,x]),ui.ag.tec,'Todos')}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
+    ${fldHtml('Serviço',`<select name="title">${opts(EVTIT.map(x=>[x,x]),f.title,'Todos')}</select>`)}
+    ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),f.periodo,'Todos')}</select>`)}
+    ${fldHtml('Lote',`<input name="lote" value="${esc(f.lote)}" autocomplete="off" style="text-transform:uppercase">`)}
+    ${fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),f.cat,'Todas')}</select>`)}
+    ${fldHtml('Pesquisar',`<input name="q" type="search" value="${esc(f.q)}" autocomplete="off" placeholder="Texto livre">`,'wide')}
+    </div><div class="mf"><button class="btn" type="button" data-a="agFilClear" style="margin-right:auto">Limpar filtros</button><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Aplicar</button></div></form>`}
+  if(m.type==='agpdf'){
+    const {view,date}=ui.ag,d=Dt(date);
+    let a=date,n=1;
+    if(view==='month'){a=isoD(new Date(d.getFullYear(),d.getMonth(),1));n=new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
+    else if(view==='week'){a=weekStart(date);n=7}else if(view==='list'){[a,n]=agRange()}
+    const rows=[];for(let i=0;i<n;i++){const x=addDays(a,i);evOn(x).forEach(e=>rows.push([x,e]))}
+    const per=agTitle()+(agFilList().length?' · '+agFilList().join(' · '):'');
+    const fs=(()=>{try{const c=document.createElement('canvas').getContext('2d');c.font='8px '+getComputedStyle(document.body).fontFamily;
+      const w=Math.max(0,...rows.map(([x,e])=>c.measureText((view==='week'&&!e.allday?perOf(e)+' ':'')+evLabel(e)).width)),av=138;
+      return w>av?Math.max(4.5,Math.floor(80*av/w)/10):8}catch(err){return 8}})();
+    const pc=(e,wk)=>`<div style="background:${e.color||EVCOL[0]};color:#fff;border-radius:3px;padding:1px 2px;margin-top:2px;font-size:${fs}px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:clip;-webkit-print-color-adjust:exact;print-color-adjust:exact">${wk&&!e.allday?`<small style="font-size:${Math.max(4,fs-1)}px;opacity:.9">${esc(perOf(e))}</small> `:''}${esc(evLabel(e))}</div>`;
+    const bd='1px solid #888',hd=x=>`style="padding:2px;text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;border-right:${bd};border-bottom:${bd};background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact"`;
+    let cal='';
+    if(view==='month'){
+      const first=a,st=weekStart(first),nn=Math.ceil((Dt(first).getDay()+n)/7)*7;
+      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${WDS.map(w=>`<div ${hd()}>${w}</div>`).join('')}
+      ${Array.from({length:nn},(_,i)=>{const x=addDays(st,i),dd=Dt(x),out=dd.getMonth()!==d.getMonth();
+        return `<div style="min-height:70px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd};break-inside:avoid;${out?'color:#999':''}"><b style="font-size:9px">${dd.getDate()}</b>${out?'':evOn(x).map(e=>pc(e,false)).join('')}</div>`}).join('')}</div>`}
+    else if(view==='week'){
+      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div ${hd()}>${WDS[Dt(x).getDay()]} ${dt(x).slice(0,5)}</div>`}).join('')}
+      ${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
+    body=`<h3>Agenda</h3>
+    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Agenda · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper-b" style="font-size:12px">${cal||(rows.length?`<table><thead><tr><th>Data</th><th>Período</th><th>Fazenda</th><th>Serviço</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Equipe</th></tr></thead><tbody>
+    ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(perOf(e))}</td><td>${esc(evFarm(e)||'—')}</td><td>${esc(e.title)}</td><td>${esc(e.lote||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(e.team||(e.tecs||[]).join(', ')||'—')}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td colspan="8">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>')}</div></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês':view==='week'?'semana':view==='day'?'lista do dia':'lista'}.</p>
+    <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='evproto'){const ev=m.ev,sel=m.sel||{};
+    body=`<h3>Protocolo IATF</h3>${err}<p style="margin:0 0 12px">Evento <b>${esc(evLabel(ev))}</b> salvo em ${dt(ev.date)}. Deseja criar os próximos eventos automaticamente?</p>
+    <form data-form="evproto" data-im="${ev.date}" novalidate><div class="form">
+    ${fldHtml('Protocolo',`<select name="prot">${opts([[7,'7 dias'],[8,'8 dias'],[9,'9 dias']],sel.prot,'Não criar outros eventos')}</select>`)}
+    ${fldHtml('Haverá ressincronização?',`<select name="resync">${opts([['Não','Não'],['Sim','Sim (RES 30 dias após a IA)']],sel.resync||'Não')}</select>`)}
+    </div><div id="evp-prev" class="muted" style="margin:12px 0 0;font-size:13px">${evpPrev(ev.date,sel.prot,sel.resync==='Sim')}</div>
+    <div class="mf"><button class="btn" type="button" data-a="close">Agora não</button><button class="btn pri" type="submit">Criar eventos</button></div></form>`}
+  if(m.type==='finpdf'){
+    const k=m.kind,c=FIN[k],f=ui.ff[k],list=finList(k),tot=r2(list.reduce((a,r)=>a+finTot(r),0));
+    const arq=ui.fa[k]==='p',flt=['Aba: '+(arq?'Arquivadas (pagas)':'Em aberto'),f.from&&'De '+dt(f.from),f.to&&'até '+dt(f.to),f.prest&&'Prestador: '+f.prest,f.farm&&'Fazenda: '+F(f.farm).name,f.q&&'Pesquisa: '+f.q].filter(Boolean).join(' · ')||'';
+    body=`<h3>${c.title}</h3>
+    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Gestão Financeira · ${c.title}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper-b" style="font-size:12px"><p style="margin:0 0 10px"><b>Filtros:</b> ${esc(flt)}</p>
+    ${list.length?`<table><thead><tr><th>${c.dl}</th>${arq?'<th>Data Pagamento</th>':''}<th>Prestador</th><th>Fazenda</th><th class="num">${c.ql}</th><th class="num">Valor Unitário</th><th class="num">Valor Total</th></tr></thead><tbody>
+    ${list.map(r=>`<tr><td>${dt(r.date)}</td>${arq?`<td>${r.paidAt?dt(r.paidAt):'—'}</td>`:''}<td>${esc(r.prest||'—')}</td><td>${esc(F(r.farm).name)}</td><td class="num">${fnum(r.qty)}</td><td class="num">${brl(r.unit)}</td><td class="num">${brl(finTot(r))}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td colspan="${arq?6:5}">${arq?'Total pago':'Total a pagar'} (${list.length} ${list.length===1?'lançamento':'lançamentos'})</td><td class="num">${brl(tot)}</td></tr></tfoot></table>`:'<p>Nenhum lançamento encontrado.</p>'}</div></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia do relatório para impressão (folha na horizontal), respeitando os filtros.</p>
+    <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='fin'){const k=m.kind,c=FIN[k],rows=m.rows||[{}],isD=k==='diarias',edit=!!m.editId;
+    const tv=tecVA();
+    const lines=rows.map((r,i)=>{
+      const tecs=[...tv,...(r.prest&&!tv.includes(r.prest)?[r.prest]:[])],vals=[...VALDIA,...(r.unit!==undefined&&r.unit!==''&&!VALDIA.includes(Number(r.unit))?[Number(r.unit)]:[])];
+      const unitH=isD?`<select name="unit.${i}" required>${opts(vals.map(x=>[x,brl(x)]),r.unit,'Selecione…')}</select>`:`<input name="unit.${i}" type="number" min="0" step="0.01" inputmode="decimal" value="${r.unit??''}" required>`;
+      return `<div class="line"><div class="line-h"><b>${edit?c.one.charAt(0).toUpperCase()+c.one.slice(1):(isD?'Diária ':'Km rodado ')+(i+1)}</b>${rows.length>1?`<button type="button" class="btn sm dng" data-a="finDelRow" data-v="${i}">Remover</button>`:''}</div><div class="form">
+      ${fldHtml(c.dl,`<input name="date.${i}" type="date" value="${esc(r.date||today())}" required>`)}
+      ${fldHtml('Situação',`<select name="sit.${i}">${opts(SITS.map(x=>[x,x]),r.sit||'Aberta')}</select>`)}
+      ${fldHtml(k==='kms'?'Prestador (Técnico Vale Animal)':'Técnico (Vale Animal)',`<select name="prest.${i}" required>${opts(tecs.map(x=>[x,x]),r.prest,tecs.length?'Selecione…':'Nenhum contato com cargo Técnico Vale Animal')}</select>`)}
+      ${fldHtml('Fazenda',`<select name="farm.${i}" required>${opts(FZ(r.farm).map(f=>[f.id,f.name]),r.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
+      ${fldHtml(c.ql,`<input name="qty.${i}" type="number" min="0" step="any" inputmode="decimal" value="${r.qty??''}" required>`)}
+      ${fldHtml('Valor Unitário (R$)',unitH)}
+      ${fldHtml('Valor Total',`<input id="fin-total-${i}" readonly tabindex="-1" value="${brl(finTot(r))}" style="background:var(--navy-soft);font-weight:700">`)}
+      </div>${edit?'':`<button type="button" class="btn sm" data-a="finAddRow" data-v="${i}">+ Adicionar ${isD?'diária':'km rodado'}</button>`}</div>`}).join('');
+    body=`<h3>${edit?'Editar':'Lançar'} ${c.one}</h3>${err}<form data-form="fin" data-kind="${k}" data-id="${m.editId||''}" novalidate>${lines}${foot(rows.length>1?'Salvar '+rows.length+' lançamentos':'Salvar')}</form>`}
+  if(m.type==='epdf'){
+    const e=ui.ef,list=farmsFilt().filter(f=>!ui.q.fz||nrm(farmTxt(f)).includes(nrm(ui.q.fz)));
+    const flt=[e.seg&&'Segmento: '+e.seg,e.city&&'Cidade: '+e.city,e.tipo&&'Tipo: '+e.tipo,ui.q.fz&&'Pesquisa: '+ui.q.fz].filter(Boolean).join(' · ')||'Sem filtros';
+    body=`<h3>Empresas</h3>
+    <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Empresas</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper-b"><p style="margin:0 0 10px"><b>Filtros:</b> ${esc(flt)} &nbsp; <b>Total:</b> ${list.length}</p>
+    ${list.length?`<table><thead><tr><th>Nome Empresa</th><th>Segmento</th><th>Cidade</th><th>Estado</th><th>Tipo de Empresa</th></tr></thead><tbody>${list.map(f=>`<tr><td>${esc(f.name)}</td><td>${esc(segTxt(f)||'—')}</td><td>${esc(f.city||'—')}</td><td>${esc((CIDADES.includes(f.city)?'MT':f.state)||'—')}</td><td>${esc(tipoOf(f))}</td></tr>`).join('')}</tbody></table>`:'<p>Nenhuma empresa encontrada.</p>'}</div></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia da lista para impressão.</p>
+    <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='opdf'){
+    const o=m.data||ui.os,farm=o.farm?F(o.farm).name:'—';
+    const sv=o.svcs.filter(r=>r.qty||r.desc||r.lote),tr=o.trips.filter(r=>r.qty||r.from||r.to);
+    body=`<h3>Ordem de Serviço</h3>
+    <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Ordem de Serviço</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper-b">
+     <table><tbody><tr><td><b>Data do serviço:</b> ${o.date?dt(o.date):'—'}</td><td><b>Fazenda:</b> ${esc(farm)}</td></tr>
+     <tr><td><b>Técnico:</b> ${esc(o.tech||'—')}</td><td><b>Cidade:</b> ${esc((o.farm&&F(o.farm).city)||o.city||'—')}</td></tr></tbody></table>
+     <h4 style="margin:16px 0 6px">Serviços</h4>
+     ${sv.length?`<table><thead><tr><th class="num" style="width:90px">Quantidade</th><th>Descrição da atividade</th><th>Lote</th></tr></thead><tbody>${sv.map(r=>{return `<tr><td class="num">${r.qty===''||r.qty===undefined?'':fmt(Number(r.qty))}</td><td>${esc(r.desc||'')}</td><td>${esc(loteTxt(r.lote)||'—')}</td></tr>`}).join('')}</tbody></table>`:'<p>Nenhum serviço lançado.</p>'}
+     <h4 style="margin:16px 0 6px">Viagem</h4>
+     ${tr.length?`<table><thead><tr><th class="num" style="width:90px">Quantidade</th><th>Origem</th><th>Destino</th></tr></thead><tbody>${tr.map(r=>`<tr><td class="num">${r.qty===''||r.qty===undefined?'':fmt(Number(r.qty))}</td><td>${esc(r.from||'')}</td><td>${esc(r.to||'')}</td></tr>`).join('')}</tbody></table>`:'<p>Nenhuma viagem lançada.</p>'}
+     <h4 style="margin:16px 0 6px">Observações</h4><div style="border:1px solid #999;border-radius:4px;min-height:64px;padding:8px;white-space:pre-wrap">${esc(o.obs||'')}</div>
+     <div style="margin-top:48px;display:flex;gap:40px"><div style="flex:1;border-top:1px solid #000;padding-top:4px;text-align:center">${esc(o.tech||'Técnico')}</div><div style="flex:1;border-top:1px solid #000;padding-top:4px;text-align:center">Responsável da fazenda</div></div>
+    </div></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia da ordem de serviço para impressão.</p>
+    <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='lpdf'){
+    const e=S.estacoes.find(x=>x.id===ui.est.id)||{},tab=m.tab,all=S.lancs.filter(x=>x.est===e.id);
+    const n=v=>v===undefined?'—':fmt(v);
+    let tbl='';
+    if(tab==='G'){
+      const rows=[1,2,3].map(i=>({lbl:'IATF '+i,...lcalc(all.filter(x=>x.etapa===i))})),tot={lbl:'Total',...lcalc(all)};
+      const mz=F(e.farm).matrices,pz=tot.pren!==undefined&&mz?pct(tot.pren,mz):'—';
+      tbl=`<table><thead><tr><th>Etapa</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${r.lbl}</td><td class="num">${fmt(r.impl)}</td><td class="num">${n(r.ret)}</td><td class="num">${n(r.ins)}</td><td class="num">${n(r.diag)}</td><td class="num">${n(r.pren)}</td><td class="num">${n(r.vaz)}</td><td class="num">${r.conc}</td></tr>`).join('')}
+      </tbody><tfoot><tr><td>Total</td><td class="num">${fmt(tot.impl)}</td><td class="num">${n(tot.ret)}</td><td class="num">${n(tot.ins)}</td><td class="num">${n(tot.diag)}</td><td class="num">${n(tot.pren)}</td><td class="num">${n(tot.vaz)}</td><td class="num">${tot.conc}</td></tr></tfoot></table>
+      <p style="margin:12px 0 0">Matrizes: <b>${mz?fmt(mz):'—'}</b> · Prenhez geral: <b>${pz}</b> (prenhas ÷ matrizes)</p>`;
+    }else{
+      const list=all.filter(x=>String(x.etapa)===tab).sort((a,b)=>a.im.localeCompare(b.im)),c=lcalc(list);
+      tbl=list.length?`<table><thead><tr><th>Lote</th><th>Data IM</th><th>Data RE</th><th>Data IA</th><th>Data DG</th><th>Categoria</th><th>Carimbo</th><th>Protocolo</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th></tr></thead><tbody>
+      ${list.map(l=>{const lt=S.lotes.find(x=>x.id===l.lote),vz=l.diag!==undefined&&l.pren!==undefined?l.diag-l.pren:undefined;
+       return `<tr><td>${esc(lt?lt.name:'?')}</td><td>${dt(l.im)||'—'}</td><td>${dt(l.re)||'—'}</td><td>${dt(l.ia)||'—'}</td><td>${dt(l.dg)||'—'}</td><td>${esc(l.cat)}</td><td>${esc(l.carimbo||'—')}</td><td>${l.prot?l.prot+' dias':'—'}</td>
+       <td class="num">${fmt(l.impl)}</td><td class="num">${n(l.ret)}</td><td class="num">${n(l.ins)}</td><td class="num">${n(l.diag)}</td><td class="num">${n(l.pren)}</td><td class="num">${n(vz)}</td><td class="num">${l.pren!==undefined&&l.ins?pct(l.pren,l.ins):'—'}</td></tr>`}).join('')}
+      </tbody><tfoot><tr><td colspan="8">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td></tr></tfoot></table>`:'<p>Nenhum lançamento nesta IATF.</p>';
+    }
+    const ttl=tab==='G'?'GERAL IATF':'IATF '+tab;
+    body=`<h3>Controle da Estação · ${ttl}</h3>
+    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Controle da Estação · ${ttl}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper-b" style="font-size:12px"><p style="margin:0 0 12px"><b>Fazenda:</b> ${esc(F(e.farm).name)}${e.city?' · '+esc(e.city):''} &nbsp; <b>EM:</b> ${dt(e.start)} a ${dt(e.end)}</p>${tbl}</div></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia do relatório para impressão (folha na horizontal).</p>
+    <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='lanc'){const l=m.data||{},e=S.estacoes.find(x=>x.id===l.est)||{},lots=S.lotes.filter(x=>x.farm===e.farm).sort((a,b)=>a.name.localeCompare(b.name));
+    const nm=(n,lbl,v,req)=>fldHtml(lbl,`<input name="${n}" type="number" min="0" step="1" inputmode="numeric" value="${esc(v??'')}"${req?' required':''}>`);
+    const sec=t=>`<h4 style="grid-column:1/-1;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">${t}</h4>`;
+    const re=l.prot&&l.im?addDays(l.im,Number(l.prot)):(l.re||''),ia=re?addDays(re,2):(l.ia||'');
+    body=`<h3>${l.id?'Editar lançamento':'Novo lançamento'} · IATF ${l.etapa}</h3>${err}<p style="margin:0 0 4px"><b>${esc(F(e.farm).name)}</b> · EM ${dt(e.start)} a ${dt(e.end)}</p>
+    <form data-form="lanc" data-id="${l.id||''}" data-est="${esc(l.est)}" data-etapa="${l.etapa}" novalidate><div class="form">
+    ${sec('Animais')}
+    ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes desta fazenda (cadastre em Agendar Lotes)')}</select>`)}
+    ${fldHtml('Categoria',`<select name="cat" required>${opts(LCAT.map(x=>[x,x]),l.cat,'Selecione…')}</select>`)}
+    ${fldHtml('Carimbo',`<input name="carimbo" value="${esc(l.carimbo||'')}">`)}
+    ${sec('Protocolo e datas')}
+    ${fldHtml('Protocolo IATF',`<select name="prot" required>${opts(PROTS.map(x=>[x,x+' dias']),l.prot,'Selecione…')}</select>`)}
+    ${fldHtml('Data IM (implante)',`<input name="im" type="date" value="${l.im||''}" required>`)}
+    ${fldHtml('Data RE (retirada)',`<input name="re" type="date" value="${re}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
+    ${fldHtml('Data IA (inseminação)',`<input name="ia" type="date" value="${ia}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
+    ${fldHtml('Data DG (diagnóstico)',`<input name="dg" type="date" value="${l.dg||''}">`)}
+    <p class="muted" style="grid-column:1/-1;font-size:13px;margin:0">RE = IM + dias do protocolo · IA = RE + 2 dias. As duas se calculam sozinhas e mudam se você trocar o protocolo ou a data IM.</p>
+    ${sec('Resultados')}
+    ${nm('impl','Implantadas',l.impl,1)}${nm('ret','Retiradas',l.ret)}${nm('ins','Inseminadas',l.ins)}${nm('diag','Diagnósticos',l.diag)}${nm('pren','Prenhas',l.pren)}
+    </div><p class="muted" style="font-size:13px;margin:10px 0 0">Vazias = Diagnósticos − Prenhas · Concepção = Prenhas ÷ Inseminadas. Deixe em branco o que ainda não aconteceu.</p>${foot('Salvar')}</form>`}
   if(m.type==='lote'){const l=m.data||{};
     body=`<h3>${l.id?'Editar lote':'Agendar lote'}</h3>${err}<form data-form="lote" data-id="${l.id||''}" novalidate><div class="form">
-    ${fldHtml('Fazenda',`<select name="farm" required>${opts(S.farms.map(f=>[f.id,f.name]),l.farm,S.farms.length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(l.farm).map(f=>[f.id,f.name]),l.farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(LCAT.map(x=>[x,x]),l.category,'Selecione…')}</select>`)}
@@ -589,7 +1030,7 @@ function modalHtml(){
     body=`<h3>Editar ${x.type==='entrada'?'entrada':'saída'}</h3>${err}<form data-form="pmov" data-id="${x.id}" novalidate><div class="form">
     ${fldHtml('Data',`<input name="date" type="date" value="${x.date}" required>`)}
     ${fldHtml('Produto',`<select name="product">${opts(S.products.map(b=>[b.id,b.name]),x.product)}</select>`)}
-    ${fldHtml('Fazenda',`<select name="farm">${opts(S.farms.map(b=>[b.id,b.name]),x.farm)}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
     ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${foot('Salvar')}</form>`}
   if(m.type==='export'){
@@ -611,20 +1052,38 @@ function modalHtml(){
     <form data-form="wipe" novalidate><div style="display:grid;gap:8px">
      ${chk('movs','Sêmen: movimentações e estoque','Apaga todas as entradas e saídas de sêmen. O saldo de doses de todas as fazendas volta a zero.',true)}
      ${chk('breeders','Reprodutores','Apaga o cadastro de reprodutores e as movimentações ligadas a eles.',true)}
-     ${chk('farms','Fazendas','Apaga o cadastro de fazendas e as movimentações ligadas a elas.',false)}
+     ${chk('farms','Empresas','Apaga o cadastro de empresas e as movimentações e contatos ligados a elas.',false)}
+     ${chk('contacts','Contatos','Apaga o cadastro de contatos.',false)}
      ${chk('tanks','Botijões e nitrogênio','Apaga os botijões, as medições, os abastecimentos e as movimentações ligadas a eles.',false)}
      ${chk('pmovs','Produtos: movimentações e estoque','Apaga todas as entradas e saídas de produtos. O saldo de todas as fazendas volta a zero.',false)}
      ${chk('lotes','Lotes agendados (Serviços da IATF)','Apaga todos os lotes agendados.',false)}
+     ${chk('estacoes','Estações de monta (Controle da Estação)','Apaga todas as estações e os lançamentos de IATF delas.',false)}
+     ${chk('ordens','Ordens de serviços','Apaga o histórico de ordens de serviços.',false)}
      ${chk('fichas','Fichas de serviços','Apaga o histórico de fichas.',false)}
+     ${chk('fin','Gestão Financeira: diárias e km rodado','Apaga todos os lançamentos de diárias técnicas e km rodado.',false)}
+     ${chk('eventos','Agenda: eventos','Apaga todos os eventos da agenda.',false)}
      ${chk('products','Produtos cadastrados','Apaga o cadastro de produtos e as movimentações ligadas a eles.',false)}
     </div>${foot('Zerar dados')}</form>`}
-  if(m.type==='farm'){const f=m.data||{};
-    body=`<h3>${f.id?'Editar fazenda':'Cadastrar fazenda'}</h3>${err}<form data-form="farm" data-id="${f.id||''}" novalidate><div class="form">
-    ${fldHtml('Nome da fazenda',`<input name="name" value="${esc(f.name)}" required>`)}
-    ${fldHtml('Proprietário',`<input name="owner" value="${esc(f.owner)}">`)}
-    ${fldHtml('Localidade',`<input name="city" value="${esc(f.city)}">`)}
-    ${fldHtml('Estado',`<select name="state">${opts(UFS.map(x=>[x,x]),f.state,'Selecione…')}</select>`)}
-    ${fldHtml('Total de matrizes',`<input name="matrices" type="number" min="0" step="1" value="${f.matrices??''}">`)}</div>${foot('Salvar')}</form>`}
+  if(m.type==='farm'){const f=m.data||{},tp=f.tipo||(f.id?tipoOf(f):'Cliente ativo');
+    body=`<h3>${f.id?'Editar empresa':'Cadastrar empresa'}</h3>${err}<form data-form="farm" data-id="${f.id||''}" novalidate><div class="form">
+    ${fldHtml('Nome da empresa',`<input name="name" value="${esc(f.name)}" required>`)}
+    ${fldHtml('Segmento',`<input name="segment" value="${esc(f.segment!==undefined&&!(f.segment in OLDSEG)?f.segment:'')}" placeholder="Ex.: Pecuária de corte">`)}
+    ${fldHtml('Cidade',`<select name="city">${opts(cityOpts(f.city),f.city,'Selecione…')}</select>`)}
+    ${fldHtml('Estado',`<select name="state"${CIDADES.includes(f.city)?' tabindex="-1" style="pointer-events:none;background:var(--navy-soft)"':''}>${opts(UFS.map(x=>[x,x]),CIDADES.includes(f.city)?'MT':f.state,'Selecione…')}</select>`)}
+    ${fldHtml('Tipo de Empresa',`<select name="tipo" required>${opts(TIPOS.map(x=>[x,x]),tp)}</select>`)}
+    </div>${foot('Salvar')}</form>`}
+  if(m.type==='contact'){const c=m.data||{};
+    body=`<h3>${c.id?'Editar contato':'Cadastrar contato'}</h3>${err}<form data-form="contact" data-id="${c.id||''}" novalidate><div class="form">
+    ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name)}" required>`)}
+    ${fldHtml('Empresa',`<select name="company" required>${opts(S.farms.map(x=>[x.id,x.name]),c.farm||c.company,S.farms.length?'Selecione…':'Cadastre uma empresa primeiro')}</select>`)}
+    ${fldHtml('E-mail',`<input name="email" type="email" value="${esc(c.email||'')}" autocomplete="off">`)}
+    ${fldHtml('Telefone',`<input name="phone" type="tel" value="${esc(c.phone||'')}" inputmode="tel" placeholder="(66) 99999-9999">`)}
+    ${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}
+    </div>${foot('Salvar')}</form>`}
+  if(m.type==='empcontacts'){const e=F(m.farm),list=S.contacts.filter(c=>c.farm===m.farm).sort((a,b)=>a.name.localeCompare(b.name));
+    body=`<h3>Contatos · ${esc(e.name)}</h3>
+    ${list.length?`<div class="tw"><table><thead><tr><th>Nome</th><th>Cargo</th><th>Telefone</th><th>E-mail</th></tr></thead><tbody>${list.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.role||'—')}</td><td>${foneHtml(c.phone)}</td><td>${esc(c.email||'—')}</td></tr>`).join('')}</tbody></table></div>`:empty('Nenhum contato vinculado a esta empresa.')}
+    <div class="mf"><button class="btn" type="button" data-a="close">Fechar</button><button class="btn pri" type="button" data-a="newContactFor" data-v="${m.farm}">Novo contato</button></div>`}
   if(m.type==='tank'){const t=m.data||{};
     body=`<h3>${t.id?'Editar botijão':'Adicionar botijão'}</h3>${err}<form data-form="tank" data-id="${t.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do botijão',`<input name="name" value="${esc(t.name)}" required>`)}
@@ -647,7 +1106,7 @@ function modalHtml(){
     ${fldHtml('Data',`<input name="date" type="date" value="${x.date}" required>`)}
     ${fldHtml('Reprodutor',`<select name="b">${opts(S.breeders.map(b=>[b.id,b.name]),x.b)}</select>`)}
     ${fldHtml('Indicação',`<select name="ind">${opts(INDS.map(i=>[i,i]),x.ind)}</select>`)}
-    ${fldHtml('Fazenda',`<select name="farm">${opts(S.farms.map(b=>[b.id,b.name]),x.farm)}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Botijão',`<select name="tank">${opts(S.tanks.map(b=>[b.id,b.name]),x.tank)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="1" step="1" value="${x.qty}" required>`)}
     ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${foot('Salvar')}</form>`}
@@ -728,7 +1187,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  return `<div class="ov"><div class="modal${['pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov"><div class="modal${['pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -743,7 +1202,7 @@ const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
 const ptitle=()=>({'p-painel':'Produtos','p-cadastro':'Produtos › Cadastro','p-estoque':'Produtos › Estoque','p-movs':'Produtos › Movimentações'}[ui.tab]);
-const modName=()=>ui.tab==='fazendas'?'Cadastro':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços da IATF':'Sêmen';
+const modName=()=>ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Gestão Financeira':(ui.tab==='fazendas'||ui.tab==='contatos')?'Cadastro':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços da IATF':'Sêmen';
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
@@ -777,7 +1236,7 @@ function pChart(){
 }
 function vPPainel(){
   const com=S.products.filter(p=>pTotal(p.id)>0).length;
-  const fz=S.farms.filter(f=>pItems(f.id).length).length;
+  const fz=FZ().filter(f=>pItems(f.id).length).length;
   const last=[...S.pmovs].sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0)).slice(0,6);
   return `<div class="stats">
     <div class="card stat"><div class="n">${fmt(S.products.length)}</div><div class="l">Produtos cadastrados</div></div>
@@ -796,9 +1255,9 @@ function vPCadastro_(){
   </tbody></table>`:empty('Nenhum produto cadastrado. Clique em Novo produto para começar.')}</div></div>`;
 }
 function vPEstoque(){
-  if(!ui.pfarm||!S.farms.some(f=>f.id===ui.pfarm)){
+  if(!ui.pfarm||!FZ().some(f=>f.id===ui.pfarm)){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
-    ${S.farms.length?S.farms.map(f=>{const n=pItems(f.id).length;return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'produto':'produtos'} em estoque</div></div><button class="btn" data-a="pfarm" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em Cadastro › Fazendas.')}
+    ${FZ().length?FZ().map(f=>{const n=pItems(f.id).length;return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'produto':'produtos'} em estoque</div></div><button class="btn" data-a="pfarm" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em Cadastro › Fazendas.')}
     <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
   const f=F(ui.pfarm),list=pItems(ui.pfarm,ui.pcat);
@@ -821,7 +1280,7 @@ function vPMovs(){
    ${fldHtml('Data inicial',`<input type="date" data-pm="from" value="${h.from}">`)}
    ${fldHtml('Data final',`<input type="date" data-pm="to" value="${h.to}">`)}
    ${fldHtml('Tipo',`<select data-pm="type">${opts([['entrada','Entrada'],['saida','Saída']],h.type,'Todos')}</select>`)}
-   ${fldHtml('Fazenda',`<select data-pm="farm">${opts(S.farms.map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-pm="farm">${opts(FZ().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
    ${fldHtml('Produto',`<select data-pm="product">${opts(S.products.map(x=>[x.id,x.name]),h.product,'Todos')}</select>`)}
   </div><div class="tw">${pmovTable(pmList(),true)}</div></div>`;
 }
@@ -829,7 +1288,7 @@ function pEntradaFields(){
   const f=ui.f.pentrada;if(!f.rows||!f.rows.length)f.rows=[{}];
   return `<div class="form">
    ${fldHtml('Data da entrada',fi('pentrada','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('pentrada','farm',S.farms.map(x=>[x.id,x.name]),'Selecione…'))}
+   ${fldHtml('Nome da fazenda',fs('pentrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…'))}
   </div>${f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="entrada" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
    ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(S.products.map(p=>[p.id,p.name]),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
@@ -842,7 +1301,7 @@ function pSaidaFields(){
   const its=f.farm?pItems(f.farm):[];
   return `<div class="form">
    ${fldHtml('Data da saída',fi('psaida','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('psaida','farm',S.farms.map(x=>[x.id,x.name]),'Selecione…',true))}
+   ${fldHtml('Nome da fazenda',fs('psaida','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,i)=>{const it=its.find(o=>o.product===r.product);return `<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="saida" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
    ${fldHtml('Produto',`<select data-pf="saida.${i}.product" data-r="1"${f.farm?'':' disabled'}>${opts(its.map(o=>[o.product,o.p.name]),r.product,f.farm?(its.length?'Selecione…':'Sem produto com saldo'):'Escolha a fazenda')}</select>
@@ -854,10 +1313,57 @@ function pSaidaFields(){
 
 /* ---------- serviços da iatf ---------- */
 const LCAT=['Novilhas','Primíparas','Multíparas','Solteiras'];
-const ITIT={'i-lotes':'Agendar Lotes','i-fichas':'Fichas Serviços','i-estacao':'Controle da Estação'};
-const ititle=()=>'Serviços da IATF › '+ITIT[ui.tab];
+const ITIT={'i-painel':'Painel','i-lotes':'Agendar Lotes','i-fichas':'Fichas Serviços','i-ordens':'Ordens Serviços','i-estacao':'Controle da Estação'};
+const ititle=()=>ui.tab==='i-painel'?'Serviços da IATF':'Serviços da IATF › '+ITIT[ui.tab];
 function vEmBreve(){
   return `<div class="card"><div class="card-h"><h3>${ITIT[ui.tab]}</h3></div>${empty('Esta tela está em construção. Envie a estrutura para eu montar.')}</div>`;
+}
+const pct=(a,b)=>b>0?(a/b*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%':'—';
+const sumL=(arr,k)=>arr.reduce((a,x)=>a+(x[k]||0),0);
+const hasN=(arr,k)=>arr.some(x=>x[k]!==undefined);
+function estTot(id){const a=S.lancs.filter(x=>x.est===id);
+  const e=S.estacoes.find(x=>x.id===id)||{};
+  return {n:a.length,mz:F(e.farm).matrices,diag:hasN(a,'diag')?sumL(a,'diag'):undefined,pren:hasN(a,'pren')?sumL(a,'pren'):undefined}}
+function vEstacao(){
+  if(ui.est.id&&S.estacoes.some(x=>x.id===ui.est.id))return vEstLanc();
+  const list=[...S.estacoes].sort((a,b)=>b.start.localeCompare(a.start));
+  const n=v=>v===undefined||v===null||v===''?'—':fmt(v);
+  return `<div class="card"><div class="card-h"><h3>Controle da Estação</h3><button class="btn pri" data-a="newEst">Nova estação</button></div>
+  <div class="tw">${list.length?`<table><thead><tr><th>Fazenda</th><th>Início EM</th><th>Final EM</th><th class="num">Matrizes</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Prenhez Geral</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(e=>{const t=estTot(e.id),l=t.diag!==undefined&&t.pren!==undefined;return `<tr><td><b>${esc(F(e.farm).name)}</b></td><td>${dt(e.start)}</td><td>${dt(e.end)}</td>
+   <td class="num">${n(t.mz)}</td><td class="num">${n(t.diag)}</td><td class="num">${n(t.pren)}</td><td class="num">${l?fmt(t.diag-t.pren):'—'}</td><td class="num"><b>${t.pren!==undefined&&t.mz?pct(t.pren,t.mz):'—'}</b></td>
+   <td><div class="acts"><button class="btn sm pri" data-a="lancEst" data-v="${e.id}">Lançar</button><button class="btn sm" data-a="editEst" data-v="${e.id}">Editar</button><button class="btn sm dng" data-a="delEst" data-v="${e.id}">Excluir</button></div></td></tr>`}).join('')}
+  </tbody></table>`:empty('Nenhuma estação criada. Clique em Nova estação para começar.')}</div></div>`;
+}
+const lcalc=a=>{const d=hasN(a,'diag')&&hasN(a,'pren');
+  return {impl:sumL(a,'impl'),ret:hasN(a,'ret')?sumL(a,'ret'):undefined,ins:hasN(a,'ins')?sumL(a,'ins'):undefined,diag:hasN(a,'diag')?sumL(a,'diag'):undefined,pren:hasN(a,'pren')?sumL(a,'pren'):undefined,
+    vaz:d?sumL(a,'diag')-sumL(a,'pren'):undefined,conc:hasN(a,'pren')&&hasN(a,'ins')?pct(sumL(a,'pren'),sumL(a,'ins')):'—'}};
+function vEstLanc(){
+  const e=S.estacoes.find(x=>x.id===ui.est.id),tab=ui.est.tab;
+  const all=S.lancs.filter(x=>x.est===e.id);
+  const tabs=['1','2','3','G'].map(t=>`<button class="btn ${tab===t?'pri':''}" data-a="estTab" data-v="${t}">${t==='G'?'GERAL IATF':'IATF '+t}</button>`).join('');
+  const head=`<div class="card"><div class="card-h"><div><button class="btn sm" data-a="backEst">← Estações</button></div></div>
+   <h3 style="margin:0 0 4px">${esc(F(e.farm).name)}</h3><p class="muted" style="margin:0 0 12px">EM ${dt(e.start)} a ${dt(e.end)}${e.city?' · '+esc(e.city):''}</p>
+   <div class="acts" style="margin-bottom:14px;flex-wrap:wrap">${tabs}</div>`;
+  const n=v=>v===undefined?'—':fmt(v);
+  const calc=lcalc;
+  if(tab==='G'){
+    const rows=[1,2,3].map(i=>({lbl:'IATF '+i,...calc(all.filter(x=>x.etapa===i))})),tot={lbl:'Total',...calc(all)};
+    const mz=F(e.farm).matrices,prenhez=tot.pren!==undefined&&mz?pct(tot.pren,mz):'—';
+    return head+`<div class="card-h" style="padding:0 0 10px"><h3>GERAL IATF</h3><button class="btn pri" data-a="printLanc">Imprimir</button></div><div class="tw"><table><thead><tr><th>Etapa</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${r.lbl}</td><td class="num">${fmt(r.impl)}</td><td class="num">${n(r.ret)}</td><td class="num">${n(r.ins)}</td><td class="num">${n(r.diag)}</td><td class="num">${n(r.pren)}</td><td class="num">${n(r.vaz)}</td><td class="num">${r.conc}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td>Total</td><td class="num">${fmt(tot.impl)}</td><td class="num">${n(tot.ret)}</td><td class="num">${n(tot.ins)}</td><td class="num">${n(tot.diag)}</td><td class="num">${n(tot.pren)}</td><td class="num">${n(tot.vaz)}</td><td class="num">${tot.conc}</td></tr></tfoot></table></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Matrizes da fazenda: <b>${mz?fmt(mz):'—'}</b> (do cadastro da fazenda) · Prenhez geral: <b>${prenhez}</b> (prenhas ÷ matrizes).</p></div>`;
+  }
+  const list=all.filter(x=>String(x.etapa)===tab).sort((a,b)=>a.im.localeCompare(b.im));
+  const c=calc(list);
+  return head+`<div class="card-h" style="padding:0 0 10px"><h3>IATF ${tab}</h3><div class="acts"><button class="btn" data-a="printLanc">Imprimir</button><button class="btn pri" data-a="newLanc">Novo Lançamento IATF</button></div></div>
+  <div class="tw cmp">${list.length?`<table><thead><tr><th>Lote</th><th>Data IM</th><th>Data RE</th><th>Data IA</th><th>Data DG</th><th>Categoria</th><th>Carimbo</th><th>Protocolo</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(l=>{const lt=S.lotes.find(x=>x.id===l.lote),vz=l.diag!==undefined&&l.pren!==undefined?l.diag-l.pren:undefined;
+   return `<tr><td><b>${esc(lt?lt.name:'?')}</b></td><td>${dt(l.im)||'—'}</td><td>${dt(l.re)||'—'}</td><td>${dt(l.ia)||'—'}</td><td>${dt(l.dg)||'—'}</td><td>${esc(l.cat)}</td><td>${esc(l.carimbo||'—')}</td><td>${l.prot?l.prot+' dias':'—'}</td>
+   <td class="num">${fmt(l.impl)}</td><td class="num">${n(l.ret)}</td><td class="num">${n(l.ins)}</td><td class="num">${n(l.diag)}</td><td class="num">${n(l.pren)}</td><td class="num">${n(vz)}</td><td class="num"><b>${l.pren!==undefined&&l.ins?pct(l.pren,l.ins):'—'}</b></td>
+   <td><div class="acts"><button class="btn sm" data-a="editLanc" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLanc" data-v="${l.id}">Excluir</button></div></td></tr>`}).join('')}
+  </tbody><tfoot><tr><td colspan="8">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td><td></td></tr></tfoot></table>`:empty('Nenhum lançamento na IATF '+tab+'. Clique em Novo Lançamento IATF.')}</div></div>`;
 }
 function vLotes(){
   const f=ui.lf;
@@ -865,7 +1371,7 @@ function vLotes(){
   return `<div class="card"><div class="card-h"><h3>Agendar Lotes</h3><button class="btn pri" data-a="newLote">Agendar lote</button></div>
   <div class="filters" style="margin-bottom:12px">
    ${fldHtml('Status',`<select data-lf="status">${opts([['Aberto','Aberto'],['Arquivado','Arquivado']],f.status,'Todos')}</select>`)}
-   ${fldHtml('Fazenda',`<select data-lf="farm">${opts(S.farms.map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-lf="farm">${opts(FZ().map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
   </div>
   <div class="tw">${list.length?`<table><thead><tr><th>Fazenda / Lote</th><th class="num">Total</th><th>Início Parição</th><th>Final Parição</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead><tbody>
   ${list.map(l=>`<tr><td><b>${esc(F(l.farm).name)}</b> / ${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${dt(l.start)}</td><td>${dt(l.end)}</td><td>${esc(l.category)}</td>
@@ -875,6 +1381,37 @@ function vLotes(){
 }
 
 const TECNICOS=['Flávio Alves','Hiago Miguel','Erikson Caetano','Célio Gregócio','Joaquim Gomes','José Danilo'];
+function vOrdens(){
+  const o=ui.os;
+  const sv=o.svcs.map((r,i)=>`<div class="line"><div class="line-h"><b>Serviço ${i+1}</b>${o.svcs.length>1?`<button type="button" class="btn sm dng" data-a="delSS" data-v="${i}">Remover</button>`:''}</div><div class="form svc3">
+    ${fldHtml('Quantidade',`<input type="number" min="0" step="any" inputmode="decimal" data-ss="${i}.qty" value="${esc(r.qty??'')}">`)}
+    ${fldHtml('Descrição da atividade',`<select data-ss="${i}.desc">${opts([...ATIVS,...(r.desc&&!ATIVS.includes(r.desc)?[r.desc]:[])].map(x=>[x,x]),r.desc,'Selecione…')}</select>`)}
+    ${fldHtml('Lote',`<input data-ss="${i}.lote" value="${esc(r.lote||'')}" autocomplete="off" style="text-transform:uppercase" placeholder="EX.: LOTE 1">`)}
+   </div><button type="button" class="btn sm" data-a="addSS" data-v="${i}">+ Adicionar serviço</button></div>`).join('');
+  const tr=o.trips.map((r,i)=>`<div class="line"><div class="line-h"><b>Viagem ${i+1}</b>${o.trips.length>1?`<button type="button" class="btn sm dng" data-a="delOT" data-v="${i}">Remover</button>`:''}</div><div class="form">
+    ${fldHtml('Quantidade',`<input type="number" min="0" step="any" inputmode="decimal" data-ot="${i}.qty" value="${esc(r.qty??'')}">`)}
+    ${fldHtml('Origem',`<input data-ot="${i}.from" value="${esc(r.from||'')}" list="dl-places" autocomplete="off" placeholder="Fazenda ou cidade">`)}
+    ${fldHtml('Destino',`<input data-ot="${i}.to" value="${esc(r.to||'')}" list="dl-places" autocomplete="off" placeholder="Fazenda ou cidade">`)}
+   </div><button type="button" class="btn sm" data-a="addOT" data-v="${i}">+ Adicionar viagem</button></div>`).join('');
+  const cities=[...new Set([...CIDADES,...S.farms.map(f=>(f.city||'').trim()).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
+  const places=`<datalist id="dl-places">${FZ().sort((a,b)=>a.name.localeCompare(b.name)).map(f=>`<option value="${esc(f.name)}" label="${esc(f.city||'Fazenda')}"></option>`).join('')}${cities.map(c=>`<option value="${esc(c)}" label="Cidade"></option>`).join('')}</datalist>`;
+  const hist=[...S.ordens].sort((a,b)=>b.date.localeCompare(a.date));
+  return `<div class="card"><div class="card-h"><h3>${o.id?'Editando ordem de serviço':'Ordem de Serviço'}</h3><div class="acts">${o.id?'<button class="btn" data-a="cancelOs">Cancelar edição</button>':'<button class="btn" data-a="osClear">Limpar</button>'}<button class="btn" data-a="osPdf">Imprimir ordem</button><button class="btn pri" data-a="saveOs">${o.id?'Salvar alterações':'Salvar ordem'}</button></div></div>
+  <div class="form" style="margin-bottom:16px">
+   ${fldHtml('Data do serviço',`<input type="date" data-os="date" value="${esc(o.date)}">`)}
+   ${fldHtml('Nome da fazenda',`<select data-os="farm">${opts(FZ(o.farm).map(x=>[x.id,x.name]),o.farm,'Selecione…')}</select>`)}
+   ${fldHtml('Técnico',`<select data-os="tech">${opts([...tecVA(),...(o.tech&&!tecVA().includes(o.tech)?[o.tech]:[])].map(x=>[x,x]),o.tech,tecVA().length?'Selecione…':'Nenhum contato com cargo Técnico Vale Animal')}</select>`)}
+   ${fldHtml('Cidade (da fazenda)',`<input value="${esc(o.farm?(F(o.farm).city||''):'')}" placeholder="${o.farm?'Fazenda sem cidade cadastrada':'Escolha a fazenda'}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
+  </div>
+  <h3 style="margin:0 0 8px">Serviços</h3>${sv}
+  <h3 style="margin:16px 0 8px">Viagem</h3>${tr}${places}
+  <h3 style="margin:16px 0 8px">Observações</h3>${fldHtml('Anotações (opcional)',`<textarea data-os="obs" rows="3" placeholder="Anote aqui o que for preciso">${esc(o.obs||'')}</textarea>`,'wide')}</div>
+  <div class="card" style="margin-top:16px"><div class="card-h"><h3>Histórico Ordens de Serviços</h3></div>
+  <div class="tw">${hist.length?`<table><thead><tr><th>Data do Serviço</th><th>Fazenda</th><th>Cidade</th><th>Técnico</th><th>Ações</th></tr></thead><tbody>
+  ${hist.map(x=>`<tr><td>${dt(x.date)}</td><td>${esc(F(x.farm).name)}</td><td>${esc(F(x.farm).city||x.city||'—')}</td><td>${esc(x.tech)}</td>
+   <td><div class="acts"><button class="btn sm" data-a="printOs" data-v="${x.id}">Imprimir</button><button class="btn sm" data-a="editOs" data-v="${x.id}">Editar</button><button class="btn sm dng" data-a="delOs" data-v="${x.id}">Excluir</button></div></td></tr>`).join('')}
+  </tbody></table>`:empty('Nenhuma ordem de serviço salva ainda.')}</div></div>`;
+}
 const PROCS=['Indução','Implante','Retirada','Inseminação','Diagnóstico'];
 const ETAPAS=['1º IATF','2º IATF','3º IATF'];
 function ficOptions(){
@@ -912,8 +1449,8 @@ function vFicha(){
   <div class="form" style="margin-bottom:16px">
    ${fldHtml('Data inicial',`<input type="date" data-fi="from" value="${esc(f.from)}">`)}
    ${fldHtml('Data final',`<input type="date" data-fi="to" value="${esc(f.to)}">`)}
-   ${fldHtml('Nome da fazenda',`<select data-fi="farm">${opts(S.farms.map(x=>[x.id,x.name]),f.farm,'Selecione…')}</select>`)}
-   ${fldHtml('Técnico responsável',`<select data-fi="tech">${opts([...TECNICOS,...(f.tech&&!TECNICOS.includes(f.tech)?[f.tech]:[])].map(x=>[x,x]),f.tech,'Selecione…')}</select>`)}
+   ${fldHtml('Nome da fazenda',`<select data-fi="farm">${opts(FZ(f.farm).map(x=>[x.id,x.name]),f.farm,'Selecione…')}</select>`)}
+   ${fldHtml('Técnico responsável',`<select data-fi="tech">${opts([...tecVA(),...(f.tech&&!tecVA().includes(f.tech)?[f.tech]:[])].map(x=>[x,x]),f.tech,tecVA().length?'Selecione…':'Nenhum contato com cargo Técnico Vale Animal')}</select>`)}
   </div>
   <h3 style="margin:0 0 8px">Serviços</h3>${svc}
   <h3 style="margin:16px 0 8px">Materiais utilizados</h3>${mat}
@@ -936,13 +1473,22 @@ const ICONS={
  farm:'<path d="M3 11l9-7 9 7v9H3z"/><path d="M10 20v-6h4v6"/>',
  cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+ coin:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M14.6 9.6c-.5-.9-1.4-1.3-2.6-1.3-1.5 0-2.5.7-2.5 1.8 0 2.3 5.1 1.2 5.1 3.6 0 1.1-1.1 1.9-2.6 1.9-1.2 0-2.1-.4-2.7-1.4"/>',
  pack:'<path d="M3 9l9-5 9 5v10H3z"/><path d="M3 9h18M9 9v4h6V9"/>',
  list:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h6"/>'};
 const ic=n=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 const chev='<svg class="chev CLS" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 const NAV=[
+ {tab:'inicio',label:'Início',icon:'grid'},
+ {tab:'agenda',label:'Agenda',icon:'cal'},
  {id:'cad',label:'Cadastro',icon:'list',kids:[
-  {tab:'fazendas',label:'Fazendas',icon:'farm'}]},
+  {tab:'contatos',label:'Contatos',icon:'user'},
+  {tab:'fazendas',label:'Empresas',icon:'farm'}]},
+ {id:'iatf',label:'Serviços da IATF',icon:'cal',home:'i-painel',kids:[
+  {tab:'i-lotes',label:'Agendar Lotes',icon:'cal'},
+  {tab:'i-fichas',label:'Fichas Serviços',icon:'list'},
+  {tab:'i-ordens',label:'Ordens Serviços',icon:'list'},
+  {tab:'i-estacao',label:'Controle da Estação',icon:'grid'}]},
  {id:'prod',label:'Produtos',icon:'pack',home:'p-painel',kids:[
   {tab:'p-cadastro',label:'Cadastro',icon:'list'},
   {tab:'p-estoque',label:'Estoque',icon:'box'},
@@ -952,10 +1498,10 @@ const NAV=[
   {tab:'estoque',label:'Estoque',icon:'box'},
   {tab:'botijoes',label:'Botijões',icon:'tank'},
   {tab:'movs',msub:'hist',label:'Movimentações',icon:'swap'}]},
- {id:'iatf',label:'Serviços da IATF',icon:'cal',kids:[
-  {tab:'i-lotes',label:'Agendar Lotes',icon:'cal'},
-  {tab:'i-fichas',label:'Fichas Serviços',icon:'list'},
-  {tab:'i-estacao',label:'Controle da Estação',icon:'grid'}]}];
+ {id:'fin',label:'Gestão Financeira',icon:'coin',kids:[
+  {tab:'f-diarias',label:'Diárias Técnicas',icon:'list'},
+  {tab:'f-kms',label:'Km Rodado',icon:'list'},
+  {tab:'f-comis',label:'Comissões Vendedores',icon:'list'}]}];
 const isMob=()=>matchMedia('(max-width:820px)').matches;
 const curTab=()=>ui.tab==='hist'?'botijoes':ui.tab;
 const isOn=n=>n.tab?(curTab()===n.tab&&(!n.msub||ui.msub===n.msub)):(n.kids||[]).some(isOn);
@@ -969,7 +1515,7 @@ function navHtml(list,d){
     return `<button class="ni ${isOn(n)?'cur':''}" style="--d:${d}" data-a="go" data-v="${n.tab}" data-sub="${n.msub||''}" title="${n.label}">${n.icon?ic(n.icon):'<span class="dot"></span>'}<span class="lbl">${n.label}</span></button>`;
   }).join('');
 }
-const LBL={painel:'Sêmen',cadastro:'Cadastro',estoque:'Estoque',botijoes:'Botijões',movs:'Movimentações',fazendas:'Fazendas'};
+const LBL={painel:'Sêmen',cadastro:'Cadastro',estoque:'Estoque',botijoes:'Botijões',movs:'Movimentações',fazendas:'Empresas',contatos:'Contatos'};
 const SUBL={entrada:'Entrada de sêmen',saida:'Saída de sêmen',hist:'Histórico'};
 
 /* ---------- render ---------- */
@@ -982,9 +1528,12 @@ function responsive(){
           if(td.childNodes.length>1||(td.firstChild&&td.firstChild.nodeType===3))td.innerHTML='<span>'+td.innerHTML+'</span>'}
         i+=sp})})});
 }
+let lastMK='';
 function render(){
-  const view={painel:vPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-estacao':vEmBreve,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='fazendas'?'Cadastro › Fazendas':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  normData();
+  const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const title=ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Gestão Financeira › '+FTIT[ui.tab]:ui.tab==='fazendas'?'Cadastro › Empresas':ui.tab==='contatos'?'Cadastro › Contatos':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
@@ -997,7 +1546,12 @@ function render(){
   document.getElementById('app').innerHTML=`<div class="banner ${dbState==='ok'?'ok':''}"><span>${bannerTxt()}</span><span class="acts"><button class="btn sm" data-a="export">Exportar dados</button><button class="btn sm" data-a="import">Importar dados</button><button class="btn sm" data-a="wipe">Zerar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button class="btn sm" data-a="logout">Sair</button>':''}</span></div>${view}`;
   document.getElementById('modal-root').innerHTML=modalHtml();
   responsive();
+  lastMK=ui.modal?ui.modal.type+(ui.modal.kind||''):'';
+  if(_ap)_ap.scrollTop=_sa;
+  agAfter();
+  const _ov2=document.querySelector('#modal-root .ov');if(_ov2&&_mk0&&_mk0===lastMK)_ov2.scrollTop=_so;
 }
+function goNew(sel,i){const el=document.querySelectorAll(sel)[i];if(!el)return;el.scrollIntoView({block:'center'});const f=el.querySelector('input,select,textarea');if(f)try{f.focus({preventScroll:true})}catch(e){}}
 let tt;function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,2800)}
 const done=t=>{save();ui.modal=null;ui.confirm=null;render();if(t)toast(t)};
 const ask=(msg,ok,o={})=>{ui.confirm={msg,okFn:ok,...o};render()};
@@ -1008,7 +1562,7 @@ document.addEventListener('click',e=>{
   const a=b.dataset.a,v=b.dataset.v;
   switch(a){
    case 'tab':ui.tab=v;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
-   case 'go':ui.tab=v;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
+   case 'go':ui.tab=v;if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
    case 'grp':{const g=b.dataset.home;
      const goHome=g&&!(curTab()===g&&(g!=='movs'||ui.msub==='hist'));
      if(ui.mini&&!isMob()){ui.mini=false;ui.nav[v]=true;if(g){ui.tab=g;if(g==='movs')ui.msub='hist'}}
@@ -1023,7 +1577,7 @@ document.addEventListener('click',e=>{
    case 'back':ui.farm=null;render();break;
    case 'toggle':ui.open[v]=!ui.open[v];render();break;
    case 'pdf':ui.modal={type:'pdf'};render();break;
-   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='fpdf'?'Ficha de Serviços - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
+   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Controle da Estação - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha de Serviços - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='agpdf'?'Agenda - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
    case 'pdfHist':ui.modal={type:'pdfhist'};render();break;
    case 'pdfMov':ui.modal={type:'pdfmov'};render();break;
    case 'export':ui.modal={type:'export'};render();break;
@@ -1042,13 +1596,13 @@ document.addEventListener('click',e=>{
      const n=S.movs.filter(m=>m.b===v).length;
      ask(n?`${B(v).name} possui ${n} movimentação(ões). Excluir o reprodutor também apaga essas movimentações e atualiza o estoque. Deseja continuar?`:`Excluir o reprodutor ${B(v).name}?`,
        ()=>{S.movs=S.movs.filter(m=>m.b!==v);S.breeders=S.breeders.filter(x=>x.id!==v);done('Reprodutor excluído.')},{title:n?'Atenção':'Confirmar'});break}
-   case 'addRow':ui.f.entrada.rows.splice(+v+1,0,{});render();break;
+   case 'addRow':ui.f.entrada.rows.splice(+v+1,0,{});render();goNew('#modal-root .line',+v+1);break;
    case 'delRow':ui.f.entrada.rows.splice(+v,1);render();break;
-   case 'addSRow':ui.f.saida.rows.splice(+v+1,0,{});render();break;
+   case 'addSRow':ui.f.saida.rows.splice(+v+1,0,{});render();goNew('#modal-root .line',+v+1);break;
    case 'delSRow':ui.f.saida.rows.splice(+v,1);render();break;
-   case 'addFS':ui.fi.rows.splice(+v+1,0,{});render();break;
+   case 'addFS':ui.fi.rows.splice(+v+1,0,{});render();goNew('#app .line',+v+1);break;
    case 'delFS':ui.fi.rows.splice(+v,1);render();break;
-   case 'addFM':ui.fi.mats.splice(+v+1,0,{});render();break;
+   case 'addFM':ui.fi.mats.splice(+v+1,0,{});render();goNew('#app .line',ui.fi.rows.length+ +v+1);break;
    case 'delFM':ui.fi.mats.splice(+v,1);render();break;
    case 'fSave':{const f=ui.fi;
      if(!f.from||!f.farm||!f.tech.trim()){toast('Preencha a data inicial, a fazenda e o técnico responsável.');break}
@@ -1064,6 +1618,37 @@ document.addEventListener('click',e=>{
    case 'fPdf':ui.modal={type:'fpdf'};render();break;
    case 'printFicha':ui.modal={type:'fpdf',data:S.fichas.find(q=>q.id===v)};render();break;
    case 'fClear':ask('Limpar toda a ficha?',()=>{ui.fi=newFi();done('Ficha limpa.')});break;
+   case 'newEst':ui.modal={type:'estacao',data:{}};render();break;
+   case 'editEst':ui.modal={type:'estacao',data:{...S.estacoes.find(x=>x.id===v)}};render();break;
+   case 'delEst':{const e=S.estacoes.find(x=>x.id===v);ask(`Excluir a estação de ${F(e.farm).name} (${dt(e.start)} a ${dt(e.end)})?`,()=>{S.estacoes=S.estacoes.filter(x=>x.id!==v);S.lancs=S.lancs.filter(x=>x.est!==v);done('Estação excluída.')});break}
+   case 'lancEst':ui.est={id:v,tab:'1'};render();document.getElementById('app').scrollTop=0;break;
+   case 'estTab':ui.est.tab=v;render();break;
+   case 'backEst':ui.est.id=null;render();break;
+   case 'addSS':ui.os.svcs.splice(+v+1,0,{});render();goNew('#app .line',+v+1);break;
+   case 'delSS':ui.os.svcs.splice(+v,1);render();break;
+   case 'addOT':ui.os.trips.splice(+v+1,0,{});render();goNew('#app .line',ui.os.svcs.length+ +v+1);break;
+   case 'delOT':ui.os.trips.splice(+v,1);render();break;
+   case 'osPdf':ui.modal={type:'opdf'};render();break;
+   case 'printOs':ui.modal={type:'opdf',data:S.ordens.find(q=>q.id===v)};render();break;
+   case 'osClear':ask('Limpar toda a ordem de serviço?',()=>{ui.os=newOs();done('Ordem limpa.')});break;
+   case 'cancelOs':ui.os=newOs();render();break;
+   case 'editOs':{const x=S.ordens.find(q=>q.id===v);ui.os=JSON.parse(JSON.stringify({id:x.id,date:x.date,farm:x.farm,tech:x.tech,city:x.city,obs:x.obs||'',svcs:x.svcs.length?x.svcs.map(r=>({...r,lote:loteTxt(r.lote)})):[{}],trips:x.trips.length?x.trips:[{}]}));render();window.scrollTo(0,0);const m=document.querySelector('main,#app');if(m)m.scrollTop=0;break}
+   case 'delOs':{const x=S.ordens.find(q=>q.id===v);ask(`Excluir a ordem de serviço de ${F(x.farm).name} (${dt(x.date)})?`,()=>{S.ordens=S.ordens.filter(q=>q.id!==v);if(ui.os.id===v)ui.os=newOs();done('Ordem excluída.')});break}
+   case 'saveOs':{const o=ui.os;
+     if(!o.date||!o.farm||!o.tech){toast('Preencha a data do serviço, a fazenda e o técnico.');break}
+     const used=(r,ks)=>ks.some(k=>String(r[k]??'').trim()!=='');
+     const sv=o.svcs.filter(r=>used(r,['qty','desc','lote'])),tr=o.trips.filter(r=>used(r,['qty','from','to']));
+     if(!sv.length&&!tr.length){toast('Lance ao menos um serviço ou uma viagem.');break}
+     if(sv.some(r=>!(Number(r.qty)>0)||!String(r.desc||'').trim())){toast('Em cada serviço, informe a quantidade e escolha a descrição da atividade.');break}
+     if(tr.some(r=>!(Number(r.qty)>0)||!String(r.from||'').trim()||!String(r.to||'').trim())){toast('Em cada viagem, informe a quantidade, a origem e o destino.');break}
+     const rec={date:o.date,farm:o.farm,tech:o.tech,city:(F(o.farm).city||'').trim(),
+       obs:(o.obs||'').trim(),svcs:sv.map(r=>({qty:Number(r.qty),desc:r.desc.trim(),lote:String(r.lote||'').trim().toUpperCase()})),trips:tr.map(r=>({qty:Number(r.qty),from:r.from.trim(),to:r.to.trim()}))};
+     if(o.id)Object.assign(S.ordens.find(x=>x.id===o.id),rec);else S.ordens.push({id:nid('os'),...rec});
+     ui.os=newOs();done('Ordem de serviço salva.');break}
+   case 'printLanc':ui.modal={type:'lpdf',tab:ui.est.tab};render();break;
+   case 'newLanc':ui.modal={type:'lanc',data:{est:ui.est.id,etapa:+ui.est.tab}};render();break;
+   case 'editLanc':ui.modal={type:'lanc',data:{...S.lancs.find(x=>x.id===v)}};render();break;
+   case 'delLanc':ask('Excluir este lançamento de IATF?',()=>{S.lancs=S.lancs.filter(x=>x.id!==v);done('Lançamento excluído.')});break;
    case 'newLote':ui.modal={type:'lote',data:{status:'Aberto'}};render();break;
    case 'editLote':ui.modal={type:'lote',data:{...S.lotes.find(x=>x.id===v)}};render();break;
    case 'delLote':{const l=S.lotes.find(x=>x.id===v);ask(`Excluir o lote ${F(l.farm).name} / ${l.name}?`,()=>{S.lotes=S.lotes.filter(x=>x.id!==v);done('Lote excluído.')});break}
@@ -1079,7 +1664,7 @@ document.addEventListener('click',e=>{
    case 'pPdfMov':ui.modal={type:'ppdfmov'};render();break;
    case 'newPEntrada':ui.f.pentrada={date:today(),rows:[{}]};ui.err={};ui.modal={type:'pentrada'};render();break;
    case 'newPSaida':ui.f.psaida={date:today(),rows:[{}]};ui.err={};ui.modal={type:'psaida'};render();break;
-   case 'addPRow':ui.f['p'+b.dataset.k].rows.splice(+v+1,0,{});render();break;
+   case 'addPRow':ui.f['p'+b.dataset.k].rows.splice(+v+1,0,{});render();goNew('#modal-root .line',+v+1);break;
    case 'delPRow':ui.f['p'+b.dataset.k].rows.splice(+v,1);render();break;
    case 'editPMov':ui.modal={type:'pmov',data:{...S.pmovs.find(m=>m.id===v)}};render();break;
    case 'delPMov':
@@ -1089,11 +1674,39 @@ document.addEventListener('click',e=>{
        S.pmovs=rest;done('Movimentação excluída. Estoque atualizado.')});break;
    case 'wipe':ui.modal={type:'wipe'};render();break;
    case 'newFarm':ui.modal={type:'farm'};render();break;
+   case 'finPrint':ui.modal={type:'finpdf',kind:v};render();break;
+   case 'agPrint':ui.modal={type:'agpdf'};render();break;
+   case 'iniAgendar':{const l=S.lotes.find(x=>x.id===v);ui.modal={type:'ev',data:{date:today(),periodo:'Dia Inteiro',farm:l.farm,lote:String(l.name||'').toUpperCase(),total:l.total}};render();break}
+   case 'agFil':ui.modal={type:'agfil'};render();break;
+   case 'agFilClear':ui.ag.tec='';ui.ag.f={farm:'',title:'',cat:'',periodo:'',lote:'',q:''};ui.modal=null;render();break;
+   case 'agTec':ui.ag.tec=v;render();break;
+   case 'agView':ui.ag.view=v;render();break;
+   case 'agToday':ui.ag.date=today();render();break;
+   case 'agPrev':case 'agNext':{const k=a==='agNext'?1:-1,vw=ui.ag.view;
+     if(vw==='month'){const d=Dt(ui.ag.date);d.setDate(1);d.setMonth(d.getMonth()+k);ui.ag.date=isoD(d)}else if(vw==='list'&&(ui.ag.lf||ui.ag.lt)){const [a,n]=agRange();ui.ag.lf=addDays(a,k*n);ui.ag.lt=addDays(a,k*n+n-1)}else ui.ag.date=addDays(ui.ag.date,k*(vw==='day'?1:vw==='week'?7:vw==='list'?60:30));render();break}
+   case 'agGoDay':ui.ag.date=v;ui.ag.view='day';render();break;
+   case 'agNew':{const [d,h]=String(v).split('|');const H=h===undefined?null:+h;
+     ui.modal={type:'ev',data:{date:d,periodo:H===null?'Dia Inteiro':(H<12?'Manhã':'Tarde')}};render();break}
+   case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
+   case 'agDel':{const x=S.eventos.find(q=>q.id===v);ask(`Excluir o evento "${x.title}"?`,()=>{S.eventos=S.eventos.filter(q=>q.id!==v);done('Evento excluído.')});break}
+   case 'finNew':ui.modal={type:'fin',kind:v,rows:[{date:today(),sit:'Aberta',qty:v==='diarias'?1:''}]};render();break;
+   case 'finEdit':{const [k,id]=v.split(':');ui.modal={type:'fin',kind:k,editId:id,rows:[{...S[FIN[k].col].find(x=>x.id===id)}]};render();break}
+   case 'finAddRow':{finCollect();const rs=ui.modal.rows,i=+v,p=rs[i]||{};rs.splice(i+1,0,{date:p.date||today(),sit:p.sit||'Aberta',prest:p.prest,farm:p.farm,unit:ui.modal.kind==='diarias'?p.unit:undefined,qty:ui.modal.kind==='diarias'?1:''});render();goNew('#modal-root .line',i+1);break}
+   case 'finDelRow':{finCollect();ui.modal.rows.splice(+v,1);render();break}
+   case 'finDel':{const [k,id]=v.split(':'),r=S[FIN[k].col].find(x=>x.id===id);ask(`Excluir o lançamento de ${dt(r.date)} (${r.prest}, ${brl(finTot(r))})?`,()=>{S[FIN[k].col]=S[FIN[k].col].filter(x=>x.id!==id);done('Lançamento excluído.')});break}
+   case 'finPay':{const [k,id]=v.split(':'),r=S[FIN[k].col].find(x=>x.id===id);if(r.sit==='Paga'){r.sit='Aberta';delete r.paidAt}else{r.sit='Paga';r.paidAt=today()}save();render();toast(r.sit==='Paga'?'Arquivada como paga.':'Reaberta.');break}
+   case 'finClear':ui.ff[v]={q:'',from:'',to:'',sit:'',prest:'',farm:''};render();break;
+   case 'printFarms':ui.modal={type:'epdf'};render();break;
+   case 'newContact':ui.modal={type:'contact',data:ui.cf.farm?{farm:ui.cf.farm,city:F(ui.cf.farm).city||'',state:F(ui.cf.farm).state||''}:{}};render();break;
+   case 'newContactFor':ui.modal={type:'contact',data:{farm:v,city:F(v).city||'',state:F(v).state||''}};render();break;
+   case 'editContact':ui.modal={type:'contact',data:{...S.contacts.find(x=>x.id===v)}};render();break;
+   case 'delContact':{const c=S.contacts.find(x=>x.id===v);ask(`Excluir o contato ${c.name}?`,()=>{S.contacts=S.contacts.filter(x=>x.id!==v);done('Contato excluído.')});break}
+   case 'empContacts':ui.modal={type:'empcontacts',farm:v};render();break;
    case 'editFarm':ui.modal={type:'farm',data:{...F(v)}};render();break;
    case 'delFarm':{
-     const n=S.movs.filter(m=>m.farm===v).length;
-     ask(n?`${F(v).name} possui ${n} movimentação(ões) de sêmen. Excluir a fazenda também apaga essas movimentações e atualiza o estoque. Deseja continuar?`:`Excluir a fazenda ${F(v).name}?`,
-       ()=>{S.movs=S.movs.filter(m=>m.farm!==v);S.farms=S.farms.filter(x=>x.id!==v);done('Fazenda excluída.')},{title:n?'Atenção':'Confirmar'});break}
+     const n=S.movs.filter(m=>m.farm===v).length,nc=S.contacts.filter(c=>c.farm===v).length,nf=S.diarias.filter(c=>c.farm===v).length+S.kms.filter(c=>c.farm===v).length;
+     ask(n||nc||nf?`${F(v).name} possui ${[n?n+' movimentação(ões) de sêmen':'',nc?nc+' contato(s)':'',nf?nf+' lançamento(s) financeiro(s)':''].filter(Boolean).join(', ')}. Excluir a empresa também apaga esses registros${n?' e atualiza o estoque':''}. Deseja continuar?`:`Excluir a empresa ${F(v).name}?`,
+       ()=>{S.movs=S.movs.filter(m=>m.farm!==v);S.contacts=S.contacts.filter(c=>c.farm!==v);S.diarias=S.diarias.filter(c=>c.farm!==v);S.kms=S.kms.filter(c=>c.farm!==v);S.eventos.forEach(e=>{if(e.farm===v)e.farm=''});S.farms=S.farms.filter(x=>x.id!==v);done('Empresa excluída.')},{title:n||nc||nf?'Atenção':'Confirmar'});break}
    case 'newTank':ui.modal={type:'tank'};render();break;
    case 'editTank':ui.modal={type:'tank',data:{...T(v)}};render();break;
    case 'delTank':
@@ -1116,10 +1729,29 @@ document.addEventListener('click',e=>{
 
 document.addEventListener('input',e=>{
   const t=e.target;
+  if(t.name==='phone'&&t.closest&&t.closest('form[data-form=contact]')){t.value=fmtFone(t.value)}
+  if(t.name==='allday'&&t.closest&&t.closest('form[data-form=ev]')){const a=document.getElementById('ev-times'),b=document.getElementById('ev-endd');if(a)a.style.display=t.checked?'none':'contents';if(b)b.style.display=t.checked?'contents':'none'}
+  if(t.name==='lote'&&t.closest&&t.closest('form[data-form=ev]')){const p=t.selectionStart;t.value=t.value.toUpperCase();try{t.setSelectionRange(p,p)}catch(e){}}
+  if(t.closest&&t.closest('form[data-form=evproto]')){const f=t.closest('form').elements,o=document.getElementById('evp-prev');if(o)o.innerHTML=evpPrev(t.closest('form').dataset.im,f.prot.value,f.resync.value==='Sim')}
+  if(t.closest&&t.closest('form[data-form=ev]')){const en=t.closest('form').elements.end;if(t.name==='end')t.dataset.touched='1';if(t.name==='date'&&en&&(!en.dataset.touched||en.value<t.value))en.value=t.value}
+  if(t.dataset.agq){ui.ag.f.q=t.value;const b=document.getElementById('ag-list');if(b)b.innerHTML=agList();return}
+  if(t.dataset.fq){const k=t.dataset.fq;ui.ff[k].q=t.value;const b=document.getElementById('fin-tbl');if(b)b.innerHTML=finTable(k);return}
+  if(t.name&&/^(qty|unit)\.\d+$/.test(t.name)&&t.closest&&t.closest('form[data-form=fin]')){const i=t.name.split('.')[1],f=t.closest('form').elements,o=document.getElementById('fin-total-'+i);if(o)o.value=brl(r2(Number(f['qty.'+i].value||0)*Number(f['unit.'+i].value||0)))}
+  if(t.dataset.q){ui.q[t.dataset.q]=t.value;const c=t.closest('.card');if(c)c.querySelectorAll('tbody tr').forEach(r=>{r.style.display=!t.value||nrm(r.textContent).includes(nrm(t.value))?'':'none'});return}
   if(t.dataset.f){const [f,n]=t.dataset.f.split('.');ui.f[f][n]=t.value}
   if(t.dataset.pf){const [kd,i,k]=t.dataset.pf.split('.');ui.f['p'+kd].rows[+i][k]=t.value}
   if(t.dataset.srow){const [i,k]=t.dataset.srow.split('.');ui.f.saida.rows[+i][k]=t.value}
   if(t.dataset.row){const [i,k]=t.dataset.row.split('.');ui.f.entrada.rows[+i][k]=t.value}
+  if(t.name==='city'&&t.closest&&t.closest('form[data-form=farm],form[data-form=contact]')){
+    const st=t.closest('form').elements.state,auto=CIDADES.includes(t.value);
+    if(auto)st.value='MT';st.tabIndex=auto?-1:0;st.style.pointerEvents=auto?'none':'';st.style.background=auto?'var(--navy-soft)':''}
+  if((t.name==='im'||t.name==='prot')&&t.closest&&t.closest('form[data-form=lanc]')){
+    const f=t.closest('form').elements,p=Number(f.prot.value),re=f.im.value&&p?addDays(f.im.value,p):'';
+    f.re.value=re;f.ia.value=re?addDays(re,2):''}
+  if(t.dataset.os&&t.dataset.os!=='farm')ui.os[t.dataset.os]=t.value;
+  if(t.dataset.ss&&t.dataset.ss.endsWith('.lote')){const p=t.selectionStart;t.value=t.value.toUpperCase();try{t.setSelectionRange(p,p)}catch(e){}}
+  if(t.dataset.ss){const [i,k]=t.dataset.ss.split('.');ui.os.svcs[+i][k]=t.value}
+  if(t.dataset.ot){const [i,k]=t.dataset.ot.split('.');ui.os.trips[+i][k]=t.value}
   if(t.dataset.fi)ui.fi[t.dataset.fi]=t.value;
   if(t.dataset.fs){const [i,k]=t.dataset.fs.split('.');ui.fi.rows[+i][k]=t.value}
   if(t.dataset.fm){const [i,k]=t.dataset.fm.split('.');ui.fi.mats[+i][k]=t.value}
@@ -1141,12 +1773,18 @@ document.addEventListener('change',e=>{
   if(d.pm){ui.pm[d.pm]=t.value;render()}
   if(d.impfile&&t.files&&t.files[0]){const r=new FileReader();r.onload=()=>{const ta=document.querySelector('textarea[name=json]');if(ta)ta.value=String(r.result)};r.readAsText(t.files[0])}
   if(d.lf){ui.lf[d.lf]=t.value;render()}
+  if(d.cf){ui.cf[d.cf]=t.value;render()}
+  if(d.ef){ui.ef[d.ef]=t.value;render()}
+  if(d.agfarm!==undefined){ui.ag.f.farm=t.value;render()}
+  if(d.agd){ui.ag[d.agd]=t.value;render()}
+  if(d.ff){const [k,f]=d.ff.split('.');ui.ff[k][f]=t.value;render()}
   if(d.fi){ui.fi[d.fi]=t.value;
     if(d.fi==='farm'){ui.fi.rows=ui.fi.rows.map(r=>({...r,lote:'',total:''}));render()}}
   if(d.fs){const [i,k]=d.fs.split('.');const r=ui.fi.rows[+i];r[k]=t.value;
     if(k==='lote'){const l=S.lotes.find(x=>x.id===t.value);if(l)r.total=l.total}
     if(d.r)render()}
   if(d.fm){const [i,k]=d.fm.split('.');ui.fi.mats[+i][k]=t.value;if(k==='item')render()}
+  if(d.os==='farm'){ui.os.farm=t.value;ui.os.city=F(t.value).city||'';render()}
 });
 
 document.addEventListener('submit',e=>{
@@ -1199,6 +1837,28 @@ document.addEventListener('submit',e=>{
     if(S.breeders.some(b=>b.id!==id&&b.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe um reprodutor com esse nome.');
     if(id){Object.assign(B(id),{name,breed:fd.breed})}else S.breeders.push({id:nid('b'),name,breed:fd.breed});
     return done('Reprodutor salvo.')}
+  if(k==='estacao'){
+    const id=form.dataset.id;
+    if(!fd.farm||!fd.start||!fd.end)return modalErr('Preencha a fazenda, o início e o final da EM.');
+    if(fd.end<fd.start)return modalErr('O final da EM não pode ser antes do início.');
+    const rec={farm:fd.farm,city:(fd.city||'').trim()||F(fd.farm).city||'',start:fd.start,end:fd.end};
+    if(id)Object.assign(S.estacoes.find(x=>x.id===id),rec);else S.estacoes.push({id:nid('e'),...rec});
+    return done('Estação salva.')}
+  if(k==='lanc'){
+    const id=form.dataset.id,est=form.dataset.est,etapa=Number(form.dataset.etapa);
+    if(!fd.lote||!fd.cat||!fd.prot||!fd.im||fd.impl==='')return modalErr('Preencha lote, categoria, protocolo, data IM e implantadas.');
+    fd.re=addDays(fd.im,Number(fd.prot));fd.ia=addDays(fd.re,2);
+    const nums={};for(const k2 of ['impl','ret','ins','diag','pren']){
+      if(fd[k2]===''||fd[k2]===undefined){nums[k2]=undefined;continue}
+      const n=Number(fd[k2]);if(!Number.isInteger(n)||n<0)return modalErr('Use números inteiros, sem negativos.');nums[k2]=n}
+    const chain=[['ret','impl','As retiradas não podem ser mais que as implantadas.'],['ins','ret','As inseminadas não podem ser mais que as retiradas.'],['diag','ins','Os diagnósticos não podem ser mais que as inseminadas.'],['pren','diag','As prenhas não podem ser mais que os diagnósticos.']];
+    for(const [a,b2,msg] of chain)if(nums[a]!==undefined&&nums[b2]!==undefined&&nums[a]>nums[b2])return modalErr(msg);
+    const dts=[['im',fd.im],['re',fd.re],['ia',fd.ia],['dg',fd.dg]].filter(x=>x[1]);
+    for(let i=1;i<dts.length;i++)if(dts[i][1]<dts[i-1][1])return modalErr('As datas precisam estar em ordem: IM, RE, IA, DG.');
+    const rec={est,etapa,lote:fd.lote,cat:fd.cat,carimbo:(fd.carimbo||'').trim(),prot:Number(fd.prot),im:fd.im,re:fd.re,ia:fd.ia,dg:fd.dg||'',...nums};
+    Object.keys(rec).forEach(k2=>{if(rec[k2]===undefined)delete rec[k2]});
+    if(id){const o=S.lancs.find(x=>x.id===id);['ret','ins','diag','pren'].forEach(k2=>delete o[k2]);Object.assign(o,rec)}else S.lancs.push({id:nid('la'),...rec});
+    return done('Lançamento salvo.')}
   if(k==='lote'){
     const id=form.dataset.id,total=Number(fd.total),name=(fd.name||'').trim();
     if(!fd.farm||!name||!fd.category||!fd.start||!fd.end)return modalErr('Preencha fazenda, lote, categoria e as datas da parição.');
@@ -1253,12 +1913,17 @@ document.addEventListener('submit',e=>{
     const resumo=Object.keys(out).filter(c=>out[c].length).map(c=>c+': '+out[c].length).join(', ');
     return ask('Substituir TODOS os dados deste app por estes? ('+resumo+')',()=>{Object.keys(out).forEach(c=>{S[c]=out[c]});done('Dados importados.')},{ok:'Substituir tudo'})}
   if(k==='wipe'){
-    if(!fd.movs&&!fd.breeders&&!fd.farms&&!fd.tanks&&!fd.pmovs&&!fd.products&&!fd.lotes&&!fd.fichas)return modalErr('Marque pelo menos uma opção.');
+    if(!fd.movs&&!fd.breeders&&!fd.farms&&!fd.tanks&&!fd.pmovs&&!fd.products&&!fd.lotes&&!fd.fichas&&!fd.estacoes&&!fd.ordens&&!fd.contacts&&!fd.fin&&!fd.eventos)return modalErr('Marque pelo menos uma opção.');
     if(fd.movs||fd.breeders||fd.farms||fd.tanks)S.movs=[];
     if(fd.pmovs||fd.products||fd.farms)S.pmovs=[];
     if(fd.products)S.products=[];
     if(fd.lotes||fd.farms)S.lotes=[];
     if(fd.fichas||fd.farms)S.fichas=[];
+    if(fd.ordens||fd.farms)S.ordens=[];
+    if(fd.contacts||fd.farms)S.contacts=[];
+    if(fd.fin||fd.farms){S.diarias=[];S.kms=[]}
+    if(fd.eventos)S.eventos=[];
+    if(fd.estacoes||fd.farms){S.estacoes=[];S.lancs=[]}
     if(fd.breeders)S.breeders=[];
     if(fd.farms)S.farms=[];
     if(fd.tanks){S.tanks=[];S.meas=[]}
@@ -1267,13 +1932,54 @@ document.addEventListener('submit',e=>{
     ui.hm={from:'',to:'',type:'',farm:'',breeder:''};ui.hist={tank:'',farm:'',kind:ui.hist.kind||''};
     return done('Dados zerados. Pode cadastrar do zero.')}
   if(k==='farm'){
-    const name=(fd.name||'').trim(),id=form.dataset.id,mat=fd.matrices===''?null:Number(fd.matrices);
-    if(!name)return modalErr('Informe o nome da fazenda.');
-    if(mat!==null&&(!Number.isInteger(mat)||mat<0))return modalErr('O total de matrizes deve ser um número inteiro.');
-    if(S.farms.some(f=>f.id!==id&&f.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe uma fazenda com esse nome.');
-    const rec={name,owner:(fd.owner||'').trim(),city:(fd.city||'').trim(),state:fd.state||'',matrices:mat};
+    const name=(fd.name||'').trim(),id=form.dataset.id,tp=fd.tipo||'Cliente ativo';
+    if(!name)return modalErr('Informe o nome da empresa.');
+    if(S.farms.some(f=>f.id!==id&&f.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe uma empresa com esse nome.');
+    const city=(fd.city||'').trim();
+    const rec={name,segment:tc(fd.segment),tipo:tp,city,state:CIDADES.includes(city)?'MT':(fd.state||'')};
     if(id)Object.assign(F(id),rec);else S.farms.push({id:nid('f'),...rec});
-    return done('Fazenda salva.')}
+    return done('Empresa salva.')}
+  if(k==='ev'){
+    const id=form.dataset.id,tecs=[...form.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),err=m=>{ui.modal.data={...fd,tecs,id:id||undefined};ui.modal.err=m;render()};
+    const title=(fd.title||'').trim(),per=PERIODOS.includes(fd.periodo)?fd.periodo:'Dia Inteiro',all=per==='Dia Inteiro';
+    if(!fd.farm)return err('Selecione a fazenda.');
+    if(!title)return err('Selecione a descrição do serviço.');
+    if(!fd.date)return err('Informe a data do serviço.');
+    if(fd.total!==''&&fd.total!==undefined&&!(Number.isInteger(Number(fd.total))&&Number(fd.total)>=0))return err('O total deve ser um número inteiro.');
+    const [start,etime]=all?['','']:PERH[per];
+    const rec={title,date:fd.date,end:fd.date,allday:all,periodo:per,start,etime,cat:fd.cat||'',color:fd.color||EVCOL[0],farm:fd.farm,total:fd.total===''||fd.total===undefined?'':Number(fd.total),lote:(fd.lote||'').trim().toUpperCase(),team:tcTeam(fd.team),tecs,desc:(fd.desc||'').trim()};
+    ui.ag.date=fd.date;
+    if(id){Object.assign(S.eventos.find(x=>x.id===id),rec);return done('Evento salvo.')}
+    const ne={id:nid('e'),...rec};S.eventos.push(ne);
+    if(title==='IM'||title==='AV + IM'){save();ui.modal={type:'evproto',ev:ne,sel:{prot:'',resync:'Não'}};render();toast('Evento salvo.');return}
+    return done('Evento salvo.')}
+  if(k==='agfil'){ui.ag.tec=fd.tec||'';ui.ag.f={farm:fd.farm||'',title:fd.title||'',cat:fd.cat||'',periodo:fd.periodo||'',lote:(fd.lote||'').trim().toUpperCase(),q:(fd.q||'').trim()};ui.modal=null;render();return}
+  if(k==='evproto'){
+    const m0=ui.modal,ev=m0.ev,prot=Number(fd.prot)||0,rs=fd.resync==='Sim';
+    if(!prot){if(rs){m0.sel={prot:'',resync:'Sim'};m0.err='Escolha o protocolo (7, 8 ou 9 dias) para calcular a ressincronização.';return render()}return done()}
+    const d=evProto(ev.date,prot),base={title:'',date:'',end:'',allday:ev.allday,periodo:ev.periodo,start:ev.start||'',etime:ev.etime||'',cat:ev.cat||'',color:ev.color,farm:ev.farm,total:ev.total,lote:ev.lote,team:ev.team,tecs:ev.tecs||[],desc:ev.desc};
+    const add=(t,x)=>S.eventos.push({id:nid('e'),...base,title:t,date:x,end:x});
+    add('RE',d.re);add('IA',d.ia);if(rs)add('RES',d.res);
+    return done(rs?'3 eventos criados: RE, IA e RES.':'2 eventos criados: RE e IA.')}
+  if(k==='fin'){
+    const kind=form.dataset.kind,c=FIN[kind],id=form.dataset.id,rows=finRead(form);
+    ui.modal.rows=rows;
+    for(let i=0;i<rows.length;i++){const r=rows[i],w=rows.length>1?(kind==='diarias'?'Diária ':'Km rodado ')+(i+1)+': ':'';
+      if(!r.date||!r.prest.trim()||!r.farm)return modalErr(w+'informe a data, o prestador e a fazenda.');
+      if(r.qty===''||!(Number(r.qty)>0))return modalErr(w+'informe: '+c.ql+'.');
+      if(r.unit===''||!(Number(r.unit)>=0))return modalErr(w+'informe o valor unitário.')}
+    const arr=S[c.col];
+    rows.forEach(r=>{const qty=Number(r.qty),unit=Number(r.unit),rec={date:r.date,sit:r.sit==='Paga'?'Paga':'Aberta',prest:tc(r.prest),farm:r.farm,qty,unit,total:r2(qty*unit)},old=id?arr.find(x=>x.id===id):null;
+      if(rec.sit==='Paga')rec.paidAt=(old&&old.paidAt)||today();
+      if(old){if(rec.sit!=='Paga')delete old.paidAt;Object.assign(old,rec)}else arr.push({id:nid(c.pre),...rec})});
+    return done(rows.length>1?rows.length+' lançamentos salvos.':'Lançamento salvo.')}
+  if(k==='contact'){
+    const name=(fd.name||'').trim(),id=form.dataset.id,email=(fd.email||'').trim();
+    if(!name||!fd.company)return modalErr('Informe o nome do contato e a empresa.');
+    if(email&&!/^\S+@\S+\.\S+$/.test(email))return modalErr('E-mail inválido.');
+    const rec={name,farm:fd.company,email,phone:fmtFone(fd.phone),role:tc(fd.role)};
+    if(id)Object.assign(S.contacts.find(x=>x.id===id),rec);else S.contacts.push({id:nid('c'),...rec});
+    return done('Contato salvo.')}
   if(k==='tank'){
     const name=(fd.name||'').trim(),id=form.dataset.id,max=Number(fd.max);
     if(!name||!fd.cap||!(max>0))return modalErr('Informe nome, capacidade e máximo de doses.');
