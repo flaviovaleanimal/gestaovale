@@ -1543,7 +1543,7 @@ function render(){
   sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(NAV,0)}`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><span class="hu">Vale Animal</span>`;
-  document.getElementById('app').innerHTML=`<div class="banner ${dbState==='ok'?'ok':''}"><span>${bannerTxt()}</span><span class="acts"><button class="btn sm" data-a="export">Exportar dados</button><button class="btn sm" data-a="import">Importar dados</button><button class="btn sm" data-a="wipe">Zerar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button class="btn sm" data-a="logout">Sair</button>':''}</span></div>${view}`;
+  document.getElementById('app').innerHTML=`<div class="banner ${dbState==='ok'?'ok':''}"><span>${bannerTxt()}</span><span class="acts"><button class="btn sm" data-a="export">Exportar dados</button><button class="btn sm" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button class="btn sm" data-a="logout">Sair</button>':''}</span></div>${view}`;
   document.getElementById('modal-root').innerHTML=modalHtml();
   responsive();
   lastMK=ui.modal?ui.modal.type+(ui.modal.kind||''):'';
