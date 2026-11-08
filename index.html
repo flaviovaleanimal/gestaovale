@@ -70,6 +70,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ht{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
 .ht .hs{font-size:11px;opacity:.75;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ht b{font-family:var(--f-display);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hacts{flex:none;display:flex;gap:6px;align-items:center}
+.hbtn{border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;border-radius:6px;padding:5px 10px;font-family:inherit;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap}
+.hbtn:hover{background:rgba(255,255,255,.14)}
+@media(max-width:820px){.hx{display:none}}
+.hdr{min-width:0}
+@media(max-width:560px){.hu{display:none}.hdr{gap:8px}.hacts{gap:4px}.hbtn{padding:5px 7px;font-size:12px}}
 .hu{flex:none;background:rgba(255,255,255,.16);border-radius:99px;padding:5px 12px;font-weight:600;font-size:13px}
 .content{overflow:auto;min-height:0;padding:20px max(24px,env(safe-area-inset-right,0px)) 28px 24px;display:flex;flex-direction:column;gap:16px}
 .content>*{flex:none;width:100%}
@@ -1542,8 +1548,8 @@ function render(){
   sd.className='side'+(mini?' mini':'');
   sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(NAV,0)}`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
-   <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><span class="hu">Vale Animal</span>`;
-  document.getElementById('app').innerHTML=`<div class="banner ${dbState==='ok'?'ok':''}"><span>${bannerTxt()}</span><span class="acts"><button class="btn sm" data-a="export">Exportar dados</button><button class="btn sm" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button class="btn sm" data-a="logout">Sair</button>':''}</span></div>${view}`;
+   <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><span class="hacts"><button class="hbtn" data-a="export" title="Exportar dados">Exportar<span class="hx"> dados</span></button><button class="hbtn" data-a="import" title="Importar dados">Importar<span class="hx"> dados</span></button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button class="hbtn" data-a="logout">Sair</button>':''}</span><span class="hu">Vale Animal</span>`;
+  document.getElementById('app').innerHTML=`${dbState==='ok'?'':`<div class="banner" role="status"><span>${bannerTxt()}</span></div>`}${view}`;
   document.getElementById('modal-root').innerHTML=modalHtml();
   responsive();
   lastMK=ui.modal?ui.modal.type+(ui.modal.kind||''):'';
