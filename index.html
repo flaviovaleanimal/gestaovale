@@ -389,7 +389,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
@@ -479,8 +479,9 @@ function movTable(list,actions){
 
 function vCadastro(){
   return `<div class="card"><div class="card-h"><h3>Reprodutores</h3><button class="btn pri" data-a="newBreeder">Novo reprodutor</button></div>
+  ${S.breeders.length?`<div class="filters" style="margin-bottom:12px">${searchBox('br')}</div>`:''}
   <div class="tw">${S.breeders.length?`<table><thead><tr><th>Nome do reprodutor</th><th>Raça</th><th class="num">Saldo doses</th><th>Ações</th></tr></thead><tbody>
-   ${[...S.breeders].sort((a,b)=>a.name.localeCompare(b.name)).map(b=>`<tr><td><b>${esc(b.name)}</b></td><td>${esc(b.breed)}</td><td class="num">${fmt(breederBal(b.id))}</td>
+   ${[...S.breeders].sort((a,b)=>a.name.localeCompare(b.name)).map(b=>`<tr${qHide('br',b.name+' '+b.breed)}><td><b>${esc(b.name)}</b></td><td>${esc(b.breed)}</td><td class="num">${fmt(breederBal(b.id))}</td>
    <td><div class="acts"><button class="btn sm" data-a="editBreeder" data-v="${b.id}">Editar</button><button class="btn sm dng" data-a="delBreeder" data-v="${b.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty('Nenhum reprodutor cadastrado.')}</div></div>`;
 }
@@ -1249,8 +1250,9 @@ function vPPainel(){
 }
 function vPCadastro_(){
   return `<div class="card"><div class="card-h"><h3>Produtos</h3><button class="btn pri" data-a="newProduct">Novo produto</button></div>
+  ${S.products.length?`<div class="filters" style="margin-bottom:12px">${searchBox('pr')}</div>`:''}
   <div class="tw">${S.products.length?`<table><thead><tr><th>Nome do produto</th><th>Categoria</th><th class="num">Saldo total</th><th>Ações</th></tr></thead><tbody>
-   ${[...S.products].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.category)}</td><td class="num">${qtyU(pTotal(p.id))}</td>
+   ${[...S.products].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<tr${qHide('pr',p.name+' '+p.category)}><td><b>${esc(p.name)}</b></td><td>${esc(p.category)}</td><td class="num">${qtyU(pTotal(p.id))}</td>
    <td><div class="acts"><button class="btn sm" data-a="editProduct" data-v="${p.id}">Editar</button><button class="btn sm dng" data-a="delProduct" data-v="${p.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty('Nenhum produto cadastrado. Clique em Novo produto para começar.')}</div></div>`;
 }
