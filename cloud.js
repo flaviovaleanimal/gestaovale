@@ -15,9 +15,10 @@
     #gs-login form{background:var(--surface,#fff);color:var(--ink,#14213d);width:100%;max-width:380px;border-radius:14px;padding:28px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
     #gs-login h1{font:700 22px var(--f-display,system-ui);margin:0 0 4px}#gs-login p{margin:0 0 18px;color:var(--muted,#5a6785);font-size:14px}
     #gs-login label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
-    #gs-login input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#dce1ee);border-radius:8px;font:inherit;background:var(--bg,#f2f4f9);color:inherit}
+    #gs-login input,#gs-login input:invalid{box-shadow:none;outline-offset:0;text-decoration:none;width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#dce1ee);border-radius:8px;font:inherit;background:var(--bg,#f2f4f9);color:inherit}
+    #gs-login input:focus{outline:2px solid var(--navy,#12285a);outline-offset:1px}
     #gs-login button{margin-top:18px;width:100%;padding:12px;border:0;border-radius:8px;background:var(--navy,#12285a);color:#fff;font:600 15px var(--f-body,system-ui);cursor:pointer}
-    #gs-login .err{color:var(--danger,#b3261e);font-size:13px;margin-top:10px;min-height:18px}`;
+    #gs-login .err{color:var(--danger,#b3261e);font-size:13px;margin-top:10px;background:none;padding:0;border:0}#gs-login .err:empty{display:none}`;
     document.head.appendChild(s);
   }
   function askLogin(){
@@ -25,8 +26,8 @@
       css();
       const d=document.createElement('div');d.id='gs-login';
       d.innerHTML=`<form><h1>Gestão de Serviços</h1><p>Vale Animal · entre com seu e-mail e senha.</p>
-        <label for="gs-e">E-mail</label><input id="gs-e" type="email" autocomplete="username" required>
-        <label for="gs-p">Senha</label><input id="gs-p" type="password" autocomplete="current-password" required>
+        <label for="gs-e">E-mail</label><input id="gs-e" type="email" autocomplete="username" spellcheck="false" autocapitalize="off" autocorrect="off" required>
+        <label for="gs-p">Senha</label><input id="gs-p" type="password" autocomplete="current-password" spellcheck="false" autocapitalize="off" autocorrect="off" required>
         <div class="err" role="alert"></div><button type="submit">Entrar</button></form>`;
       document.body.appendChild(d);
       const f=d.querySelector('form'),er=d.querySelector('.err'),b=d.querySelector('button');

@@ -1390,11 +1390,11 @@ function vOrdens(){
    </div><button type="button" class="btn sm" data-a="addSS" data-v="${i}">+ Adicionar serviço</button></div>`).join('');
   const tr=o.trips.map((r,i)=>`<div class="line"><div class="line-h"><b>Viagem ${i+1}</b>${o.trips.length>1?`<button type="button" class="btn sm dng" data-a="delOT" data-v="${i}">Remover</button>`:''}</div><div class="form">
     ${fldHtml('Quantidade',`<input type="number" min="0" step="any" inputmode="decimal" data-ot="${i}.qty" value="${esc(r.qty??'')}">`)}
-    ${fldHtml('Origem',`<input data-ot="${i}.from" value="${esc(r.from||'')}" list="dl-places" autocomplete="off" placeholder="Fazenda ou cidade">`)}
-    ${fldHtml('Destino',`<input data-ot="${i}.to" value="${esc(r.to||'')}" list="dl-places" autocomplete="off" placeholder="Fazenda ou cidade">`)}
+    ${fldHtml('Origem',`<input data-ot="${i}.from" value="${esc(r.from||'')}" list="dl-places" autocomplete="off" placeholder="Selecione a empresa ou a cidade">`)}
+    ${fldHtml('Destino',`<input data-ot="${i}.to" value="${esc(r.to||'')}" list="dl-places" autocomplete="off" placeholder="Selecione a empresa ou a cidade">`)}
    </div><button type="button" class="btn sm" data-a="addOT" data-v="${i}">+ Adicionar viagem</button></div>`).join('');
   const cities=[...new Set([...CIDADES,...S.farms.map(f=>(f.city||'').trim()).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
-  const places=`<datalist id="dl-places">${FZ().sort((a,b)=>a.name.localeCompare(b.name)).map(f=>`<option value="${esc(f.name)}" label="${esc(f.city||'Fazenda')}"></option>`).join('')}${cities.map(c=>`<option value="${esc(c)}" label="Cidade"></option>`).join('')}</datalist>`;
+  const places=`<datalist id="dl-places">${[...S.farms].sort((a,b)=>a.name.localeCompare(b.name)).map(f=>{const v=f.city?f.name+' - '+f.city:f.name;return `<option value="${esc(v)}" label="Empresa"></option>`}).join('')}${cities.map(c=>`<option value="${esc(c)}" label="Cidade"></option>`).join('')}</datalist>`;
   const hist=[...S.ordens].sort((a,b)=>b.date.localeCompare(a.date));
   return `<div class="card"><div class="card-h"><h3>${o.id?'Editando ordem de serviço':'Ordem de Serviço'}</h3><div class="acts">${o.id?'<button class="btn" data-a="cancelOs">Cancelar edição</button>':'<button class="btn" data-a="osClear">Limpar</button>'}<button class="btn" data-a="osPdf">Imprimir ordem</button><button class="btn pri" data-a="saveOs">${o.id?'Salvar alterações':'Salvar ordem'}</button></div></div>
   <div class="form" style="margin-bottom:16px">
