@@ -389,7 +389,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
@@ -714,7 +714,7 @@ function vBotijoes(){
   const rows=[...S.tanks].sort((a,b)=>a.name.localeCompare(b.name)).map(t=>{
     const st=tankStock(t.id), l=tankLast(t.id), lowN=l&&l.level<LOW;
     const lm=lastOf(t.id,'medicao'), la=lastOf(t.id,'abastecimento');
-    return `<tr><td><b>${esc(t.name)}</b></td><td>${t.cap} L</td><td class="num">${fmt(t.max)}</td><td class="num">${fmt(st)}</td>
+    return `<tr${qHide('bj',t.name+' '+t.cap+' L')}><td><b>${esc(t.name)}</b></td><td>${t.cap} L</td><td class="num">${fmt(t.max)}</td><td class="num">${fmt(st)}</td>
     <td class="num">${fmt(t.max-st)}</td>
     <td>${l?`<span class="pill ${lowN?'warn':'ok'}">${l.level} cm${lowN?' · baixo':''}</span>`:'<span class="muted">sem medição</span>'}</td>
     <td>${lm?dt(lm.date):'<span class="muted">—</span>'}</td>
@@ -723,6 +723,7 @@ function vBotijoes(){
   return `<div class="card"><div class="card-h"><h3>Botijões</h3><div class="acts">
     <button class="btn" data-a="hist" data-v="" data-k="medicao">Medição</button><button class="btn" data-a="hist" data-v="" data-k="abastecimento">Abastecimento</button>
     <button class="btn pri" data-a="newTank">Adicionar botijão</button></div></div>
+  ${S.tanks.length?`<div class="filters" style="margin-bottom:12px">${searchBox('bj')}</div>`:''}
   <div class="tw"><table><thead><tr><th>Botijão</th><th>Capacidade</th><th class="num">Máximo Doses</th><th class="num">Estoque Atual</th><th class="num">Espaço Livre</th><th>Nível Nitrogênio</th><th>Última Medição</th><th>Último Abastecimento</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>
   <p class="muted" style="margin:12px 0 0">Botijões não ficam presos a uma fazenda. Uma fazenda pode usar sêmen de vários botijões.</p></div>`;
 }
