@@ -1971,10 +1971,13 @@ document.addEventListener('submit',e=>{
     const [start,etime]=all?['','']:PERH[per];
     const rec={title,date:fd.date,end:fd.date,allday:all,periodo:per,start,etime,cat:fd.cat||'',color:fd.color||EVCOL[0],farm:fd.farm,total:fd.total===''||fd.total===undefined?'':Number(fd.total),lote:(fd.lote||'').trim().toUpperCase(),team:tcTeam(fd.team),tecs,desc:(fd.desc||'').trim()};
     ui.ag.date=fd.date;
-    if(id){Object.assign(S.eventos.find(x=>x.id===id),rec);return done('Evento salvo.')}
+    const lt=rec.lote?S.lotes.find(l=>l.farm===rec.farm&&l.status!=='Arquivado'&&nrm(l.name)===nrm(rec.lote)):null;
+    if(lt)lt.status='Arquivado';
+    const msg='Evento salvo.'+(lt?` O lote ${lt.name} foi arquivado.`:'');
+    if(id){Object.assign(S.eventos.find(x=>x.id===id),rec);return done(msg)}
     const ne={id:nid('e'),...rec};S.eventos.push(ne);
-    if(title==='IM'||title==='AV + IM'){save();ui.modal={type:'evproto',ev:ne,sel:{prot:'',resync:'Não'}};render();toast('Evento salvo.');return}
-    return done('Evento salvo.')}
+    if(title==='IM'||title==='AV + IM'){save();ui.modal={type:'evproto',ev:ne,sel:{prot:'',resync:'Não'}};render();toast(msg);return}
+    return done(msg)}
   if(k==='agfil'){ui.ag.tec=fd.tec||'';ui.ag.f={farm:fd.farm||'',title:fd.title||'',cat:fd.cat||'',periodo:fd.periodo||'',lote:(fd.lote||'').trim().toUpperCase(),q:(fd.q||'').trim()};ui.modal=null;render();return}
   if(k==='evproto'){
     const m0=ui.modal,ev=m0.ev,prot=Number(fd.prot)||0,rs=fd.resync==='Sim';
