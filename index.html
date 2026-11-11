@@ -130,6 +130,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ov{position:fixed;inset:0;background:rgba(8,14,30,.55);display:flex;align-items:flex-start;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px 16px;overflow:auto;z-index:50}
 .modal{background:var(--surface);border-radius:12px;width:100%;max-width:560px;padding:20px;margin:auto 0}
 .modal.big{max-width:760px}
+
 .line{border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:16px}
 .line-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
 .plus{display:flex;justify-content:center;margin-top:14px}
@@ -154,6 +155,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .chk small{color:var(--muted)}
 .modal.xl{max-width:1040px;padding:28px}
 .modal.xl .form{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px 20px}
+.modal .form.c3,.modal.xl .form.c3{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.modal .form.c5,.modal.xl .form.c5{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}@media(max-width:640px){.modal .form.c3,.modal .form.c5,.modal.xl .form.c3,.modal.xl .form.c5{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
 .modal.xl .fld input,.modal.xl .fld select,.modal.xl .fld textarea{padding:11px 12px;font-size:15px}
 .modal.xl h3{font-size:20px;margin-bottom:20px}
 .modal h3{margin-bottom:14px}
@@ -1002,11 +1004,11 @@ function modalHtml(){
       <p style="margin:12px 0 0">Matrizes: <b>${mz?fmt(mz):'—'}</b> · Prenhez geral: <b>${pz}</b> (prenhas ÷ matrizes)</p>`;
     }else{
       const list=all.filter(x=>String(x.etapa)===tab).sort((a,b)=>a.im.localeCompare(b.im)),c=lcalc(list);
-      tbl=list.length?`<table><thead><tr><th>Lote</th><th>Data IM</th><th>Data RE</th><th>Data IA</th><th>Data DG</th><th>Categoria</th><th>Carimbo</th><th>Protocolo</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th></tr></thead><tbody>
+      tbl=list.length?`<table><thead><tr><th>Lote</th><th>Data IM</th><th>Data RE</th><th>Data IA</th><th>Data DG</th><th>Categoria</th><th>Carimbo</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th></tr></thead><tbody>
       ${list.map(l=>{const lt=S.lotes.find(x=>x.id===l.lote),vz=l.diag!==undefined&&l.pren!==undefined?l.diag-l.pren:undefined;
-       return `<tr><td>${esc(lt?lt.name:'?')}</td><td>${dt(l.im)||'—'}</td><td>${dt(l.re)||'—'}</td><td>${dt(l.ia)||'—'}</td><td>${dt(l.dg)||'—'}</td><td>${esc(l.cat)}</td><td>${esc(l.carimbo||'—')}</td><td>${l.prot?l.prot+' dias':'—'}</td>
+       return `<tr><td>${esc(lt?lt.name:'?')}</td><td>${dt(l.im)||'—'}</td><td>${dt(l.re)||'—'}</td><td>${dt(l.ia)||'—'}</td><td>${dt(l.dg)||'—'}</td><td>${esc(l.cat)}</td><td>${esc(l.carimbo||'—')}</td>
        <td class="num">${fmt(l.impl)}</td><td class="num">${n(l.ret)}</td><td class="num">${n(l.ins)}</td><td class="num">${n(l.diag)}</td><td class="num">${n(l.pren)}</td><td class="num">${n(vz)}</td><td class="num">${l.pren!==undefined&&l.ins?pct(l.pren,l.ins):'—'}</td></tr>`}).join('')}
-      </tbody><tfoot><tr><td colspan="8">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td></tr></tfoot></table>`:'<p>Nenhum lançamento nesta IATF.</p>';
+      </tbody><tfoot><tr><td colspan="7">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td></tr></tfoot></table>`:'<p>Nenhum lançamento nesta IATF.</p>';
     }
     const ttl=tab==='G'?'GERAL IATF':'IATF '+tab;
     body=`<h3>Controle da Estação · ${ttl}</h3>
@@ -1019,19 +1021,19 @@ function modalHtml(){
     const sec=t=>`<h4 style="grid-column:1/-1;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">${t}</h4>`;
     const re=l.prot&&l.im?addDays(l.im,Number(l.prot)):(l.re||''),ia=re?addDays(re,2):(l.ia||'');
     body=`<h3>${l.id?'Editar lançamento':'Novo lançamento'} · IATF ${l.etapa}</h3>${err}<p style="margin:0 0 4px"><b>${esc(F(e.farm).name)}</b> · EM ${dt(e.start)} a ${dt(e.end)}</p>
-    <form data-form="lanc" data-id="${l.id||''}" data-est="${esc(l.est)}" data-etapa="${l.etapa}" novalidate><div class="form">
-    ${sec('Animais')}
+    <form data-form="lanc" data-id="${l.id||''}" data-est="${esc(l.est)}" data-etapa="${l.etapa}" novalidate>
+    ${sec('Animais')}<div class="form c3">
     ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes desta fazenda (cadastre em Agendar Lotes)')}</select>`)}
     ${fldHtml('Categoria',`<select name="cat" required>${opts(catOpts(l.cat),l.cat,'Selecione…')}</select>`)}
     ${fldHtml('Carimbo',`<input name="carimbo" value="${esc(l.carimbo||'')}">`)}
-    ${sec('Protocolo e datas')}
+    </div>${sec('Protocolo e datas')}<div class="form c5">
     ${fldHtml('Protocolo IATF',`<select name="prot" required>${opts(PROTS.map(x=>[x,x+' dias']),l.prot,'Selecione…')}</select>`)}
-    ${fldHtml('Data IM (implante)',`<input name="im" type="date" value="${l.im||''}" required>`)}
-    ${fldHtml('Data RE (retirada)',`<input name="re" type="date" value="${re}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
-    ${fldHtml('Data IA (inseminação)',`<input name="ia" type="date" value="${ia}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
-    ${fldHtml('Data DG (diagnóstico)',`<input name="dg" type="date" value="${l.dg||''}">`)}
-    <p class="muted" style="grid-column:1/-1;font-size:13px;margin:0">RE = IM + dias do protocolo · IA = RE + 2 dias. As duas se calculam sozinhas e mudam se você trocar o protocolo ou a data IM.</p>
-    ${sec('Resultados')}
+    ${fldHtml('Data IM',`<input name="im" type="date" value="${l.im||''}" required>`)}
+    ${fldHtml('Data RE',`<input name="re" type="date" value="${re}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
+    ${fldHtml('Data IA',`<input name="ia" type="date" value="${ia}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
+    ${fldHtml('Data DG',`<input name="dg" type="date" value="${l.dg||''}">`)}
+    </div><p class="muted" style="font-size:13px;margin:8px 0 0">RE = IM + dias do protocolo · IA = RE + 2 dias. As duas se calculam sozinhas e mudam se você trocar o protocolo ou a data IM.</p>
+    ${sec('Resultados')}<div class="form c5">
     ${nm('impl','Implantadas',l.impl,1)}${nm('ret','Retiradas',l.ret)}${nm('ins','Inseminadas',l.ins)}${nm('diag','Diagnósticos',l.diag)}${nm('pren','Prenhas',l.pren)}
     </div><p class="muted" style="font-size:13px;margin:10px 0 0">Vazias = Diagnósticos − Prenhas · Concepção = Prenhas ÷ Inseminadas. Deixe em branco o que ainda não aconteceu.</p>${foot('Salvar')}</form>`}
   if(m.type==='lote'){const l=m.data||{};
@@ -1211,7 +1213,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  return `<div class="ov"><div class="modal${['pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov"><div class="modal${['lanc','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -1377,12 +1379,12 @@ function vEstLanc(){
   const list=all.filter(x=>String(x.etapa)===tab).sort((a,b)=>a.im.localeCompare(b.im));
   const c=calc(list);
   return head+`<div class="card-h" style="padding:0 0 10px"><h3>IATF ${tab}</h3><div class="acts"><button class="btn" data-a="printLanc">Imprimir</button><button class="btn pri" data-a="newLanc">Novo Lançamento IATF</button></div></div>
-  <div class="tw cmp">${list.length?`<table><thead><tr><th>Lote</th><th>Data IM</th><th>Data RE</th><th>Data IA</th><th>Data DG</th><th>Categoria</th><th>Carimbo</th><th>Protocolo</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th><th>Ações</th></tr></thead><tbody>
+  <div class="tw cmp">${list.length?`<table><thead><tr><th>Lote</th><th>Data IM</th><th>Data RE</th><th>Data IA</th><th>Data DG</th><th>Categoria</th><th>Carimbo</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th><th>Ações</th></tr></thead><tbody>
   ${list.map(l=>{const lt=S.lotes.find(x=>x.id===l.lote),vz=l.diag!==undefined&&l.pren!==undefined?l.diag-l.pren:undefined;
-   return `<tr><td><b>${esc(lt?lt.name:'?')}</b></td><td>${dt(l.im)||'—'}</td><td>${dt(l.re)||'—'}</td><td>${dt(l.ia)||'—'}</td><td>${dt(l.dg)||'—'}</td><td>${esc(l.cat)}</td><td>${esc(l.carimbo||'—')}</td><td>${l.prot?l.prot+' dias':'—'}</td>
+   return `<tr><td><b>${esc(lt?lt.name:'?')}</b></td><td>${dt(l.im)||'—'}</td><td>${dt(l.re)||'—'}</td><td>${dt(l.ia)||'—'}</td><td>${dt(l.dg)||'—'}</td><td>${esc(l.cat)}</td><td>${esc(l.carimbo||'—')}</td>
    <td class="num">${fmt(l.impl)}</td><td class="num">${n(l.ret)}</td><td class="num">${n(l.ins)}</td><td class="num">${n(l.diag)}</td><td class="num">${n(l.pren)}</td><td class="num">${n(vz)}</td><td class="num"><b>${l.pren!==undefined&&l.ins?pct(l.pren,l.ins):'—'}</b></td>
    <td><div class="acts"><button class="btn sm" data-a="editLanc" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLanc" data-v="${l.id}">Excluir</button></div></td></tr>`}).join('')}
-  </tbody><tfoot><tr><td colspan="8">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td><td></td></tr></tfoot></table>`:empty('Nenhum lançamento na IATF '+tab+'. Clique em Novo Lançamento IATF.')}</div></div>`;
+  </tbody><tfoot><tr><td colspan="7">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td><td></td></tr></tfoot></table>`:empty('Nenhum lançamento na IATF '+tab+'. Clique em Novo Lançamento IATF.')}</div></div>`;
 }
 function vLotes(){
   const f=ui.lf;
