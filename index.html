@@ -965,6 +965,15 @@ function modalHtml(){
       ${fldHtml('Valor Total',`<input id="fin-total-${i}" readonly tabindex="-1" value="${brl(finTot(r))}" style="background:var(--navy-soft);font-weight:700">`)}
       </div>${edit?'':`<button type="button" class="btn sm" data-a="finAddRow" data-v="${i}">+ Adicionar ${isD?'diária':'km rodado'}</button>`}</div>`}).join('');
     body=`<h3>${edit?'Editar':'Lançar'} ${c.one}</h3>${err}<form data-form="fin" data-kind="${k}" data-id="${m.editId||''}" novalidate>${lines}${foot(rows.length>1?'Salvar '+rows.length+' lançamentos':'Salvar')}</form>`}
+  if(m.type==='gpdf'){
+    const f=ui.lf,list=lotesFilt(),flt=[f.status&&'Status: '+f.status,f.farm&&'Fazenda: '+F(f.farm).name].filter(Boolean).join(' · ')||'Sem filtros';
+    const tot=list.reduce((a,l)=>a+(Number(l.total)||0),0);
+    body=`<h3>Agendar Lotes</h3>
+    <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Agendar Lotes</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper-b"><p style="margin:0 0 10px"><b>Filtros:</b> ${esc(flt)} &nbsp; <b>Lotes:</b> ${list.length}</p>
+    ${list.length?`<table><thead><tr><th>Fazenda</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Carimbo</th><th>Início Parição</th><th>Final Parição</th><th>Status</th></tr></thead><tbody>${list.map(l=>`<tr><td>${esc(F(l.farm).name)}</td><td>${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${esc(l.category||'—')}</td><td>${esc(l.carimbo||'—')}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td><td>${esc(l.status)}</td></tr>`).join('')}</tbody><tfoot><tr><td colspan="2">Total de animais</td><td class="num">${fmt(tot)}</td><td colspan="5"></td></tr></tfoot></table>`:'<p>Nenhum lote encontrado.</p>'}</div></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia da lista para impressão, respeitando os filtros escolhidos.</p>
+    <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
   if(m.type==='epdf'){
     const e=ui.ef,list=farmsFilt().filter(f=>!ui.q.fz||nrm(farmTxt(f)).includes(nrm(ui.q.fz)));
     const flt=[e.seg&&'Segmento: '+e.seg,e.city&&'Cidade: '+e.city,e.tipo&&'Tipo: '+e.tipo,ui.q.fz&&'Pesquisa: '+ui.q.fz].filter(Boolean).join(' · ')||'Sem filtros';
@@ -1214,7 +1223,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  return `<div class="ov"><div class="modal${['lanc','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -1387,10 +1396,11 @@ function vEstLanc(){
    <td><div class="acts"><button class="btn sm" data-a="editLanc" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLanc" data-v="${l.id}">Excluir</button></div></td></tr>`}).join('')}
   </tbody><tfoot><tr><td colspan="7">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td><td></td></tr></tfoot></table>`:empty('Nenhum lançamento na IATF '+tab+'. Clique em Novo Lançamento IATF.')}</div></div>`;
 }
+const lotesFilt=()=>{const f=ui.lf;return S.lotes.filter(l=>(!f.status||l.status===f.status)&&(!f.farm||l.farm===f.farm)).sort((a,b)=>(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name))};
 function vLotes(){
   const f=ui.lf;
-  const list=S.lotes.filter(l=>(!f.status||l.status===f.status)&&(!f.farm||l.farm===f.farm)).sort((a,b)=>(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name));
-  return `<div class="card"><div class="card-h"><h3>Agendar Lotes</h3><button class="btn pri" data-a="newLote">Agendar lote</button></div>
+  const list=lotesFilt();
+  return `<div class="card"><div class="card-h"><h3>Agendar Lotes</h3><div class="acts"><button class="btn" data-a="printLotes">Imprimir</button><button class="btn pri" data-a="newLote">Agendar lote</button></div></div>
   <div class="filters" style="margin-bottom:12px">
    ${fldHtml('Status',`<select data-lf="status">${opts([['Aberto','Aberto'],['Arquivado','Arquivado']],f.status,'Todos')}</select>`)}
    ${fldHtml('Fazenda',`<select data-lf="farm">${opts(FZ().map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
@@ -1599,7 +1609,7 @@ document.addEventListener('click',e=>{
    case 'back':ui.farm=null;render();break;
    case 'toggle':ui.open[v]=!ui.open[v];render();break;
    case 'pdf':ui.modal={type:'pdf'};render();break;
-   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Controle da Estação - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha de Serviços - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='agpdf'?'Agenda - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
+   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Controle da Estação - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha de Serviços - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='gpdf'?'Agendar Lotes':y==='agpdf'?'Agenda - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
    case 'pdfHist':ui.modal={type:'pdfhist'};render();break;
    case 'pdfMov':ui.modal={type:'pdfmov'};render();break;
    case 'export':ui.modal={type:'export'};render();break;
@@ -1723,6 +1733,7 @@ document.addEventListener('click',e=>{
    case 'finDel':{const [k,id]=v.split(':'),r=S[FIN[k].col].find(x=>x.id===id);ask(`Excluir o lançamento de ${dt(r.date)} (${r.prest}, ${brl(finTot(r))})?`,()=>{S[FIN[k].col]=S[FIN[k].col].filter(x=>x.id!==id);done('Lançamento excluído.')});break}
    case 'finPay':{const [k,id]=v.split(':'),r=S[FIN[k].col].find(x=>x.id===id);if(r.sit==='Paga'){r.sit='Aberta';delete r.paidAt}else{r.sit='Paga';r.paidAt=today()}save();render();toast(r.sit==='Paga'?'Arquivada como paga.':'Reaberta.');break}
    case 'finClear':ui.ff[v]={q:'',from:'',to:'',sit:'',prest:'',farm:''};render();break;
+   case 'printLotes':ui.modal={type:'gpdf'};render();break;
    case 'printFarms':ui.modal={type:'epdf'};render();break;
    case 'newContact':ui.modal={type:'contact',data:ui.cf.farm?{farm:ui.cf.farm,city:F(ui.cf.farm).city||'',state:F(ui.cf.farm).state||''}:{}};render();break;
    case 'newContactFor':ui.modal={type:'contact',data:{farm:v,city:F(v).city||'',state:F(v).state||''}};render();break;
