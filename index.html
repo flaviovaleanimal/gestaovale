@@ -1153,7 +1153,6 @@ function modalHtml(){
      <h4 style="margin:16px 0 6px">Materiais utilizados</h4>
      ${mats.length?`<table><thead><tr><th>Produto</th><th class="num">Quantidade</th><th class="num">Saída</th><th class="num">Saldo</th></tr></thead><tbody>
      ${mats.map(x=>`<tr><td>${esc(x.label)}</td><td class="num">${x.qty===''?'':fmt(x.qty)}</td><td class="num">${x.out===''?'':fmt(x.out)}</td><td class="num"><b>${x.saldo===''?'':fmt(x.saldo)}</b></td></tr>`).join('')}</tbody></table>`:'<p>Nenhum material lançado.</p>'}
-     <div style="margin-top:48px;display:flex;gap:40px"><div style="flex:1;border-top:1px solid #000;padding-top:4px;text-align:center">${esc(f.tech||'Técnico responsável')}</div><div style="flex:1;border-top:1px solid #000;padding-top:4px;text-align:center">Responsável da fazenda</div></div>
     </div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e escolha Salvar como PDF.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
