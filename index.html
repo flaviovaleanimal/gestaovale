@@ -121,6 +121,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .farm-row:last-child{border:0}
 .farm-row b{font-family:var(--f-display);font-size:16px}
 .tog{background:none;border:0;cursor:pointer;font-weight:600;padding:0;text-align:left}
+.locbox{margin:10px 0 0;padding:10px 12px;background:var(--navy-soft);border-radius:8px;font-size:13px}.locbox b{display:block;margin-bottom:4px}.locbox div+div{margin-top:2px}
 .loc td{background:var(--navy-soft);padding:6px 10px 6px 34px;font-size:13px;border-bottom:1px solid var(--line)}
 .banner.ok{background:var(--in-bg);color:var(--in)}
 .banner{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
@@ -759,8 +760,14 @@ function vHist(){
   </tbody></table>`:empty('Nenhum registro encontrado.')}</div></div>`;
 }
 
+function breederLocs(fid,bid){
+  if(!fid||!bid)return[];const g={};
+  S.movs.filter(m=>m.farm===fid&&m.b===bid).forEach(m=>{g[m.tank]=(g[m.tank]||0)+sg(m)});
+  return Object.entries(g).filter(([,q])=>q>0).map(([t,q])=>({t,q})).sort((a,b)=>T(a.t).name.localeCompare(T(b.t).name));
+}
 function entradaRow(r,i,n){
   const br=r.breeder?B(r.breeder).breed:'';
+  const fz=ui.f.entrada.farm,locs=breederLocs(fz,r.breeder);
   const sel=(k,arr,ph,rr)=>`<select data-row="${i}.${k}"${rr?' data-r="1"':''}>${opts(arr,r[k],ph)}</select>`;
   return `<div class="line"><div class="line-h"><b>Sêmen ${i+1}</b>${n>1?`<button type="button" class="btn sm dng" data-a="delRow" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
@@ -771,13 +778,14 @@ function entradaRow(r,i,n){
    ${fldHtml('Indicação',sel('ind',INDS.map(x=>[x,x]),'Selecione…'))}
    ${fldHtml('Observação',`<textarea data-row="${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
    </div>
+   ${locs.length?`<div class="locbox"><b>Este reprodutor já tem sêmen nesta fazenda:</b>${locs.map(o=>`<div>${esc(F(fz).name)} - ${esc(B(r.breeder).name)} ${fmt(o.q)} doses - Botijão ${esc(T(o.t).name)}</div>`).join('')}</div>`:''}
    <div class="plus"><button type="button" class="plusbtn" data-a="addRow" data-v="${i}" aria-label="Adicionar outro sêmen abaixo" title="Adicionar outro sêmen">+</button></div></div>`;
 }
 function entradaFields(){
   const f=ui.f.entrada;if(!f.rows||!f.rows.length)f.rows=[{}];
   return `<div class="form">
    ${fldHtml('Data da entrada',fi('entrada','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('entrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…'))}
+   ${fldHtml('Nome da fazenda',fs('entrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,i)=>entradaRow(r,i,f.rows.length)).join('')}`;
 }
 function bItems(fid){
