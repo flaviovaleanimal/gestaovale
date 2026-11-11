@@ -1025,7 +1025,7 @@ function modalHtml(){
     ${sec('Animais')}<div class="form c3">
     ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes desta fazenda (cadastre em Agendar Lotes)')}</select>`)}
     ${fldHtml('Categoria',`<select name="cat" required>${opts(catOpts(l.cat),l.cat,'Selecione…')}</select>`)}
-    ${fldHtml('Carimbo',`<input name="carimbo" value="${esc(l.carimbo||'')}">`)}
+    ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
     </div>${sec('Protocolo e datas')}<div class="form c5">
     ${fldHtml('Protocolo IATF',`<select name="prot" required>${opts(PROTS.map(x=>[x,x+' dias']),l.prot,'Selecione…')}</select>`)}
     ${fldHtml('Data IM',`<input name="im" type="date" value="${l.im||''}" required>`)}
@@ -1042,10 +1042,10 @@ function modalHtml(){
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
-    ${fldHtml('Carimbo',`<input name="carimbo" value="${esc(l.carimbo||'')}" autocomplete="off">`)}
     <div class="lote-dates" style="display:${!l.category||LPAR.includes(l.category)?'contents':'none'}">
     ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
     ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div>
+    ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
     ${fldHtml('Status',`<select name="status">${opts(['Aberto','Arquivado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>${foot('Salvar')}</form>`}
   const pfoot=(k,w)=>{const n=(ui.f[k].rows||[]).length;return `<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${n>1?'Registrar '+n+' '+w+'s':'Registrar '+w}</button></div>`};
   if(m.type==='product'){const p=m.data||{};
@@ -1783,6 +1783,7 @@ document.addEventListener('input',e=>{
   if(t.dataset.fs){const [i,k]=t.dataset.fs.split('.');ui.fi.rows[+i][k]=t.value}
   if(t.dataset.fm){const [i,k]=t.dataset.fm.split('.');ui.fi.mats[+i][k]=t.value}
 });
+const carOpts=cur=>{const c=String(cur||'').trim(),L=Array.from({length:12},(_,i)=>String(i+1));return `<option value="">Selecione…</option>${[...L,...(c&&!L.includes(c)?[c]:[])].map(x=>`<option value="${esc(x)}"${x===c?' selected':''}>${esc(x)}</option>`).join('')}`};
 const evLoteSel=(fid,cur)=>{const u=String(cur||'').toUpperCase(),o=evLoteOpts(fid);return `<option value="">${fid?(o?'Selecione o lote…':'Nenhum lote em aberto'):'Selecione a fazenda primeiro'}</option>${o}${u&&!o.includes('value="'+esc(u)+'"')?`<option value="${esc(u)}">${esc(u)}</option>`:''}`};
 const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el['lote'].value||'').trim();if(!fid||!v)return;
   const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Arquivado'&&nrm(x.name)===nrm(v));if(!l)return;
@@ -1798,7 +1799,7 @@ document.addEventListener('change',e=>{
   const t=e.target,d=t.dataset;
   if(t.name==='lote'&&t.form&&t.form.dataset.form==='lanc'&&!t.form.dataset.id){const l=S.lotes.find(x=>x.id===t.value),el=t.form.elements;
     if(l){const ant=S.lancs.filter(x=>x.lote===l.id&&x.carimbo).sort((a,b)=>String(b.im).localeCompare(String(a.im)))[0];
-      el['cat'].value=NCATS.includes(l.category)?l.category:'';el['carimbo'].value=l.carimbo||(ant?ant.carimbo:'');el['impl'].value=l.total}}
+      el['cat'].value=NCATS.includes(l.category)?l.category:'';{const cv=String(l.carimbo||(ant?ant.carimbo:'')||'');const ce=el['carimbo'];if(cv&&![...ce.options].some(o=>o.value===cv))ce.add(new Option(cv,cv));ce.value=cv}el['impl'].value=l.total}}
   if(t.name==='tecs'&&t.checked&&t.form)t.form.querySelectorAll('input[name=tecs]').forEach(x=>{if(x!==t)x.checked=false});
   if(t.name==='category'&&t.form&&t.form.dataset.form==='lote'){const bx=t.form.querySelector('.lote-dates');if(bx)bx.style.display=!t.value||LPAR.includes(t.value)?'contents':'none'}
   if(d.f){const [f,n]=d.f.split('.');ui.f[f][n]=t.value;
