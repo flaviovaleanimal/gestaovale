@@ -562,7 +562,10 @@ const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=
 const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tec&&'Técnico: '+ui.ag.tec,f.farm&&'Fazenda: '+farmShort(f.farm),f.title&&'Serviço: '+f.title,f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
 const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tec||evTec(e,ui.ag.tec))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
 const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Indução','Andrológico'];
-const PERIODOS=['Manhã','Tarde','Dia Inteiro'],EVCATS=['Novilhas Nelore','Novilhas F1 Angus','Vacas Solteiras','Vacas Paridas','Touros'],PERH={'Manhã':['07:00','12:00'],'Tarde':['13:00','18:00']};
+const NCATS=['Novilhas Nelore','Novilhas Angus','Primíparas','Secundíparas','Multíparas','Solteiras'];
+const catOpts=cur=>[...NCATS,...(cur&&!NCATS.includes(cur)?[cur]:[])].map(x=>[x,x]);
+const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Arquivado').sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}</option>`).join('');
+const PERIODOS=['Manhã','Tarde','Dia Inteiro'],EVCATS=NCATS,PERH={'Manhã':['07:00','12:00'],'Tarde':['13:00','18:00']};
 const perOf=e=>e.periodo||(e.allday!==false?'Dia Inteiro':(tmin(e.start)<720?'Manhã':'Tarde'));
 const tcTeam=v=>tc(v).replace(/\sE\s/g,' e ');
 const evProto=(im,p)=>{const re=addDays(im,p),ia=addDays(re,2);return {re,ia,res:addDays(ia,30)}};
@@ -879,9 +882,9 @@ function modalHtml(){
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,x]),e.title,'Selecione…')}</select>`)}
-    ${fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" autocomplete="off" style="text-transform:uppercase">`)}
+    ${fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" list="dl-evlotes" autocomplete="off" style="text-transform:uppercase" placeholder="Escolha um lote agendado"><datalist id="dl-evlotes">${evLoteOpts(e.farm)}</datalist>`)}
     ${fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`)}
-    ${fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),e.cat,'Selecione…')}</select>`)}
+    ${fldHtml('Categoria',`<select name="cat">${opts(catOpts(e.cat),e.cat,'Selecione…')}</select>`)}
     ${fldHtml('Equipe',`<input name="team" value="${esc(e.team||'')}" autocomplete="off" placeholder="Digite o nome da equipe">`)}
     ${fldHtml('Agenda Técnico',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`,'wide')}
     ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`,'wide')}
@@ -1017,7 +1020,7 @@ function modalHtml(){
     <form data-form="lanc" data-id="${l.id||''}" data-est="${esc(l.est)}" data-etapa="${l.etapa}" novalidate><div class="form">
     ${sec('Animais')}
     ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes desta fazenda (cadastre em Agendar Lotes)')}</select>`)}
-    ${fldHtml('Categoria',`<select name="cat" required>${opts(LCAT.map(x=>[x,x]),l.cat,'Selecione…')}</select>`)}
+    ${fldHtml('Categoria',`<select name="cat" required>${opts(catOpts(l.cat),l.cat,'Selecione…')}</select>`)}
     ${fldHtml('Carimbo',`<input name="carimbo" value="${esc(l.carimbo||'')}">`)}
     ${sec('Protocolo e datas')}
     ${fldHtml('Protocolo IATF',`<select name="prot" required>${opts(PROTS.map(x=>[x,x+' dias']),l.prot,'Selecione…')}</select>`)}
@@ -1034,7 +1037,7 @@ function modalHtml(){
     ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(l.farm).map(f=>[f.id,f.name]),l.farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
-    ${fldHtml('Categoria',`<select name="category" required>${opts(LCAT.map(x=>[x,x]),l.category,'Selecione…')}</select>`)}
+    ${fldHtml('Categoria',`<select name="category" required>${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
     <div class="lote-dates" style="display:${!l.category||LPAR.includes(l.category)?'contents':'none'}">
     ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
     ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div>
@@ -1326,8 +1329,8 @@ function pSaidaFields(){
 }
 
 /* ---------- serviços da iatf ---------- */
-const LCAT=['Novilhas','Primíparas','Multíparas','Solteiras'];
-const LPAR=['Primíparas','Multíparas'];
+const LCAT=NCATS;
+const LPAR=['Primíparas','Secundíparas','Multíparas'];
 const ITIT={'i-painel':'Painel','i-lotes':'Agendar Lotes','i-fichas':'Fichas Serviços','i-ordens':'Ordens Serviços','i-estacao':'Controle da Estação'};
 const ititle=()=>ui.tab==='i-painel'?'Serviços da IATF':'Serviços da IATF › '+ITIT[ui.tab];
 function vEmBreve(){
@@ -1696,7 +1699,7 @@ document.addEventListener('click',e=>{
    case 'newFarm':ui.modal={type:'farm'};render();break;
    case 'finPrint':ui.modal={type:'finpdf',kind:v};render();break;
    case 'agPrint':ui.modal={type:'agpdf'};render();break;
-   case 'iniAgendar':{const l=S.lotes.find(x=>x.id===v);ui.modal={type:'ev',data:{date:today(),periodo:'Dia Inteiro',farm:l.farm,lote:String(l.name||'').toUpperCase(),total:l.total}};render();break}
+   case 'iniAgendar':{const l=S.lotes.find(x=>x.id===v);ui.modal={type:'ev',data:{date:today(),periodo:'Dia Inteiro',farm:l.farm,lote:String(l.name||'').toUpperCase(),total:l.total,cat:NCATS.includes(l.category)?l.category:''}};render();break}
    case 'agFil':ui.modal={type:'agfil'};render();break;
    case 'agFilClear':ui.ag.tec='';ui.ag.f={farm:'',title:'',cat:'',periodo:'',lote:'',q:''};ui.modal=null;render();break;
    case 'agTec':ui.ag.tec=v;render();break;
@@ -1776,6 +1779,11 @@ document.addEventListener('input',e=>{
   if(t.dataset.fs){const [i,k]=t.dataset.fs.split('.');ui.fi.rows[+i][k]=t.value}
   if(t.dataset.fm){const [i,k]=t.dataset.fm.split('.');ui.fi.mats[+i][k]=t.value}
 });
+const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el['lote'].value||'').trim();if(!fid||!v)return;
+  const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Arquivado'&&nrm(x.name)===nrm(v));if(!l)return;
+  el['lote'].value=String(l.name).toUpperCase();el['total'].value=l.total;el['cat'].value=NCATS.includes(l.category)?l.category:''};
+document.addEventListener('input',e=>{const t=e.target;if(t.name==='lote'&&t.form&&t.form.dataset.form==='ev')evLoteFill(t.form)});
+document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const dl=t.form.querySelector('#dl-evlotes');if(dl)dl.innerHTML=evLoteOpts(t.value);evLoteFill(t.form)}});
 document.addEventListener('change',e=>{
   const t=e.target,d=t.dataset;
   if(t.name==='category'&&t.form&&t.form.dataset.form==='lote'){const bx=t.form.querySelector('.lote-dates');if(bx)bx.style.display=!t.value||LPAR.includes(t.value)?'contents':'none'}
