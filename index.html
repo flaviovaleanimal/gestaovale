@@ -861,7 +861,7 @@ function vMovs(){
 function modalHtml(){
   const m=ui.modal, c=ui.confirm;
   if(c)return `<div class="ov"><div class="modal" role="dialog" aria-modal="true"><h3>${esc(c.title||'Confirmar')}</h3><p style="margin:0">${esc(c.msg)}</p>
-    <div class="mf"><button class="btn" data-a="close">Cancelar</button><button class="btn pri" data-a="confirmYes">${esc(c.ok||'Excluir')}</button></div></div></div>`;
+    <div class="mf"><button class="btn" data-a="close">${esc(c.cancel||'Cancelar')}</button><button class="btn pri" data-a="confirmYes">${esc(c.ok||'Excluir')}</button></div></div></div>`;
   if(!m)return '';
   const err=m.err?`<div class="err" role="alert">${esc(m.err)}</div>`:'';
   const foot=lbl=>`<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${lbl}</button></div>`;
@@ -1896,8 +1896,17 @@ document.addEventListener('submit',e=>{
     for(let i=1;i<dts.length;i++)if(dts[i][1]<dts[i-1][1])return modalErr('As datas precisam estar em ordem: IM, RE, IA, DG.');
     const rec={est,etapa,lote:fd.lote,cat:fd.cat,carimbo:(fd.carimbo||'').trim(),prot:Number(fd.prot),im:fd.im,re:fd.re,ia:fd.ia,dg:fd.dg||'',...nums};
     Object.keys(rec).forEach(k2=>{if(rec[k2]===undefined)delete rec[k2]});
+    const oldDg=id?(S.lancs.find(x=>x.id===id)||{}).dg||'':'';
     if(id){const o=S.lancs.find(x=>x.id===id);['ret','ins','diag','pren'].forEach(k2=>delete o[k2]);Object.assign(o,rec)}else S.lancs.push({id:nid('la'),...rec});
-    return done('Lançamento salvo.')}
+    done('Lançamento salvo.');
+    if(rec.dg&&etapa<3&&rec.dg!==oldDg){
+      const lt=S.lotes.find(x=>x.id===rec.lote),nx=etapa+1,nome=lt?lt.name:'';
+      ask(`Será feita a ressincronização do lote ${nome}? Se sim, o sistema cria a IATF ${nx} com o lote ${nome}, categoria ${rec.cat}, protocolo de ${rec.prot} dias e data do implante em ${dt(rec.dg)} (a data do DG).`,()=>{
+        if(S.lancs.some(x=>x.est===est&&x.lote===rec.lote&&Number(x.etapa)===nx)){done(`O lote ${nome} já tem lançamento na IATF ${nx}. Nada foi criado.`);return}
+        const re2=addDays(rec.dg,rec.prot);
+        S.lancs.push({id:nid('la'),est,etapa:nx,lote:rec.lote,cat:rec.cat,carimbo:rec.carimbo,prot:rec.prot,im:rec.dg,re:re2,ia:addDays(re2,2),dg:''});
+        done(`IATF ${nx} criada para o lote ${nome}, com implante em ${dt(rec.dg)}. Abra a aba IATF ${nx} para lançar as implantadas.`)},{title:'Ressincronização',ok:'Sim, ressincronizar',cancel:'Não'})}
+    return}
   if(k==='lote'){
     const id=form.dataset.id,total=Number(fd.total),name=(fd.name||'').trim();
     const par=LPAR.includes(fd.category);
