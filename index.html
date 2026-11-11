@@ -1237,15 +1237,8 @@ function pChart(){
    <div class="bar-row axis"><span></span><div class="ticks">${[0,1,2,3,4].map(i=>`<span style="left:${i*25}%">${fmt(r3(max*i/4))}</span>`).join('')}</div><span></span></div></div></div>`;
 }
 function vPPainel(){
-  const com=S.products.filter(p=>pTotal(p.id)>0).length;
-  const fz=FZ().filter(f=>pItems(f.id).length).length;
   const last=[...S.pmovs].sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0)).slice(0,6);
-  return `<div class="stats">
-    <div class="card stat"><div class="n">${fmt(S.products.length)}</div><div class="l">Produtos cadastrados</div></div>
-    <div class="card stat"><div class="n">${fmt(com)}</div><div class="l">Produtos em estoque</div></div>
-    <div class="card stat"><div class="n">${fmt(fz)}</div><div class="l">Fazendas com produtos</div></div>
-  </div>
-  ${pChart()}
+  return `${pChart()}
   <div class="card"><div class="card-h"><h3>Últimas movimentações</h3><button class="btn sm" data-a="tab" data-v="p-movs">Ver histórico</button></div>
     <div class="tw small">${pmovTable(last,false)}</div></div>`;
 }
