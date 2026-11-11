@@ -229,10 +229,11 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-chat .tk-send{display:block}.tk-ed{position:relative;border:2px solid var(--navy);border-radius:8px;background:var(--surface)}.tk-tbar{display:flex;align-items:center;gap:2px;padding:4px 6px;border-bottom:1px solid var(--line)}.tk-tbar button,.tk-clip{min-width:34px;min-height:34px;border:0;background:transparent;border-radius:6px;cursor:pointer;color:var(--ink);font:inherit;display:inline-flex;align-items:center;justify-content:center}.tk-tbar button:hover,.tk-clip:hover{background:var(--bg)}.tk-clip{margin-left:auto}
 .tk-ed textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;min-height:60px;padding:10px;background:transparent;color:var(--ink);font:inherit;overflow:hidden}.tk-sendbar{margin:8px 0 2px}.tk-sendbar .btn[disabled]{opacity:.5;cursor:not-allowed}
 .tk-msg ul{margin:4px 0;padding-left:18px}.tk-edit textarea{flex:1 1 100%;min-width:0;box-sizing:border-box;border:1px solid var(--navy);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink);font:inherit;resize:vertical}
-.modal.tk-m{position:relative}.tk-close{position:absolute;top:10px;right:10px;z-index:3;width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:18px;cursor:pointer}.tk-close:hover{background:var(--line)}.tk-chat h4.tk-h{padding-right:44px}
-.modal.tk-m .tk-mg{min-height:min(780px,calc(100vh - 56px))}.tk-ed textarea{min-height:60px}.tk-chat .tk-msg{display:block;width:100%;box-sizing:border-box;padding:10px;font-size:14px;line-height:1.45;overflow-wrap:anywhere;background:var(--surface);border:1px solid var(--line);border-radius:8px}.tk-chat .tk-ev>div{flex:1;min-width:0}.tk-ed{background:var(--surface)}
+.modal.tk-m{position:relative}.tk-close{position:absolute;top:10px;right:10px;z-index:3;width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:18px;cursor:pointer}.tk-close:hover{background:var(--line)}
+.modal.tk-m .tk-mg{min-height:min(740px,calc(100vh - 120px))}.tk-ed textarea{min-height:60px}.tk-chat .tk-msg{display:block;width:100%;box-sizing:border-box;padding:10px;font-size:14px;line-height:1.45;overflow-wrap:anywhere;background:var(--surface);border:1px solid var(--line);border-radius:8px}.tk-chat .tk-ev>div{flex:1;min-width:0}.tk-ed{background:var(--surface)}
 .tk-edd{margin-bottom:0}.tk-edd .tk-desc{border:0;border-radius:0;min-height:44px}.tk-dview{padding:8px 10px;border-radius:8px;cursor:pointer;overflow-wrap:anywhere}.tk-dview:hover{background:var(--bg)}.tk-ul{margin:4px 0;padding-left:20px}.tk-ul.dash{list-style:'– '}.tk-ul.bol{list-style:disc}
 .tk-de{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.tk-dbox{display:inline-flex;align-items:center;gap:10px;min-height:42px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbox:hover{border-color:var(--navy)}.tk-st{font-style:normal;font-weight:700;font-size:12px;padding:2px 8px;border-radius:4px;color:#fff}.tk-st.late{background:#c0392b}.tk-st.ok{background:#1d8a5b}.tk-chv{color:var(--muted)}
+.tk-top2{display:flex;align-items:center;gap:6px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--line)}.tk-sp{flex:1}.tk-qd{border:0;border-radius:6px;background:var(--bg);color:var(--ink);padding:6px 10px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;max-width:60%}.tk-ib{min-width:40px;min-height:40px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:16px;cursor:pointer;line-height:1}.tk-ib:hover{background:var(--bg)}.tk-mw{position:relative}.tk-menu{position:absolute;right:0;top:100%;margin-top:4px;min-width:170px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 22px rgba(20,33,61,.2);z-index:6;overflow:hidden}.tk-menu button{display:block;width:100%;min-height:42px;padding:8px 14px;border:0;background:transparent;text-align:left;font:inherit;color:var(--ink);cursor:pointer}.tk-menu button:hover{background:var(--bg)}.tk-menu .red{color:#b3361f}
 .tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
@@ -767,9 +768,8 @@ function tkModal(){
   const tb=(k,svg,lbl,on)=>`<button type="button" class="tk-tb${on?' on':''}" data-tk="${k}">${svg}${lbl}</button>`;
   const feed=[...(t.msgs||[]).map((m,i)=>({...m,c:1,i})),...(t.log||[])].sort((a,b)=>b.h-a.h);
   const showChk=ck.length||u.showChk;
-  return `<div class="ov"><div class="modal xl tk-m" role="dialog" aria-modal="true"><button class="tk-close" data-a="close" aria-label="Fechar" title="Fechar">✕</button><div class="tk-mg"><div class="tk-l">
+  return `<div class="ov"><div class="modal xl tk-m" role="dialog" aria-modal="true"><div class="tk-top2"><select class="tk-qd" data-tkf="col" aria-label="Quadro" title="Quadro">${tkCols().map(c=>`<option value="${c.id}"${c.id===t.col?' selected':''}>${esc(c.nome)}</option>`).join('')}</select><span class="tk-sp"></span><div class="tk-mw"><button type="button" class="tk-ib" data-tk="menu" aria-label="Mais opções" title="Mais opções">•••</button>${u.menu?`<div class="tk-menu"><button type="button" data-tk="arquivar">Arquivar</button><button type="button" data-tk="delCard" class="red">Excluir</button></div>`:''}</div><button type="button" class="tk-ib" data-a="close" aria-label="Fechar" title="Fechar">✕</button></div><div class="tk-mg"><div class="tk-l">
    <div class="tk-mh"><button type="button" class="tk-circ${t.feito?' ok':''}" data-tk="concl" title="${t.feito?'Reabrir':'Marcar como concluída'}" aria-label="Concluir tarefa">${t.feito?'✓':''}</button><input class="tk-tt" data-tkf="titulo" value="${esc(t.titulo)}" placeholder="Nome da tarefa" aria-label="Nome da tarefa"></div>
-   <div class="tk-sub">no quadro <select data-tkf="col" aria-label="Quadro">${tkCols().map(c=>`<option value="${c.id}"${c.id===t.col?' selected':''}>${esc(c.nome)}</option>`).join('')}</select></div>
    <div class="tk-tools">
     ${tb('pdatas',ico('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),'Datas',u.pop==='datas')}
     ${tb('pchk',ico('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>'),'Checklist',false)}
@@ -813,7 +813,7 @@ document.addEventListener('keydown',e=>{const t0=e.target;if(e.key==='Enter'&&(e
  else if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();box.remove()}});
 document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.tk-sug button');if(!b)return;e.preventDefault();tkPick(b.closest('form').querySelector('[name=t]'),b.dataset.nm)});
 let tkDrag=null;
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tk]');if(!b)return;const u=tkU(),a=b.dataset.tk,v=b.dataset.v;
+document.addEventListener('click',e=>{if(tkU().menu&&!(e.target.closest&&e.target.closest('.tk-mw'))){tkU().menu=false;render()}const b=e.target.closest&&e.target.closest('[data-tk]');if(!b)return;const u=tkU(),a=b.dataset.tk,v=b.dataset.v;
  if(e.target.closest('.tk-cn'))return;
  switch(a){
   case 'modo':u.modo=v;break;
@@ -831,6 +831,8 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
    if(v==='dash'||v==='dot'){const pf=v==='dash'?'- ':'• ';const ls=(sel||'').split('\n').map(l=>/^(- |• )/.test(l)?l:pf+l).join('\n');ins=ls;c0=sel?a:a+ls.length;c1=a+ls.length}
    else{const m=v==='b'?'**':'_';ins=m+sel+m;c0=a+m.length;c1=c0+sel.length}
    ta.value=v0.slice(0,a)+ins+v0.slice(z);ta.focus();ta.setSelectionRange(c0,c1);ta.dispatchEvent(new Event('input',{bubbles:true}));return}
+  case 'menu':u.menu=!u.menu;break;
+  case 'arquivar':{const c=tkCur();u.menu=false;if(u.draft&&u.draft.id===c.id){toast('Salve a tarefa antes de arquivar.');break}c.feito=true;c.concluidaEm=today();tkLog(c,'arquivou este cartão');save();ui.modal=null;u.sel=null;toast('Tarefa arquivada.');break}
   case 'descEdit':u.editDesc=true;break;
   case 'descOk':u.editDesc=false;break;
   case 'atbtn':{const i=document.querySelector('[data-tkform=msg] input');if(!i)return;const p=i.selectionStart??i.value.length;i.value=i.value.slice(0,p)+(p&&!/\s$/.test(i.value.slice(0,p))?' ':'')+'@'+i.value.slice(p);i.focus();const q=i.value.indexOf('@',Math.max(0,p-1))+1;i.setSelectionRange(q,q);tkSug(i);return}
@@ -839,11 +841,11 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   case 'fclear':Object.assign(u,{resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false});break;
   case 'fpanel':u.fp=!u.fp;break;
   case 'chipx':{const m={resp:{resp:'Todos'},per:{per:'todos',de:'',ate:''},col:{col:''},st:{st:'todos'},q:{q:''},semResp:{semResp:false},anx:{anx:false}};Object.assign(u,m[v]);break}
-  case 'open':u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
+  case 'open':u.menu=false;u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
   case 'colDel':{if(S.tarefas.some(t=>t.col===v))return toast('Mova ou exclua os cartões desta coluna antes.');if(S.tcols.length<2)return toast('Mantenha pelo menos uma coluna.');const c=S.tcols.find(x=>x.id===v);return ask(`Excluir a coluna "${c.nome}"?`,()=>{S.tcols=S.tcols.filter(x=>x.id!==v);done('Coluna excluída.')})}
   case 'chkDel':{const t=tkCur();t.check.splice(+v,1);save();break}
   case 'anxDel':{const t=tkCur();t.anexos.splice(+v,1);save();break}
-  case 'delCard':{const t=tkCur();if(u.draft&&u.draft.id===t.id){u.draft=null;u.sel=null;ui.modal=null;break}return ask(`Remover a tarefa "${t.titulo||'sem nome'}"?`,()=>{S.tarefas=S.tarefas.filter(x=>x.id!==t.id);u.sel=null;done('Tarefa removida.')},{ok:'Remover'})}
+  case 'delCard':{u.menu=false;const t=tkCur();if(u.draft&&u.draft.id===t.id){u.draft=null;u.sel=null;ui.modal=null;break}return ask(`Remover a tarefa "${t.titulo||'sem nome'}"?`,()=>{S.tarefas=S.tarefas.filter(x=>x.id!==t.id);u.sel=null;done('Tarefa removida.')},{ok:'Remover'})}
   default:return}
  render()});
 document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.tkf;if(!k)return;const u=tkU(),c=tkCur();
