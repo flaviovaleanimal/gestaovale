@@ -160,6 +160,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .mf{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap}
 .paper{background:var(--paper);color:var(--paper-ink);border:1px solid var(--paper-line);border-radius:4px;overflow:hidden;font-size:13px}
 .paper-h{background:#12285a;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.paper-h.plain{background:#fff;color:#12285a;border-bottom:2px solid #12285a;padding:10px 0}.paper-h.plain b,.paper-h.plain span{color:#12285a;opacity:1}
 .paper-h b{font-family:var(--f-display);font-size:18px}
 .paper-h span{font-size:12px;opacity:.85}
 .paper-b{padding:14px 16px;overflow-x:auto}
@@ -197,6 +198,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 
 .paper.land table{min-width:0;width:100%;font-size:11px}.paper.land th,.paper.land td{padding:6px 4px;white-space:normal}.paper.land th{font-size:9.5px;letter-spacing:.01em}
 
+.form.svc5{grid-template-columns:150px minmax(0,1.3fr) minmax(0,1.4fr) 125px 115px}@media(max-width:1000px){.form.svc5{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
 .form.svc3{grid-template-columns:130px minmax(0,2fr) minmax(0,1fr)}@media(max-width:640px){.form.svc3{grid-template-columns:100px minmax(0,1fr)}.form.svc3>:last-child{grid-column:1/-1}}
 
 .ag-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
@@ -1140,7 +1142,7 @@ function modalHtml(){
     const rows=f.rows.filter(r=>r.date||r.proc||r.lote||r.etapa||r.total).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
     const mats=ficMats(f.mats).filter(x=>x.label);
     body=`<h3>Ficha de Serviços</h3>
-    <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Ficha de Serviços</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper"><div class="paper-h plain"><div><b>Vale Animal</b><br><span>Ficha de Serviços</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b">
      <table><tbody><tr><td><b>Data inicial:</b> ${f.from?dt(f.from):'—'}</td><td><b>Data final:</b> ${f.to?dt(f.to):'—'}</td></tr>
      <tr><td><b>Fazenda:</b> ${esc(farm)}</td><td><b>Técnico responsável:</b> ${esc(f.tech||'—')}</td></tr></tbody></table>
@@ -1447,7 +1449,7 @@ function ficMats(mats=ui.fi.mats){
 function vFicha(){
   const f=ui.fi,lots=S.lotes.filter(l=>l.farm===f.farm).sort((a,b)=>a.name.localeCompare(b.name));
   const o=ficOptions(),mm=ficMats();
-  const svc=f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Serviço ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delFS" data-v="${i}">Remover</button>`:''}</div><div class="form">
+  const svc=f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Serviço ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delFS" data-v="${i}">Remover</button>`:''}</div><div class="form svc5">
     ${fldHtml('Data do serviço',`<input type="date" data-fs="${i}.date" value="${esc(r.date||'')}">`)}
     ${fldHtml('Procedimento',`<select data-fs="${i}.proc">${opts(PROCS.map(x=>[x,x]),r.proc,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<select data-fs="${i}.lote" data-r="1"${f.farm?'':' disabled'}>${opts(lots.map(l=>[l.id,l.name+' ('+l.category+')']),r.lote,f.farm?(lots.length?'Selecione…':'Sem lotes agendados'):'Escolha a fazenda')}</select>`)}
