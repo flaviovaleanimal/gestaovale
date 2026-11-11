@@ -1810,7 +1810,7 @@ document.addEventListener('change',e=>{
   const t=e.target,d=t.dataset;
   if(t.name==='lote'&&t.form&&t.form.dataset.form==='lanc'&&!t.form.dataset.id){const l=S.lotes.find(x=>x.id===t.value),el=t.form.elements;
     if(l){const ant=S.lancs.filter(x=>x.lote===l.id&&x.carimbo).sort((a,b)=>String(b.im).localeCompare(String(a.im)))[0];
-      el['cat'].value=NCATS.includes(l.category)?l.category:'';{const cv=String(l.carimbo||(ant?ant.carimbo:'')||'');const ce=el['carimbo'];if(cv&&![...ce.options].some(o=>o.value===cv))ce.add(new Option(cv,cv));ce.value=cv}el['impl'].value=l.total}}
+      el['cat'].value=NCATS.includes(l.category)?l.category:'';{const cv=String(l.carimbo||(ant?ant.carimbo:'')||'');const ce=el['carimbo'];if(cv&&![...ce.options].some(o=>o.value===cv))ce.add(new Option(cv,cv));ce.value=cv}}}
   if(t.name==='tecs'&&t.checked&&t.form)t.form.querySelectorAll('input[name=tecs]').forEach(x=>{if(x!==t)x.checked=false});
   if(t.name==='category'&&t.form&&t.form.dataset.form==='lote'){const bx=t.form.querySelector('.lote-dates');if(bx)bx.style.display=!t.value||LPAR.includes(t.value)?'contents':'none'}
   if(d.f){const [f,n]=d.f.split('.');ui.f[f][n]=t.value;
