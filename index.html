@@ -1913,6 +1913,7 @@ document.addEventListener('submit',e=>{
     for(const [a,b2,msg] of chain)if(nums[a]!==undefined&&nums[b2]!==undefined&&nums[a]>nums[b2])return modalErr(msg);
     const dts=[['im',fd.im],['re',fd.re],['ia',fd.ia],['dg',fd.dg]].filter(x=>x[1]);
     for(let i=1;i<dts.length;i++)if(dts[i][1]<dts[i-1][1])return modalErr('As datas precisam estar em ordem: IM, RE, IA, DG.');
+    if(fd.dg&&fd.dg<addDays(fd.ia,26))return modalErr(`Data DG inválida: o diagnóstico precisa ser feito com 26 dias ou mais após a inseminação. Com a inseminação em ${dt(fd.ia)}, a Data DG deve ser a partir de ${dt(addDays(fd.ia,26))}.`);
     const rec={est,etapa,lote:fd.lote,cat:fd.cat,carimbo:(fd.carimbo||'').trim(),prot:Number(fd.prot),im:fd.im,re:fd.re,ia:fd.ia,dg:fd.dg||'',...nums};
     Object.keys(rec).forEach(k2=>{if(rec[k2]===undefined)delete rec[k2]});
     const oldDg=id?(S.lancs.find(x=>x.id===id)||{}).dg||'':'';
