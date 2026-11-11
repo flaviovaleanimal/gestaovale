@@ -567,7 +567,7 @@ const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tec||ev
 const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Indução','Andrológico'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Primíparas','Secundíparas','Multíparas','Solteiras'];
 const catOpts=cur=>[...NCATS,...(cur&&!NCATS.includes(cur)?[cur]:[])].map(x=>[x,x]);
-const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Arquivado').sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}</option>`).join('');
+const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Arquivado').sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${esc(String(l.name).toUpperCase())} · ${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${loteTemServico(l)?' · já agendado':''}</option>`).join('');
 const PERIODOS=['Manhã','Tarde','Dia Inteiro'],EVCATS=NCATS,PERH={'Manhã':['07:00','12:00'],'Tarde':['13:00','18:00']};
 const perOf=e=>e.periodo||(e.allday!==false?'Dia Inteiro':(tmin(e.start)<720?'Manhã':'Tarde'));
 const tcTeam=v=>tc(v).replace(/\sE\s/g,' e ');
@@ -886,7 +886,7 @@ function modalHtml(){
     ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,x]),e.title,'Selecione…')}</select>`)}
     ${e.lock?fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
-    ${e.lock?'':fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" list="dl-evlotes" autocomplete="off" style="text-transform:uppercase" placeholder="Escolha um lote agendado"><datalist id="dl-evlotes">${evLoteOpts(e.farm)}</datalist>`)+fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`)+fldHtml('Categoria',`<select name="cat">${opts(catOpts(e.cat),e.cat,'Selecione…')}</select>`)}
+    ${e.lock?'':fldHtml('Lote',`<select name="lote">${evLoteSel(e.farm,e.lote).replace('value="'+esc(String(e.lote||'').toUpperCase())+'"','value="'+esc(String(e.lote||'').toUpperCase())+'" selected')}</select>`)+fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`)+fldHtml('Categoria',`<select name="cat">${opts(catOpts(e.cat),e.cat,'Selecione…')}</select>`)}
     ${fldHtml('Equipe',`<input name="team" value="${esc(e.team||'')}" autocomplete="off" placeholder="Digite o nome da equipe">`)}
     ${fldHtml('Agenda Técnico',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`,'wide')}
     ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`,'wide')}
@@ -1780,17 +1780,17 @@ document.addEventListener('input',e=>{
   if(t.dataset.fs){const [i,k]=t.dataset.fs.split('.');ui.fi.rows[+i][k]=t.value}
   if(t.dataset.fm){const [i,k]=t.dataset.fm.split('.');ui.fi.mats[+i][k]=t.value}
 });
+const evLoteSel=(fid,cur)=>{const u=String(cur||'').toUpperCase(),o=evLoteOpts(fid);return `<option value="">${fid?(o?'Selecione o lote…':'Nenhum lote em aberto'):'Selecione a fazenda primeiro'}</option>${o}${u&&!o.includes('value="'+esc(u)+'"')?`<option value="${esc(u)}">${esc(u)}</option>`:''}`};
 const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el['lote'].value||'').trim();if(!fid||!v)return;
   const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Arquivado'&&nrm(x.name)===nrm(v));if(!l)return;
   el['lote'].value=String(l.name).toUpperCase();el['total'].value=l.total;el['cat'].value=NCATS.includes(l.category)?l.category:''};
 document.addEventListener('input',e=>{const t=e.target;if(t.name==='lote'&&t.form&&t.form.dataset.form==='ev'){t.dataset.auto='';evLoteFill(t.form)}});
-document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const dl=t.form.querySelector('#dl-evlotes');if(dl)dl.innerHTML=evLoteOpts(t.value);
-  const lo=t.form.elements['lote'];
-  if(!String(lo.value||'').trim()||lo.dataset.auto==='1'){
+document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
+  {
     const pend=S.lotes.filter(l=>l.farm===t.value&&l.status!=='Arquivado'&&!loteTemServico(l)).sort((a,b)=>(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true}))[0];
     if(pend){lo.value=String(pend.name).toUpperCase();lo.dataset.auto='1';evLoteFill(t.form)}
-    else if(lo.dataset.auto==='1'){lo.value='';lo.dataset.auto='';t.form.elements['total'].value='';t.form.elements['cat'].value=''}
-  }else evLoteFill(t.form)}});
+    else{t.form.elements['total'].value='';t.form.elements['cat'].value=''}
+  }}});
 document.addEventListener('change',e=>{
   const t=e.target,d=t.dataset;
   if(t.name==='category'&&t.form&&t.form.dataset.form==='lote'){const bx=t.form.querySelector('.lote-dates');if(bx)bx.style.display=!t.value||LPAR.includes(t.value)?'contents':'none'}
