@@ -393,7 +393,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={brInat:false,ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={brInat:false,ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
@@ -1581,7 +1581,7 @@ document.addEventListener('click',e=>{
   const a=b.dataset.a,v=b.dataset.v;
   switch(a){
    case 'tab':ui.tab=v;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
-   case 'go':ui.tab=v;if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
+   case 'go':ui.tab=v;if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
    case 'grp':{const g=b.dataset.home;
      const goHome=g&&!(curTab()===g&&(g!=='movs'||ui.msub==='hist'));
      if(ui.mini&&!isMob()){ui.mini=false;ui.nav[v]=true;if(g){ui.tab=g;if(g==='movs')ui.msub='hist'}}
