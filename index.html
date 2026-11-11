@@ -122,6 +122,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .farm-row b{font-family:var(--f-display);font-size:16px}
 .tog{background:none;border:0;cursor:pointer;font-weight:600;padding:0;text-align:left}
 .locbox{margin:10px 0 0;padding:10px 12px;background:var(--navy-soft);border-radius:8px;font-size:13px}.locbox b{display:block;margin-bottom:4px}.locbox div+div{margin-top:2px}
+.cad-loc{font-size:12.5px;color:var(--muted);font-weight:400;margin-top:3px}.cad-loc:first-of-type{margin-top:5px}
 .loc td{background:var(--navy-soft);padding:6px 10px 6px 34px;font-size:13px;border-bottom:1px solid var(--line)}
 .banner.ok{background:var(--in-bg);color:var(--in)}
 .banner{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
@@ -478,13 +479,18 @@ function movTable(list,actions){
   </tbody></table>`;
 }
 
+function breederAllLocs(bid){
+  const g={};S.movs.filter(m=>m.b===bid).forEach(m=>{const k=m.farm+'|'+m.tank;g[k]=(g[k]||0)+sg(m)});
+  return Object.entries(g).filter(([,q])=>q>0).map(([k,q])=>{const [f,t]=k.split('|');return{f,t,q}})
+    .sort((a,b)=>F(a.f).name.localeCompare(F(b.f).name)||T(a.t).name.localeCompare(T(b.t).name));
+}
 function vCadastro(){
   const inat=!!ui.brInat,nI=S.breeders.filter(b=>b.inativo).length,list=S.breeders.filter(b=>!!b.inativo===inat).sort((a,b)=>a.name.localeCompare(b.name));
   return `<div class="card"><div class="card-h"><h3>${inat?'Reprodutores inativos':'Reprodutores'}</h3><button class="btn pri" data-a="newBreeder">Novo reprodutor</button></div>
   ${S.breeders.length?`<div class="filters" style="margin-bottom:12px;align-items:flex-end">${searchBox('br')}<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button></div>`:''}
   <div class="tw">${list.length?`<table><thead><tr><th>Nome do reprodutor</th><th>Raça</th><th class="num">Saldo doses</th><th>Ações</th></tr></thead><tbody>
-   ${list.map(b=>`<tr${qHide('br',b.name+' '+b.breed)}><td><b>${esc(b.name)}</b></td><td>${esc(b.breed)}</td><td class="num">${fmt(breederBal(b.id))}</td>
-   <td><div class="acts"><button class="btn sm" data-a="editBreeder" data-v="${b.id}">Editar</button>${inat?`<button class="btn sm pri" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn sm" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`}<button class="btn sm dng" data-a="delBreeder" data-v="${b.id}">Excluir</button></div></td></tr>`).join('')}
+   ${list.map(b=>{const lc=breederAllLocs(b.id);return `<tr${qHide('br',b.name+' '+b.breed+' '+lc.map(o=>F(o.f).name+' '+T(o.t).name).join(' '))}><td><b>${esc(b.name)}</b>${lc.map(o=>`<div class="cad-loc">${esc(F(o.f).name)} - ${esc(b.name)} ${fmt(o.q)} doses - Botijão ${esc(T(o.t).name)}</div>`).join('')}</td><td>${esc(b.breed)}</td><td class="num">${fmt(breederBal(b.id))}</td>
+   <td><div class="acts"><button class="btn sm" data-a="editBreeder" data-v="${b.id}">Editar</button>${inat?`<button class="btn sm pri" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn sm" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`}<button class="btn sm dng" data-a="delBreeder" data-v="${b.id}">Excluir</button></div></td></tr>`}).join('')}
   </tbody></table>`:empty(inat?'Nenhum reprodutor inativo.':(S.breeders.length?'Nenhum reprodutor ativo.':'Nenhum reprodutor cadastrado.'))}</div></div>`;
 }
 
