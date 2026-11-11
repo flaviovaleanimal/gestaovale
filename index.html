@@ -486,6 +486,7 @@ function vCadastro(){
   </tbody></table>`:empty('Nenhum reprodutor cadastrado.')}</div></div>`;
 }
 
+const az=p=>[...p].sort((x,y)=>String(x[1]).localeCompare(String(y[1]),'pt-BR',{sensitivity:'base'}));
 const nrm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const searchBox=k=>`<div class="fld" style="max-width:340px;flex:1 1 240px"><label>Pesquisar</label><input type="search" data-q="${k}" value="${esc(ui.q[k])}" placeholder="Digite para pesquisar…" autocomplete="off"></div>`;
 const qHide=(k,txt)=>ui.q[k]&&!nrm(txt).includes(nrm(ui.q[k]))?' style="display:none"':'';
@@ -763,7 +764,7 @@ function entradaRow(r,i,n){
   return `<div class="line"><div class="line-h"><b>Sêmen ${i+1}</b>${n>1?`<button type="button" class="btn sm dng" data-a="delRow" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
    ${fldHtml('Botijão de sêmen',sel('tank',S.tanks.map(t=>[t.id,`${t.name} — espaço ${fmt(t.max-tankStock(t.id))}`]),'Selecione…'))}
-   ${fldHtml('Nome do reprodutor',sel('breeder',S.breeders.map(b=>[b.id,b.name]),'Selecione…',true))}
+   ${fldHtml('Nome do reprodutor',sel('breeder',az(S.breeders.map(b=>[b.id,b.name])),'Selecione…',true))}
    ${fldHtml('Raça do reprodutor',`<div class="ro">${br?esc(br):'<span class="muted">Preenchida pelo cadastro</span>'}</div>`)}
    ${fldHtml('Quantidade de doses',`<input data-row="${i}.qty" type="number" min="1" step="1" inputmode="numeric" value="${esc(r.qty??'')}">`)}
    ${fldHtml('Indicação',sel('ind',INDS.map(x=>[x,x]),'Selecione…'))}
@@ -793,7 +794,7 @@ function saidaRow(r,i,n,its,farm){
   const av=it&&r.tank?(it.tanks[r.tank]||0):null;
   return `<div class="line"><div class="line-h"><b>Sêmen ${i+1}</b>${n>1?`<button type="button" class="btn sm dng" data-a="delSRow" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
-   ${fldHtml('Reprodutor / Sêmen',`<select data-srow="${i}.item" data-r="1"${farm?'':' disabled'}>${opts(its.map(o=>[o.b,o.name]),r.item,farm?(its.length?'Selecione…':'Sem sêmen com saldo'):'Escolha a fazenda')}</select>
+   ${fldHtml('Reprodutor / Sêmen',`<select data-srow="${i}.item" data-r="1"${farm?'':' disabled'}>${opts(az(its.map(o=>[o.b,o.name])),r.item,farm?(its.length?'Selecione…':'Sem sêmen com saldo'):'Escolha a fazenda')}</select>
       ${it?`<span class="hint">Estoque disponível na ${esc(F(farm).name)}: ${fmt(it.bal)} doses.</span>`:''}`)}
    ${fldHtml('Botijão com essas doses',`<select data-srow="${i}.tank" data-r="1"${it?'':' disabled'}>${opts(tks.map(([t,q])=>[t,`${T(t).name} — ${fmt(q)} doses`]),r.tank,it?'Selecione…':'Escolha o sêmen')}</select>
       ${av!==null?`<span class="hint">Disponível neste botijão: ${fmt(av)} doses.</span>`:''}`)}
@@ -828,7 +829,7 @@ function vMovs(){
    ${fldHtml('Data final',`<input type="date" data-m="to" value="${h.to}">`)}
    ${sub==='hist'?fldHtml('Tipo',`<select data-m="type">${opts([['entrada','Entrada'],['saida','Saída']],h.type,'Todos')}</select>`):''}
    ${fldHtml('Fazenda',`<select data-m="farm">${opts(FZ().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
-   ${fldHtml('Reprodutor',`<select data-m="breeder">${opts(S.breeders.map(x=>[x.id,x.name]),h.breeder,'Todos')}</select>`)}
+   ${fldHtml('Reprodutor',`<select data-m="breeder">${opts(az(S.breeders.map(x=>[x.id,x.name])),h.breeder,'Todos')}</select>`)}
   </div><div class="tw">${movTable(list,true)}</div></div>`;
 }
 
@@ -1031,7 +1032,7 @@ function modalHtml(){
   if(m.type==='pmov'){const x=m.data;
     body=`<h3>Editar ${x.type==='entrada'?'entrada':'saída'}</h3>${err}<form data-form="pmov" data-id="${x.id}" novalidate><div class="form">
     ${fldHtml('Data',`<input name="date" type="date" value="${x.date}" required>`)}
-    ${fldHtml('Produto',`<select name="product">${opts(S.products.map(b=>[b.id,b.name]),x.product)}</select>`)}
+    ${fldHtml('Produto',`<select name="product">${opts(az(S.products.map(b=>[b.id,b.name])),x.product)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
     ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${foot('Salvar')}</form>`}
@@ -1106,7 +1107,7 @@ function modalHtml(){
   if(m.type==='mov'){const x=m.data;
     body=`<h3>Editar ${x.type==='entrada'?'entrada':'saída'}</h3>${err}<form data-form="mov" data-id="${x.id}" novalidate><div class="form">
     ${fldHtml('Data',`<input name="date" type="date" value="${x.date}" required>`)}
-    ${fldHtml('Reprodutor',`<select name="b">${opts(S.breeders.map(b=>[b.id,b.name]),x.b)}</select>`)}
+    ${fldHtml('Reprodutor',`<select name="b">${opts(az(S.breeders.map(b=>[b.id,b.name])),x.b)}</select>`)}
     ${fldHtml('Indicação',`<select name="ind">${opts(INDS.map(i=>[i,i]),x.ind)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Botijão',`<select name="tank">${opts(S.tanks.map(b=>[b.id,b.name]),x.tank)}</select>`)}
@@ -1277,7 +1278,7 @@ function vPMovs(){
    ${fldHtml('Data final',`<input type="date" data-pm="to" value="${h.to}">`)}
    ${fldHtml('Tipo',`<select data-pm="type">${opts([['entrada','Entrada'],['saida','Saída']],h.type,'Todos')}</select>`)}
    ${fldHtml('Fazenda',`<select data-pm="farm">${opts(FZ().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
-   ${fldHtml('Produto',`<select data-pm="product">${opts(S.products.map(x=>[x.id,x.name]),h.product,'Todos')}</select>`)}
+   ${fldHtml('Produto',`<select data-pm="product">${opts(az(S.products.map(x=>[x.id,x.name])),h.product,'Todos')}</select>`)}
   </div><div class="tw">${pmovTable(pmList(),true)}</div></div>`;
 }
 function pEntradaFields(){
@@ -1287,7 +1288,7 @@ function pEntradaFields(){
    ${fldHtml('Nome da fazenda',fs('pentrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…'))}
   </div>${f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="entrada" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
-   ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(S.products.map(p=>[p.id,p.name]),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
+   ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(az(S.products.map(p=>[p.id,p.name])),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
    ${fldHtml('Quantidade',`<input data-pf="entrada.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
    ${fldHtml('Observação',`<textarea data-pf="entrada.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
    </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}`;
@@ -1300,7 +1301,7 @@ function pSaidaFields(){
    ${fldHtml('Nome da fazenda',fs('psaida','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,i)=>{const it=its.find(o=>o.product===r.product);return `<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="saida" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
-   ${fldHtml('Produto',`<select data-pf="saida.${i}.product" data-r="1"${f.farm?'':' disabled'}>${opts(its.map(o=>[o.product,o.p.name]),r.product,f.farm?(its.length?'Selecione…':'Sem produto com saldo'):'Escolha a fazenda')}</select>
+   ${fldHtml('Produto',`<select data-pf="saida.${i}.product" data-r="1"${f.farm?'':' disabled'}>${opts(az(its.map(o=>[o.product,o.p.name])),r.product,f.farm?(its.length?'Selecione…':'Sem produto com saldo'):'Escolha a fazenda')}</select>
       ${it?`<span class="hint">Estoque disponível na ${esc(F(f.farm).name)}: ${qtyU(it.bal,it.p.unit)}.</span>`:''}`)}
    ${fldHtml('Quantidade utilizada',`<input data-pf="saida.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
    ${fldHtml('Observação',`<textarea data-pf="saida.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
