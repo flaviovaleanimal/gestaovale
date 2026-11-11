@@ -231,6 +231,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-msg ul{margin:4px 0;padding-left:18px}.tk-edit textarea{flex:1 1 100%;min-width:0;box-sizing:border-box;border:1px solid var(--navy);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink);font:inherit;resize:vertical}
 .modal.tk-m{position:relative}.tk-close{position:absolute;top:10px;right:10px;z-index:3;width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:18px;cursor:pointer}.tk-close:hover{background:var(--line)}.tk-chat h4.tk-h{padding-right:44px}
 .modal.tk-m .tk-mg{min-height:min(780px,calc(100vh - 56px))}.tk-ed textarea{min-height:60px}.tk-chat .tk-msg{display:block;width:100%;box-sizing:border-box;padding:10px;font-size:14px;line-height:1.45;overflow-wrap:anywhere;background:var(--surface);border:1px solid var(--line);border-radius:8px}.tk-chat .tk-ev>div{flex:1;min-width:0}.tk-ed{background:var(--surface)}
+.tk-edd{margin-bottom:0}.tk-edd .tk-desc{border:0;border-radius:0;min-height:44px}.tk-dview{padding:8px 10px;border-radius:8px;cursor:pointer;overflow-wrap:anywhere}.tk-dview:hover{background:var(--bg)}.tk-ul{margin:4px 0;padding-left:20px}.tk-ul.dash{list-style:'– '}.tk-ul.bol{list-style:disc}
 .tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
@@ -699,7 +700,7 @@ const tkNF=u=>(u.resp!=='Todos')+(u.per!=='todos')+(!!u.col)+(u.st!=='todos')+(!
 const tkMe=()=>{const e=(window.GS_EMAIL||'').toLowerCase().split('@')[0];if(!e)return 'Flávio';if(/flavio|flávio/.test(e))return 'Flávio';if(/isabel/.test(e))return 'Isabella';if(/bina/.test(e))return 'Bina';const w=e.replace(/[0-9._-]+/g,' ').trim().split(' ')[0]||e;return w.charAt(0).toUpperCase()+w.slice(1)};
 const tkLog=(c,tx)=>{(c.log=c.log||[]).push({a:tkMe(),t:tx,h:Date.now()})};
 const tkFmt=t=>{let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[\s(])_(.+?)_(?=[\s).,!?]|$)/g,'$1<i>$2</i>').replace(new RegExp('@('+TK_TEAM.join('|')+')','g'),'<span class="tk-men">@$1</span>');
- const out=[];let ul=false;h.split('\n').forEach(l=>{const m=/^- (.*)$/.exec(l);if(m){if(!ul){out.push('<ul>');ul=true}out.push('<li>'+m[1]+'</li>')}else{if(ul){out.push('</ul>');ul=false}out.push(l+'<br>')}});if(ul)out.push('</ul>');return out.join('').replace(/<br>$/,'')};
+ const out=[];let ul='';h.split('\n').forEach(l=>{const m=/^(- |• )(.*)$/.exec(l),k=m?(m[1]==='- '?'dash':'bol'):'';if(k){if(ul!==k){if(ul)out.push('</ul>');out.push('<ul class="tk-ul '+k+'">');ul=k}out.push('<li>'+m[2]+'</li>')}else{if(ul){out.push('</ul>');ul=''}out.push(l+'<br>')}});if(ul)out.push('</ul>');return out.join('').replace(/<br>$/,'')};
 const tkMen=tkFmt;
 const tkCur=()=>{const u=tkU();return u.draft&&u.draft.id===u.sel?u.draft:S.tarefas.find(x=>x.id===u.sel)};
 const tkColResp=c=>TK_TEAM.find(n=>c&&c.nome.toUpperCase().includes('('+n.toUpperCase()+')'))||'';
@@ -768,9 +769,9 @@ function tkModal(){
    <div class="tk-mh"><button type="button" class="tk-circ${t.feito?' ok':''}" data-tk="concl" title="${t.feito?'Reabrir':'Marcar como concluída'}" aria-label="Concluir tarefa">${t.feito?'✓':''}</button><input class="tk-tt" data-tkf="titulo" value="${esc(t.titulo)}" placeholder="Nome da tarefa" aria-label="Nome da tarefa"></div>
    <div class="tk-sub">no quadro <select data-tkf="col" aria-label="Quadro">${tkCols().map(c=>`<option value="${c.id}"${c.id===t.col?' selected':''}>${esc(c.nome)}</option>`).join('')}</select></div>
    <div class="tk-tools">
-    ${tb('pmemb',ico('<circle cx="10" cy="8" r="4"/><path d="M2 21c0-4 3.6-6 8-6M18 8v6M15 11h6"/>'),'Membros',u.pop==='memb')}
     ${tb('pdatas',ico('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),'Datas',u.pop==='datas')}
     ${tb('pchk',ico('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>'),'Checklist',false)}
+    ${tb('pmemb',ico('<circle cx="10" cy="8" r="4"/><path d="M2 21c0-4 3.6-6 8-6M18 8v6M15 11h6"/>'),'Membros',u.pop==='memb')}
     <label class="tk-tb">${ico('<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>')}Anexo<input type="file" data-tkf="file" multiple hidden></label>
    </div>
    ${u.pop==='memb'?`<div class="tk-pop"><b>Membros</b>${TK_TEAM.map(n=>`<label class="tk-chk"><input type="checkbox" data-tkf="memb" data-v="${n}"${(t.membros||[]).includes(n)?' checked':''}> ${tkAv(n)} ${n}</label>`).join('')}</div>`:''}
@@ -778,8 +779,8 @@ function tkModal(){
      <label class="fld"><span>Recorrente</span><select data-tkf="rec">${Object.entries(TK_REC).map(([k,v])=>`<option value="${k}"${(t.rec||'')===k?' selected':''}>${v}</option>`).join('')}</select></label>
      <label class="fld"><span>Definir lembrete</span><select data-tkf="lemb">${Object.entries(TK_LEMB).map(([k,v])=>`<option value="${k}"${String(t.lemb??'')===k?' selected':''}>${v}</option>`).join('')}</select></label></div></div>`:''}
    ${(t.membros||[]).length||t.prazo?`<div class="tk-info">${(t.membros||[]).length?`<div><small class="muted">Membros</small><div class="tk-avs2">${t.membros.map(n=>tkAv(n)).join('')}</div></div>`:''}${t.prazo?`<div><small class="muted">Data de entrega</small><div><span class="tk-b${tkLate(t)?' red':''}">${dt(t.prazo)}${t.hora?' '+esc(t.hora):''}${t.rec?' · ↻ '+TK_REC[t.rec]:''}${t.lemb!==undefined&&t.lemb!==''?' · 🔔 '+TK_LEMB[t.lemb]:''}${tkLate(t)?' · Atrasada':''}</span></div></div>`:''}</div>`:''}
-   <h4 class="tk-h">${ico('<path d="M4 6h16M4 12h16M4 18h10"/>')}Descrição</h4>
-   <textarea class="tk-desc" data-tkf="desc" rows="2" placeholder="Adicione uma descrição mais detalhada…">${esc(t.desc||'')}</textarea>
+   <h4 class="tk-h">${ico('<path d="M4 6h16M4 12h16M4 18h10"/>')}Descrição${t.desc&&!u.editDesc?'<button type="button" class="btn sm" data-tk="descEdit" style="margin-left:auto">Editar</button>':''}</h4>
+   ${(u.editDesc||!t.desc)?`<div class="tk-ed tk-edd"><div class="tk-tbar"><button type="button" data-tk="fmt" data-v="b" title="Negrito" aria-label="Negrito"><b>B</b></button><button type="button" data-tk="fmt" data-v="i" title="Itálico" aria-label="Itálico"><i>I</i></button><button type="button" data-tk="fmt" data-v="dash" title="Lista com traço" aria-label="Lista com traço">–≡</button><button type="button" data-tk="fmt" data-v="dot" title="Lista com bolinha" aria-label="Lista com bolinha">•≡</button></div><textarea class="tk-desc" name="d" data-tkf="desc" rows="2" placeholder="Adicione uma descrição mais detalhada…">${esc(t.desc||'')}</textarea></div><div class="tk-sendbar"><button type="button" class="btn pri" data-tk="descOk">Salvar</button></div>`:`<div class="tk-dview" data-tk="descEdit" title="Clique para editar">${tkFmt(t.desc)}</div>`}
    ${showChk?`<h4 class="tk-h">${ico('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>')}Checklist</h4>
    ${ck.length?`<div class="tk-prog"><span>${pc}%</span><div><i style="width:${pc}%"></i></div></div>`:''}
    ${ck.map((x,i)=>`<div class="tk-ci"><label class="tk-chk"><input type="checkbox" data-tkf="chk" data-v="${i}"${x.ok?' checked':''}> <span${x.ok?' style="text-decoration:line-through;color:var(--muted)"':''}>${esc(x.t)}</span></label><button class="tk-x" data-tk="chkDel" data-v="${i}" aria-label="Remover item">✕</button></div>`).join('')}
@@ -788,7 +789,7 @@ function tkModal(){
    <div class="mf"><button class="btn" data-tk="delCard" style="margin-right:auto">Remover</button><button class="btn pri" data-tk="salvar">Salvar</button></div>
   </div><div class="tk-chat">
    <h4 class="tk-h" style="margin-top:0">${ico('<path d="M4 5h16v11H9l-5 4z"/>')}Comentários e atividade</h4>
-   <form data-tkform="msg" class="tk-send"><div class="tk-ed"><div class="tk-tbar"><button type="button" data-tk="fmt" data-v="b" title="Negrito" aria-label="Negrito"><b>B</b></button><button type="button" data-tk="fmt" data-v="i" title="Itálico" aria-label="Itálico"><i>I</i></button><button type="button" data-tk="fmt" data-v="ul" title="Lista" aria-label="Lista">•≡</button><label class="tk-clip" title="Anexar arquivo" aria-label="Anexar arquivo">📎<input type="file" data-tkf="file" multiple hidden></label></div><textarea name="t" rows="2" placeholder="Escrever um comentário…" autocomplete="off"></textarea></div><div class="tk-sendbar"><button class="btn pri" type="submit" disabled>Salvar</button></div></form>
+   <form data-tkform="msg" class="tk-send"><div class="tk-ed"><div class="tk-tbar"><button type="button" data-tk="fmt" data-v="b" title="Negrito" aria-label="Negrito"><b>B</b></button><button type="button" data-tk="fmt" data-v="i" title="Itálico" aria-label="Itálico"><i>I</i></button><button type="button" data-tk="fmt" data-v="dash" title="Lista com traço" aria-label="Lista com traço">–≡</button><button type="button" data-tk="fmt" data-v="dot" title="Lista com bolinha" aria-label="Lista com bolinha">•≡</button><label class="tk-clip" title="Anexar arquivo" aria-label="Anexar arquivo">📎<input type="file" data-tkf="file" multiple hidden></label></div><textarea name="t" rows="2" placeholder="Escrever um comentário…" autocomplete="off"></textarea></div><div class="tk-sendbar"><button class="btn pri" type="submit" disabled>Salvar</button></div></form>
    <div class="tk-msgs">${feed.map(m=>`<div class="tk-ev">${tkAv(m.a)}<div><b>${esc(m.a)}</b> ${m.c?`<small class="muted">${tkHora(m.h)}${m.ed?' · editado':''}</small>${u.editMsg===m.i?`<form data-tkform="msgedit" class="tk-edit"><textarea name="t" rows="2">${esc(m.t)}</textarea><button class="btn sm pri" type="submit">Salvar</button><button class="btn sm" type="button" data-tk="msgCancel">Cancelar</button></form>`:`<div class="tk-msg">${tkMen(m.t)}</div>`}${m.a===tkMe()&&u.editMsg!==m.i?(u.delMsg===m.i?`<div class="tk-act">Excluir este comentário? <button type="button" data-tk="msgDelYes" data-v="${m.i}">Sim</button> · <button type="button" data-tk="msgDelNo">Não</button></div>`:`<div class="tk-act"><button type="button" data-tk="msgEdit" data-v="${m.i}">Editar</button> · <button type="button" data-tk="msgDel" data-v="${m.i}">Excluir</button></div>`):''}`:`${esc(m.t)}<div><small class="muted">${tkHora(m.h)}</small></div>`}</div></div>`).join('')||'<p class="muted" style="margin:0">Nenhuma atividade ainda.</p>'}</div>
   </div></div></div></div>`}
 function tkAuto1(t){t.style.height='auto';t.style.height=Math.max(t.classList.contains('tk-desc')?44:60,t.scrollHeight+2)+'px'}
@@ -802,7 +803,7 @@ function tkSug(inp){
  box.innerHTML=list.map((n,i)=>`<button type="button" class="${i?'':'on'}" data-nm="${n}">${tkAv(n)} ${n}</button>`).join('');box.dataset.start=pos-m[2].length-1}
 function tkPick(inp,nome){const f=inp.form,box=f.querySelector('.tk-sug');if(!box)return;const st=+box.dataset.start,pos=inp.selectionStart;
  inp.value=inp.value.slice(0,st)+'@'+nome+' '+inp.value.slice(pos);const c=st+nome.length+2;inp.setSelectionRange(c,c);box.remove();inp.focus()}
-document.addEventListener('input',e=>{const t=e.target;if(t.matches&&t.matches('.tk-desc,.tk-ed textarea,.tk-edit textarea'))tkAuto1(t);if(t.name==='t'&&t.form&&t.form.dataset.tkform==='msg'){tkSug(t);const b=t.form.querySelector('button[type=submit]');if(b)b.disabled=!t.value.trim()}});
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.tkf==='desc'){const c=tkCur();if(c){c.desc=t.value;tkU().editDesc=true}}if(t.matches&&t.matches('.tk-desc,.tk-ed textarea,.tk-edit textarea'))tkAuto1(t);if(t.name==='t'&&t.form&&t.form.dataset.tkform==='msg'){tkSug(t);const b=t.form.querySelector('button[type=submit]');if(b)b.disabled=!t.value.trim()}});
 document.addEventListener('keydown',e=>{const t0=e.target;if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)&&t0.name==='t'&&t0.form&&t0.form.dataset.tkform&&t0.form.requestSubmit){e.preventDefault();t0.form.requestSubmit();return}const t=e.target,box=t.form&&t.form.querySelector&&t.form.querySelector('.tk-sug');if(!box||t.name!=='t')return;
  const bs=[...box.children],i=bs.findIndex(b=>b.classList.contains('on'));
  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();bs[i]&&bs[i].classList.remove('on');bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length].classList.add('on')}
@@ -815,7 +816,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
  switch(a){
   case 'modo':u.modo=v;break;
   case 'reabrir':{const t=S.tarefas.find(x=>x.id===v);t.feito=false;t.concluidaEm='';save();toast('Tarefa reaberta.');break}
-  case 'novo':{const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};break}
+  case 'novo':{u.editDesc=false;const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};break}
   case 'pdatas':u.pop=u.pop==='datas'?'':'datas';break;
   case 'pmemb':u.pop=u.pop==='memb'?'':'memb';break;
   case 'pchk':u.showChk=true;break;
@@ -824,17 +825,19 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   case 'msgDel':u.delMsg=+v;break;
   case 'msgDelNo':u.delMsg=null;break;
   case 'msgDelYes':{const c=tkCur();c.msgs.splice(+v,1);u.delMsg=null;if(!(u.draft&&u.draft.id===c.id))save();toast('Comentário excluído.');break}
-  case 'fmt':{const ta=document.querySelector('[data-tkform=msg] textarea');if(!ta)return;const a=ta.selectionStart,z=ta.selectionEnd,v0=ta.value,sel=v0.slice(a,z);let ins,c0,c1;
-   if(v==='ul'){const ls=(sel||'').split('\n').map(l=>l.startsWith('- ')?l:'- '+l).join('\n');ins=ls;c0=a;c1=a+ls.length}
+  case 'fmt':{const ta=b.closest('.tk-ed').querySelector('textarea');const a=ta.selectionStart,z=ta.selectionEnd,v0=ta.value,sel=v0.slice(a,z);let ins,c0,c1;
+   if(v==='dash'||v==='dot'){const pf=v==='dash'?'- ':'• ';const ls=(sel||'').split('\n').map(l=>/^(- |• )/.test(l)?l:pf+l).join('\n');ins=ls;c0=sel?a:a+ls.length;c1=a+ls.length}
    else{const m=v==='b'?'**':'_';ins=m+sel+m;c0=a+m.length;c1=c0+sel.length}
    ta.value=v0.slice(0,a)+ins+v0.slice(z);ta.focus();ta.setSelectionRange(c0,c1);ta.dispatchEvent(new Event('input',{bubbles:true}));return}
+  case 'descEdit':u.editDesc=true;break;
+  case 'descOk':u.editDesc=false;break;
   case 'atbtn':{const i=document.querySelector('[data-tkform=msg] input');if(!i)return;const p=i.selectionStart??i.value.length;i.value=i.value.slice(0,p)+(p&&!/\s$/.test(i.value.slice(0,p))?' ':'')+'@'+i.value.slice(p);i.focus();const q=i.value.indexOf('@',Math.max(0,p-1))+1;i.setSelectionRange(q,q);tkSug(i);return}
   case 'concl':{const c=tkCur();c.feito=!c.feito;c.concluidaEm=c.feito?today():'';tkLog(c,c.feito?'marcou este cartão como concluído':'reabriu este cartão');if(c.feito&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id))S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});if(!(u.draft&&u.draft.id===c.id))save();if(c.feito){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}break}
   case 'salvar':{const t=tkCur();if(!t.titulo.trim()){toast('Digite o nome da tarefa.');return}if(u.draft&&u.draft.id===t.id){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);u.draft=null}save();u.sel=null;ui.modal=null;toast('Tarefa salva.');break}
   case 'fclear':Object.assign(u,{resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false});break;
   case 'fpanel':u.fp=!u.fp;break;
   case 'chipx':{const m={resp:{resp:'Todos'},per:{per:'todos',de:'',ate:''},col:{col:''},st:{st:'todos'},q:{q:''},semResp:{semResp:false},anx:{anx:false}};Object.assign(u,m[v]);break}
-  case 'open':u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
+  case 'open':u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
   case 'colDel':{if(S.tarefas.some(t=>t.col===v))return toast('Mova ou exclua os cartões desta coluna antes.');if(S.tcols.length<2)return toast('Mantenha pelo menos uma coluna.');const c=S.tcols.find(x=>x.id===v);return ask(`Excluir a coluna "${c.nome}"?`,()=>{S.tcols=S.tcols.filter(x=>x.id!==v);done('Coluna excluída.')})}
   case 'chkDel':{const t=tkCur();t.check.splice(+v,1);save();break}
   case 'anxDel':{const t=tkCur();t.anexos.splice(+v,1);save();break}
@@ -854,7 +857,7 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
   else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';if(t.checked&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id)){S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[]})}
   if(!(u.draft&&u.draft.id===c.id))save();if(t.checked){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}return render()}
   else if(k==='prazo')c.prazo=t.value;
-  else if(k==='desc')c.desc=t.value;
+  else if(k==='desc'){c.desc=t.value;if(!(u.draft&&u.draft.id===c.id))save();return}
   else if(k==='chk'){c.check[+t.dataset.v].ok=t.checked}
   else if(k==='file'){const fs=[...t.files];t.value='';let n=fs.length;if(!n)return;
    fs.forEach(f=>{if(f.size>1572864){toast('"'+f.name+'" passa de 1,5 MB.');if(!--n)render();return}
