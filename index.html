@@ -1025,14 +1025,14 @@ function modalHtml(){
     <div class="paper-b" style="font-size:12px"><p style="margin:0 0 12px"><b>Fazenda:</b> ${esc(F(e.farm).name)}${e.city?' · '+esc(e.city):''} &nbsp; <b>EM:</b> ${dt(e.start)} a ${dt(e.end)}</p>${tbl}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia do relatório para impressão (folha na horizontal).</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  if(m.type==='lanc'){const l=m.data||{},e=S.estacoes.find(x=>x.id===l.est)||{},lots=S.lotes.filter(x=>x.farm===e.farm).sort((a,b)=>a.name.localeCompare(b.name));
+  if(m.type==='lanc'){const l=m.data||{},e=S.estacoes.find(x=>x.id===l.est)||{},lots=S.lotes.filter(x=>x.farm===e.farm&&(x.status!=='Arquivado'||x.id===l.lote)).sort((a,b)=>a.name.localeCompare(b.name));
     const nm=(n,lbl,v,req)=>fldHtml(lbl,`<input name="${n}" type="number" min="0" step="1" inputmode="numeric" value="${esc(v??'')}"${req?' required':''}>`);
     const sec=t=>`<h4 style="grid-column:1/-1;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">${t}</h4>`;
     const re=l.prot&&l.im?addDays(l.im,Number(l.prot)):(l.re||''),ia=re?addDays(re,2):(l.ia||'');
     body=`<h3>${l.id?'Editar lançamento':'Novo lançamento'} · IATF ${l.etapa}</h3>${err}<p style="margin:0 0 4px"><b>${esc(F(e.farm).name)}</b> · EM ${dt(e.start)} a ${dt(e.end)}</p>
     <form data-form="lanc" data-id="${l.id||''}" data-est="${esc(l.est)}" data-etapa="${l.etapa}" novalidate>
     ${sec('Animais')}<div class="form c3">
-    ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes desta fazenda (cadastre em Agendar Lotes)')}</select>`)}
+    ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes em aberto desta fazenda (cadastre em Agendar Lotes)')}</select>`)}
     ${fldHtml('Categoria',`<select name="cat" required>${opts(catOpts(l.cat),l.cat,'Selecione…')}</select>`)}
     ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
     </div>${sec('Protocolo e datas')}<div class="form c5">
