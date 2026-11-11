@@ -1028,8 +1028,9 @@ function modalHtml(){
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(LCAT.map(x=>[x,x]),l.category,'Selecione…')}</select>`)}
-    ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}" required>`)}
-    ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}" required>`)}
+    <div class="lote-dates" style="display:${!l.category||LPAR.includes(l.category)?'contents':'none'}">
+    ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
+    ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div>
     ${fldHtml('Status',`<select name="status">${opts(['Aberto','Arquivado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>${foot('Salvar')}</form>`}
   const pfoot=(k,w)=>{const n=(ui.f[k].rows||[]).length;return `<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${n>1?'Registrar '+n+' '+w+'s':'Registrar '+w}</button></div>`};
   if(m.type==='product'){const p=m.data||{};
@@ -1319,6 +1320,7 @@ function pSaidaFields(){
 
 /* ---------- serviços da iatf ---------- */
 const LCAT=['Novilhas','Primíparas','Multíparas','Solteiras'];
+const LPAR=['Primíparas','Multíparas'];
 const ITIT={'i-painel':'Painel','i-lotes':'Agendar Lotes','i-fichas':'Fichas Serviços','i-ordens':'Ordens Serviços','i-estacao':'Controle da Estação'};
 const ititle=()=>ui.tab==='i-painel'?'Serviços da IATF':'Serviços da IATF › '+ITIT[ui.tab];
 function vEmBreve(){
@@ -1373,14 +1375,14 @@ function vEstLanc(){
 }
 function vLotes(){
   const f=ui.lf;
-  const list=S.lotes.filter(l=>(!f.status||l.status===f.status)&&(!f.farm||l.farm===f.farm)).sort((a,b)=>a.start.localeCompare(b.start)||a.name.localeCompare(b.name));
+  const list=S.lotes.filter(l=>(!f.status||l.status===f.status)&&(!f.farm||l.farm===f.farm)).sort((a,b)=>(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name));
   return `<div class="card"><div class="card-h"><h3>Agendar Lotes</h3><button class="btn pri" data-a="newLote">Agendar lote</button></div>
   <div class="filters" style="margin-bottom:12px">
    ${fldHtml('Status',`<select data-lf="status">${opts([['Aberto','Aberto'],['Arquivado','Arquivado']],f.status,'Todos')}</select>`)}
    ${fldHtml('Fazenda',`<select data-lf="farm">${opts(FZ().map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
   </div>
   <div class="tw">${list.length?`<table><thead><tr><th>Fazenda / Lote</th><th class="num">Total</th><th>Início Parição</th><th>Final Parição</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-  ${list.map(l=>`<tr><td><b>${esc(F(l.farm).name)}</b> / ${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${dt(l.start)}</td><td>${dt(l.end)}</td><td>${esc(l.category)}</td>
+  ${list.map(l=>`<tr><td><b>${esc(F(l.farm).name)}</b> / ${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td><td>${esc(l.category)}</td>
    <td><span class="pill ${l.status==='Aberto'?'in':'ok'}">${esc(l.status)}</span></td>
    <td><div class="acts"><button class="btn sm" data-a="editLote" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLote" data-v="${l.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty(S.lotes.length?'Nenhum lote com esses filtros.':'Nenhum lote agendado. Clique em Agendar lote para começar.')}</div></div>`;
@@ -1769,6 +1771,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   const t=e.target,d=t.dataset;
+  if(t.name==='category'&&t.form&&t.form.dataset.form==='lote'){const bx=t.form.querySelector('.lote-dates');if(bx)bx.style.display=!t.value||LPAR.includes(t.value)?'contents':'none'}
   if(d.f){const [f,n]=d.f.split('.');ui.f[f][n]=t.value;
     if(f==='saida'&&n==='farm'){ui.f.saida.rows=(ui.f.saida.rows||[{}]).map(r=>({qty:r.qty,note:r.note}))}
     if(f==='psaida'&&n==='farm'){ui.f.psaida.rows=(ui.f.psaida.rows||[{}]).map(r=>({qty:r.qty,note:r.note}))}
@@ -1872,10 +1875,11 @@ document.addEventListener('submit',e=>{
     return done('Lançamento salvo.')}
   if(k==='lote'){
     const id=form.dataset.id,total=Number(fd.total),name=(fd.name||'').trim();
-    if(!fd.farm||!name||!fd.category||!fd.start||!fd.end)return modalErr('Preencha fazenda, lote, categoria e as datas da parição.');
+    const par=LPAR.includes(fd.category);
+    if(!fd.farm||!name||!fd.category||(par&&(!fd.start||!fd.end)))return modalErr(par?'Preencha fazenda, lote, categoria e as datas da parição.':'Preencha fazenda, lote e categoria.');
     if(!(total>0)||!Number.isInteger(total))return modalErr('O total deve ser um número inteiro maior que zero.');
-    if(fd.end<fd.start)return modalErr('O final da parição não pode ser antes do início.');
-    const rec={farm:fd.farm,name,total,category:fd.category,start:fd.start,end:fd.end,status:fd.status||'Aberto'};
+    if(par&&fd.end<fd.start)return modalErr('O final da parição não pode ser antes do início.');
+    const rec={farm:fd.farm,name,total,category:fd.category,start:par?fd.start:'',end:par?fd.end:'',status:fd.status||'Aberto'};
     if(id)Object.assign(S.lotes.find(x=>x.id===id),rec);else S.lotes.push({id:nid('l'),...rec});
     return done('Lote salvo.')}
   if(k==='product'){
