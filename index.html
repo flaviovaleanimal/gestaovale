@@ -224,6 +224,8 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-me{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px}.tk-me select{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);padding:4px 6px;font:inherit}
 .tk-ev{display:flex;gap:10px;align-items:flex-start}.tk-ev .tk-av{margin-left:0;flex:none;width:30px;height:30px;font-size:13px;border-color:transparent}.tk-msgs{margin-top:12px;display:flex;flex-direction:column;gap:14px;max-height:none;overflow:visible}.tk-msg{margin-top:4px}
 @media(max-width:820px){.tk-m .tk-mg{grid-template-columns:minmax(0,1fr)}}
+.tk-desc{overflow:hidden;resize:none;min-height:44px}.tk-send{position:relative;display:flex;gap:6px}.tk-sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(20,33,61,.18);z-index:5;overflow:hidden}.tk-sug button{display:flex;gap:8px;align-items:center;width:100%;min-height:40px;padding:6px 10px;border:0;background:transparent;color:var(--ink);text-align:left;font:inherit;cursor:pointer}.tk-sug button.on,.tk-sug button:hover{background:var(--bg)}.tk-sug .tk-av{margin:0}
+.tk-men{color:var(--navy);background:var(--navy-soft);border-radius:4px;padding:0 3px;font-weight:600}.tk-act{font-size:12px;color:var(--muted);margin-top:3px}.tk-act button{border:0;background:transparent;color:var(--navy);text-decoration:underline;cursor:pointer;font:inherit;padding:2px}.tk-edit{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.tk-edit input{flex:1 1 140px;min-width:0;min-height:40px;box-sizing:border-box;padding:6px 10px;border:1px solid var(--navy);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit}
 .tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
@@ -690,6 +692,7 @@ const tkOk=t=>{const u=tkU();
  return true};
 const tkNF=u=>(u.resp!=='Todos')+(u.per!=='todos')+(!!u.col)+(u.st!=='todos')+(!!u.q)+(!!u.semResp)+(!!u.anx);
 const tkLog=(c,tx)=>{const u=tkU();(c.log=c.log||[]).push({a:u.me||'Alguém',t:tx,h:Date.now()})};
+const tkMen=t=>esc(t).replace(new RegExp('@('+TK_TEAM.join('|')+')','g'),'<span class="tk-men">@$1</span>');
 const tkCur=()=>{const u=tkU();return u.draft&&u.draft.id===u.sel?u.draft:S.tarefas.find(x=>x.id===u.sel)};
 const tkColResp=c=>TK_TEAM.find(n=>c&&c.nome.toUpperCase().includes('('+n.toUpperCase()+')'))||'';
 const tkNext=(d,r)=>{if(!d)return '';if(r==='diaria')return addDays(d,1);if(r==='semanal')return addDays(d,7);const x=new Date(d+'T12:00:00');x.setMonth(x.getMonth()+1);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
@@ -751,7 +754,7 @@ function tkModal(){
   const col=S.tcols.find(x=>x.id===t.col);
   const ico=n=>`<svg class="tk-i" viewBox="0 0 24 24">${n}</svg>`;
   const tb=(k,svg,lbl,on)=>`<button type="button" class="tk-tb${on?' on':''}" data-tk="${k}">${svg}${lbl}</button>`;
-  const feed=[...(t.msgs||[]).map(m=>({...m,c:1})),...(t.log||[])].sort((a,b)=>b.h-a.h);
+  const feed=[...(t.msgs||[]).map((m,i)=>({...m,c:1,i})),...(t.log||[])].sort((a,b)=>b.h-a.h);
   const showChk=ck.length||u.showChk;
   return `<div class="ov"><div class="modal xl tk-m" role="dialog" aria-modal="true"><div class="tk-mg"><div class="tk-l">
    <div class="tk-mh"><button type="button" class="tk-circ${t.feito?' ok':''}" data-tk="concl" title="${t.feito?'Reabrir':'Marcar como concluída'}" aria-label="Concluir tarefa">${t.feito?'✓':''}</button><input class="tk-tt" data-tkf="titulo" value="${esc(t.titulo)}" placeholder="Nome da tarefa" aria-label="Nome da tarefa"><button class="btn sm" data-a="close" aria-label="Fechar">✕</button></div>
@@ -768,7 +771,7 @@ function tkModal(){
      <label class="fld"><span>Definir lembrete</span><select data-tkf="lemb">${Object.entries(TK_LEMB).map(([k,v])=>`<option value="${k}"${String(t.lemb??'')===k?' selected':''}>${v}</option>`).join('')}</select></label></div></div>`:''}
    ${(t.membros||[]).length||t.prazo?`<div class="tk-info">${(t.membros||[]).length?`<div><small class="muted">Membros</small><div class="tk-avs2">${t.membros.map(n=>tkAv(n)).join('')}</div></div>`:''}${t.prazo?`<div><small class="muted">Data de entrega</small><div><span class="tk-b${tkLate(t)?' red':''}">${dt(t.prazo)}${t.hora?' '+esc(t.hora):''}${t.rec?' · ↻ '+TK_REC[t.rec]:''}${t.lemb!==undefined&&t.lemb!==''?' · 🔔 '+TK_LEMB[t.lemb]:''}${tkLate(t)?' · Atrasada':''}</span></div></div>`:''}</div>`:''}
    <h4 class="tk-h">${ico('<path d="M4 6h16M4 12h16M4 18h10"/>')}Descrição</h4>
-   <textarea class="tk-desc" data-tkf="desc" rows="4" placeholder="Adicione uma descrição mais detalhada…">${esc(t.desc||'')}</textarea>
+   <textarea class="tk-desc" data-tkf="desc" rows="2" placeholder="Adicione uma descrição mais detalhada…">${esc(t.desc||'')}</textarea>
    ${showChk?`<h4 class="tk-h">${ico('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>')}Checklist</h4>
    ${ck.length?`<div class="tk-prog"><span>${pc}%</span><div><i style="width:${pc}%"></i></div></div>`:''}
    ${ck.map((x,i)=>`<div class="tk-ci"><label class="tk-chk"><input type="checkbox" data-tkf="chk" data-v="${i}"${x.ok?' checked':''}> <span${x.ok?' style="text-decoration:line-through;color:var(--muted)"':''}>${esc(x.t)}</span></label><button class="tk-x" data-tk="chkDel" data-v="${i}" aria-label="Remover item">✕</button></div>`).join('')}
@@ -778,9 +781,26 @@ function tkModal(){
   </div><div class="tk-chat">
    <h4 class="tk-h" style="margin-top:0">${ico('<path d="M4 5h16v11H9l-5 4z"/>')}Comentários e atividade</h4>
    <label class="tk-me">Você é <select data-tkf="me"><option value="">Selecione…</option>${TK_TEAM.map(n=>`<option${u.me===n?' selected':''}>${n}</option>`).join('')}</select></label>
-   <form data-tkform="msg" class="tk-send"><input name="t" placeholder="Escrever um comentário…" autocomplete="off"></form>
-   <div class="tk-msgs">${feed.map(m=>`<div class="tk-ev">${tkAv(m.a)}<div><b>${esc(m.a)}</b> ${m.c?`<small class="muted">${tkHora(m.h)}</small><div class="tk-msg">${esc(m.t)}</div>`:`${esc(m.t)}<div><small class="muted">${tkHora(m.h)}</small></div>`}</div></div>`).join('')||'<p class="muted" style="margin:0">Nenhuma atividade ainda.</p>'}</div>
+   <form data-tkform="msg" class="tk-send"><input name="t" placeholder="Comentário… use @ para marcar" autocomplete="off"><button class="btn" type="button" data-tk="atbtn" title="Marcar um membro" aria-label="Marcar um membro">@</button></form>
+   <div class="tk-msgs">${feed.map(m=>`<div class="tk-ev">${tkAv(m.a)}<div><b>${esc(m.a)}</b> ${m.c?`<small class="muted">${tkHora(m.h)}${m.ed?' · editado':''}</small>${u.editMsg===m.i?`<form data-tkform="msgedit" class="tk-edit"><input name="t" value="${esc(m.t)}" autocomplete="off"><button class="btn sm pri" type="submit">Salvar</button><button class="btn sm" type="button" data-tk="msgCancel">Cancelar</button></form>`:`<div class="tk-msg">${tkMen(m.t)}</div>`}${m.a===u.me&&u.editMsg!==m.i?(u.delMsg===m.i?`<div class="tk-act">Excluir este comentário? <button type="button" data-tk="msgDelYes" data-v="${m.i}">Sim</button> · <button type="button" data-tk="msgDelNo">Não</button></div>`:`<div class="tk-act"><button type="button" data-tk="msgEdit" data-v="${m.i}">Editar</button> · <button type="button" data-tk="msgDel" data-v="${m.i}">Excluir</button></div>`):''}`:`${esc(m.t)}<div><small class="muted">${tkHora(m.h)}</small></div>`}</div></div>`).join('')||'<p class="muted" style="margin:0">Nenhuma atividade ainda.</p>'}</div>
   </div></div></div></div>`}
+function tkAutosize(){document.querySelectorAll('.tk-desc').forEach(t=>{t.style.height='auto';t.style.height=Math.max(44,t.scrollHeight+2)+'px'})}
+function tkSug(inp){
+ const f=inp.form,old=f.querySelector('.tk-sug'),pos=inp.selectionStart,m=/(^|\s)@([^\s@]*)$/.exec(inp.value.slice(0,pos));
+ if(!m){if(old)old.remove();return}
+ const q=nrm(m[2]),list=TK_TEAM.filter(n=>nrm(n).includes(q));
+ if(!list.length){if(old)old.remove();return}
+ const box=old||Object.assign(document.createElement('div'),{className:'tk-sug'});if(!old)f.appendChild(box);
+ box.innerHTML=list.map((n,i)=>`<button type="button" class="${i?'':'on'}" data-nm="${n}">${tkAv(n)} ${n}</button>`).join('');box.dataset.start=pos-m[2].length-1}
+function tkPick(inp,nome){const f=inp.form,box=f.querySelector('.tk-sug');if(!box)return;const st=+box.dataset.start,pos=inp.selectionStart;
+ inp.value=inp.value.slice(0,st)+'@'+nome+' '+inp.value.slice(pos);const c=st+nome.length+2;inp.setSelectionRange(c,c);box.remove();inp.focus()}
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('tk-desc'))tkAutosize();if(t.name==='t'&&t.form&&t.form.dataset.tkform==='msg')tkSug(t)});
+document.addEventListener('keydown',e=>{const t=e.target,box=t.form&&t.form.querySelector&&t.form.querySelector('.tk-sug');if(!box||t.name!=='t')return;
+ const bs=[...box.children],i=bs.findIndex(b=>b.classList.contains('on'));
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();bs[i]&&bs[i].classList.remove('on');bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length].classList.add('on')}
+ else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();tkPick(t,bs[Math.max(0,i)].dataset.nm)}
+ else if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();box.remove()}});
+document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.tk-sug button');if(!b)return;e.preventDefault();tkPick(b.closest('form').querySelector('input[name=t]'),b.dataset.nm)});
 let tkDrag=null;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tk]');if(!b)return;const u=tkU(),a=b.dataset.tk,v=b.dataset.v;
  if(e.target.closest('.tk-cn'))return;
@@ -791,12 +811,18 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   case 'pdatas':u.pop=u.pop==='datas'?'':'datas';break;
   case 'pmemb':u.pop=u.pop==='memb'?'':'memb';break;
   case 'pchk':u.showChk=true;break;
+  case 'msgEdit':u.editMsg=+v;u.delMsg=null;break;
+  case 'msgCancel':u.editMsg=null;break;
+  case 'msgDel':u.delMsg=+v;break;
+  case 'msgDelNo':u.delMsg=null;break;
+  case 'msgDelYes':{const c=tkCur();c.msgs.splice(+v,1);u.delMsg=null;if(!(u.draft&&u.draft.id===c.id))save();toast('Comentário excluído.');break}
+  case 'atbtn':{const i=document.querySelector('[data-tkform=msg] input');if(!i)return;const p=i.selectionStart??i.value.length;i.value=i.value.slice(0,p)+(p&&!/\s$/.test(i.value.slice(0,p))?' ':'')+'@'+i.value.slice(p);i.focus();const q=i.value.indexOf('@',Math.max(0,p-1))+1;i.setSelectionRange(q,q);tkSug(i);return}
   case 'concl':{const c=tkCur();c.feito=!c.feito;c.concluidaEm=c.feito?today():'';tkLog(c,c.feito?'marcou este cartão como concluído':'reabriu este cartão');if(c.feito&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id))S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});if(!(u.draft&&u.draft.id===c.id))save();if(c.feito){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}break}
   case 'salvar':{const t=tkCur();if(!t.titulo.trim()){toast('Digite o nome da tarefa.');return}if(u.draft&&u.draft.id===t.id){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);u.draft=null}save();u.sel=null;ui.modal=null;toast('Tarefa salva.');break}
   case 'fclear':Object.assign(u,{resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false});break;
   case 'fpanel':u.fp=!u.fp;break;
   case 'chipx':{const m={resp:{resp:'Todos'},per:{per:'todos',de:'',ate:''},col:{col:''},st:{st:'todos'},q:{q:''},semResp:{semResp:false},anx:{anx:false}};Object.assign(u,m[v]);break}
-  case 'open':u.draft=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
+  case 'open':u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
   case 'colDel':{if(S.tarefas.some(t=>t.col===v))return toast('Mova ou exclua os cartões desta coluna antes.');if(S.tcols.length<2)return toast('Mantenha pelo menos uma coluna.');const c=S.tcols.find(x=>x.id===v);return ask(`Excluir a coluna "${c.nome}"?`,()=>{S.tcols=S.tcols.filter(x=>x.id!==v);done('Coluna excluída.')})}
   case 'chkDel':{const t=tkCur();t.check.splice(+v,1);save();break}
   case 'anxDel':{const t=tkCur();t.anexos.splice(+v,1);save();break}
@@ -829,6 +855,7 @@ document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.t
  else if(k==='col'){S.tcols.push({id:nid('tc'),nome:val,ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1})}
  else{const c=tkCur();if(!c)return;
   if(k==='chk')(c.check=c.check||[]).push({t:val,ok:false});
+  else if(k==='msgedit'){const m=c.msgs[u.editMsg];if(m&&m.t!==val){m.t=val;m.ed=true}u.editMsg=null}
   else if(k==='msg'){if(!u.me)return toast('Selecione quem você é, antes de enviar.');(c.msgs=c.msgs||[]).push({a:u.me,t:val,h:Date.now()})}}
  save();render();
  if(k==='msg'){const m=document.querySelector('.tk-msgs');if(m)m.scrollTop=m.scrollHeight;const i=document.querySelector('[data-tkform=msg] input');if(i)i.focus()}
@@ -1796,7 +1823,7 @@ function render(){
   responsive();
   lastMK=ui.modal?ui.modal.type+(ui.modal.kind||''):'';
   if(_ap)_ap.scrollTop=_sa;
-  agAfter();admStrip();
+  agAfter();admStrip();tkAutosize();
   const _ov2=document.querySelector('#modal-root .ov');if(_ov2&&_mk0&&_mk0===lastMK)_ov2.scrollTop=_so;
 }
 function goNew(sel,i){const el=document.querySelectorAll(sel)[i];if(!el)return;el.scrollIntoView({block:'center'});const f=el.querySelector('input,select,textarea');if(f)try{f.focus({preventScroll:true})}catch(e){}}
