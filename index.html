@@ -229,6 +229,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-chat .tk-send{display:block}.tk-ed{position:relative;border:2px solid var(--navy);border-radius:8px;background:var(--surface)}.tk-tbar{display:flex;align-items:center;gap:2px;padding:4px 6px;border-bottom:1px solid var(--line)}.tk-tbar button,.tk-clip{min-width:34px;min-height:34px;border:0;background:transparent;border-radius:6px;cursor:pointer;color:var(--ink);font:inherit;display:inline-flex;align-items:center;justify-content:center}.tk-tbar button:hover,.tk-clip:hover{background:var(--bg)}.tk-clip{margin-left:auto}
 .tk-ed textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;min-height:60px;padding:10px;background:transparent;color:var(--ink);font:inherit;overflow:hidden}.tk-sendbar{margin:8px 0 2px}.tk-sendbar .btn[disabled]{opacity:.5;cursor:not-allowed}
 .tk-msg ul{margin:4px 0;padding-left:18px}.tk-edit textarea{flex:1 1 100%;min-width:0;box-sizing:border-box;border:1px solid var(--navy);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink);font:inherit;resize:vertical}
+.modal.tk-m{position:relative}.tk-close{position:absolute;top:10px;right:10px;z-index:3;width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:18px;cursor:pointer}.tk-close:hover{background:var(--line)}.tk-chat h4.tk-h{padding-right:44px}
 .modal.tk-m .tk-mg{min-height:min(780px,calc(100vh - 56px))}.tk-ed textarea{min-height:150px}.tk-ed{background:var(--surface)}
 .tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
@@ -763,8 +764,8 @@ function tkModal(){
   const tb=(k,svg,lbl,on)=>`<button type="button" class="tk-tb${on?' on':''}" data-tk="${k}">${svg}${lbl}</button>`;
   const feed=[...(t.msgs||[]).map((m,i)=>({...m,c:1,i})),...(t.log||[])].sort((a,b)=>b.h-a.h);
   const showChk=ck.length||u.showChk;
-  return `<div class="ov"><div class="modal xl tk-m" role="dialog" aria-modal="true"><div class="tk-mg"><div class="tk-l">
-   <div class="tk-mh"><button type="button" class="tk-circ${t.feito?' ok':''}" data-tk="concl" title="${t.feito?'Reabrir':'Marcar como concluída'}" aria-label="Concluir tarefa">${t.feito?'✓':''}</button><input class="tk-tt" data-tkf="titulo" value="${esc(t.titulo)}" placeholder="Nome da tarefa" aria-label="Nome da tarefa"><button class="btn sm" data-a="close" aria-label="Fechar">✕</button></div>
+  return `<div class="ov"><div class="modal xl tk-m" role="dialog" aria-modal="true"><button class="tk-close" data-a="close" aria-label="Fechar" title="Fechar">✕</button><div class="tk-mg"><div class="tk-l">
+   <div class="tk-mh"><button type="button" class="tk-circ${t.feito?' ok':''}" data-tk="concl" title="${t.feito?'Reabrir':'Marcar como concluída'}" aria-label="Concluir tarefa">${t.feito?'✓':''}</button><input class="tk-tt" data-tkf="titulo" value="${esc(t.titulo)}" placeholder="Nome da tarefa" aria-label="Nome da tarefa"></div>
    <div class="tk-sub">no quadro <select data-tkf="col" aria-label="Quadro">${tkCols().map(c=>`<option value="${c.id}"${c.id===t.col?' selected':''}>${esc(c.nome)}</option>`).join('')}</select></div>
    <div class="tk-tools">
     ${tb('pmemb',ico('<circle cx="10" cy="8" r="4"/><path d="M2 21c0-4 3.6-6 8-6M18 8v6M15 11h6"/>'),'Membros',u.pop==='memb')}
