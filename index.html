@@ -226,6 +226,9 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 @media(max-width:820px){.tk-m .tk-mg{grid-template-columns:minmax(0,1fr)}}
 .tk-desc{overflow:hidden;resize:none;min-height:44px}.tk-send{position:relative;display:flex;gap:6px}.tk-sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(20,33,61,.18);z-index:5;overflow:hidden}.tk-sug button{display:flex;gap:8px;align-items:center;width:100%;min-height:40px;padding:6px 10px;border:0;background:transparent;color:var(--ink);text-align:left;font:inherit;cursor:pointer}.tk-sug button.on,.tk-sug button:hover{background:var(--bg)}.tk-sug .tk-av{margin:0}
 .tk-men{color:var(--navy);background:var(--navy-soft);border-radius:4px;padding:0 3px;font-weight:600}.tk-act{font-size:12px;color:var(--muted);margin-top:3px}.tk-act button{border:0;background:transparent;color:var(--navy);text-decoration:underline;cursor:pointer;font:inherit;padding:2px}.tk-edit{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.tk-edit input{flex:1 1 140px;min-width:0;min-height:40px;box-sizing:border-box;padding:6px 10px;border:1px solid var(--navy);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit}
+.tk-chat .tk-send{display:block}.tk-ed{position:relative;border:2px solid var(--navy);border-radius:8px;background:var(--surface)}.tk-tbar{display:flex;align-items:center;gap:2px;padding:4px 6px;border-bottom:1px solid var(--line)}.tk-tbar button,.tk-clip{min-width:34px;min-height:34px;border:0;background:transparent;border-radius:6px;cursor:pointer;color:var(--ink);font:inherit;display:inline-flex;align-items:center;justify-content:center}.tk-tbar button:hover,.tk-clip:hover{background:var(--bg)}.tk-clip{margin-left:auto}
+.tk-ed textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;min-height:60px;padding:10px;background:transparent;color:var(--ink);font:inherit;overflow:hidden}.tk-sendbar{margin:8px 0 2px}.tk-sendbar .btn[disabled]{opacity:.5;cursor:not-allowed}
+.tk-msg ul{margin:4px 0;padding-left:18px}.tk-edit textarea{flex:1 1 100%;min-width:0;box-sizing:border-box;border:1px solid var(--navy);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink);font:inherit;resize:vertical}
 .tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
@@ -692,7 +695,9 @@ const tkOk=t=>{const u=tkU();
  return true};
 const tkNF=u=>(u.resp!=='Todos')+(u.per!=='todos')+(!!u.col)+(u.st!=='todos')+(!!u.q)+(!!u.semResp)+(!!u.anx);
 const tkLog=(c,tx)=>{const u=tkU();(c.log=c.log||[]).push({a:u.me||'Alguém',t:tx,h:Date.now()})};
-const tkMen=t=>esc(t).replace(new RegExp('@('+TK_TEAM.join('|')+')','g'),'<span class="tk-men">@$1</span>');
+const tkFmt=t=>{let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[\s(])_(.+?)_(?=[\s).,!?]|$)/g,'$1<i>$2</i>').replace(new RegExp('@('+TK_TEAM.join('|')+')','g'),'<span class="tk-men">@$1</span>');
+ const out=[];let ul=false;h.split('\n').forEach(l=>{const m=/^- (.*)$/.exec(l);if(m){if(!ul){out.push('<ul>');ul=true}out.push('<li>'+m[1]+'</li>')}else{if(ul){out.push('</ul>');ul=false}out.push(l+'<br>')}});if(ul)out.push('</ul>');return out.join('').replace(/<br>$/,'')};
+const tkMen=tkFmt;
 const tkCur=()=>{const u=tkU();return u.draft&&u.draft.id===u.sel?u.draft:S.tarefas.find(x=>x.id===u.sel)};
 const tkColResp=c=>TK_TEAM.find(n=>c&&c.nome.toUpperCase().includes('('+n.toUpperCase()+')'))||'';
 const tkNext=(d,r)=>{if(!d)return '';if(r==='diaria')return addDays(d,1);if(r==='semanal')return addDays(d,7);const x=new Date(d+'T12:00:00');x.setMonth(x.getMonth()+1);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
@@ -781,8 +786,8 @@ function tkModal(){
   </div><div class="tk-chat">
    <h4 class="tk-h" style="margin-top:0">${ico('<path d="M4 5h16v11H9l-5 4z"/>')}Comentários e atividade</h4>
    <label class="tk-me">Você é <select data-tkf="me"><option value="">Selecione…</option>${TK_TEAM.map(n=>`<option${u.me===n?' selected':''}>${n}</option>`).join('')}</select></label>
-   <form data-tkform="msg" class="tk-send"><input name="t" placeholder="Comentário… use @ para marcar" autocomplete="off"><button class="btn" type="button" data-tk="atbtn" title="Marcar um membro" aria-label="Marcar um membro">@</button></form>
-   <div class="tk-msgs">${feed.map(m=>`<div class="tk-ev">${tkAv(m.a)}<div><b>${esc(m.a)}</b> ${m.c?`<small class="muted">${tkHora(m.h)}${m.ed?' · editado':''}</small>${u.editMsg===m.i?`<form data-tkform="msgedit" class="tk-edit"><input name="t" value="${esc(m.t)}" autocomplete="off"><button class="btn sm pri" type="submit">Salvar</button><button class="btn sm" type="button" data-tk="msgCancel">Cancelar</button></form>`:`<div class="tk-msg">${tkMen(m.t)}</div>`}${m.a===u.me&&u.editMsg!==m.i?(u.delMsg===m.i?`<div class="tk-act">Excluir este comentário? <button type="button" data-tk="msgDelYes" data-v="${m.i}">Sim</button> · <button type="button" data-tk="msgDelNo">Não</button></div>`:`<div class="tk-act"><button type="button" data-tk="msgEdit" data-v="${m.i}">Editar</button> · <button type="button" data-tk="msgDel" data-v="${m.i}">Excluir</button></div>`):''}`:`${esc(m.t)}<div><small class="muted">${tkHora(m.h)}</small></div>`}</div></div>`).join('')||'<p class="muted" style="margin:0">Nenhuma atividade ainda.</p>'}</div>
+   <form data-tkform="msg" class="tk-send"><div class="tk-ed"><div class="tk-tbar"><button type="button" data-tk="fmt" data-v="b" title="Negrito" aria-label="Negrito"><b>B</b></button><button type="button" data-tk="fmt" data-v="i" title="Itálico" aria-label="Itálico"><i>I</i></button><button type="button" data-tk="fmt" data-v="ul" title="Lista" aria-label="Lista">•≡</button><label class="tk-clip" title="Anexar arquivo" aria-label="Anexar arquivo">📎<input type="file" data-tkf="file" multiple hidden></label></div><textarea name="t" rows="2" placeholder="Escrever um comentário…" autocomplete="off"></textarea></div><div class="tk-sendbar"><button class="btn pri" type="submit" disabled>Salvar</button></div></form>
+   <div class="tk-msgs">${feed.map(m=>`<div class="tk-ev">${tkAv(m.a)}<div><b>${esc(m.a)}</b> ${m.c?`<small class="muted">${tkHora(m.h)}${m.ed?' · editado':''}</small>${u.editMsg===m.i?`<form data-tkform="msgedit" class="tk-edit"><textarea name="t" rows="2">${esc(m.t)}</textarea><button class="btn sm pri" type="submit">Salvar</button><button class="btn sm" type="button" data-tk="msgCancel">Cancelar</button></form>`:`<div class="tk-msg">${tkMen(m.t)}</div>`}${m.a===u.me&&u.editMsg!==m.i?(u.delMsg===m.i?`<div class="tk-act">Excluir este comentário? <button type="button" data-tk="msgDelYes" data-v="${m.i}">Sim</button> · <button type="button" data-tk="msgDelNo">Não</button></div>`:`<div class="tk-act"><button type="button" data-tk="msgEdit" data-v="${m.i}">Editar</button> · <button type="button" data-tk="msgDel" data-v="${m.i}">Excluir</button></div>`):''}`:`${esc(m.t)}<div><small class="muted">${tkHora(m.h)}</small></div>`}</div></div>`).join('')||'<p class="muted" style="margin:0">Nenhuma atividade ainda.</p>'}</div>
   </div></div></div></div>`}
 function tkAutosize(){document.querySelectorAll('.tk-desc').forEach(t=>{t.style.height='auto';t.style.height=Math.max(44,t.scrollHeight+2)+'px'})}
 function tkSug(inp){
@@ -790,17 +795,17 @@ function tkSug(inp){
  if(!m){if(old)old.remove();return}
  const q=nrm(m[2]),list=TK_TEAM.filter(n=>nrm(n).includes(q));
  if(!list.length){if(old)old.remove();return}
- const box=old||Object.assign(document.createElement('div'),{className:'tk-sug'});if(!old)f.appendChild(box);
+ const box=old||Object.assign(document.createElement('div'),{className:'tk-sug'});if(!old)(f.querySelector('.tk-ed')||f).appendChild(box);
  box.innerHTML=list.map((n,i)=>`<button type="button" class="${i?'':'on'}" data-nm="${n}">${tkAv(n)} ${n}</button>`).join('');box.dataset.start=pos-m[2].length-1}
 function tkPick(inp,nome){const f=inp.form,box=f.querySelector('.tk-sug');if(!box)return;const st=+box.dataset.start,pos=inp.selectionStart;
  inp.value=inp.value.slice(0,st)+'@'+nome+' '+inp.value.slice(pos);const c=st+nome.length+2;inp.setSelectionRange(c,c);box.remove();inp.focus()}
-document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('tk-desc'))tkAutosize();if(t.name==='t'&&t.form&&t.form.dataset.tkform==='msg')tkSug(t)});
-document.addEventListener('keydown',e=>{const t=e.target,box=t.form&&t.form.querySelector&&t.form.querySelector('.tk-sug');if(!box||t.name!=='t')return;
+document.addEventListener('input',e=>{const t=e.target;if(t.classList&&t.classList.contains('tk-desc'))tkAutosize();if(t.name==='t'&&t.form&&t.form.dataset.tkform==='msg'){tkSug(t);t.style.height='auto';t.style.height=Math.max(60,t.scrollHeight+2)+'px';const b=t.form.querySelector('button[type=submit]');if(b)b.disabled=!t.value.trim()}});
+document.addEventListener('keydown',e=>{const t0=e.target;if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)&&t0.name==='t'&&t0.form&&t0.form.dataset.tkform&&t0.form.requestSubmit){e.preventDefault();t0.form.requestSubmit();return}const t=e.target,box=t.form&&t.form.querySelector&&t.form.querySelector('.tk-sug');if(!box||t.name!=='t')return;
  const bs=[...box.children],i=bs.findIndex(b=>b.classList.contains('on'));
  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();bs[i]&&bs[i].classList.remove('on');bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length].classList.add('on')}
- else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();tkPick(t,bs[Math.max(0,i)].dataset.nm)}
+ else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();tkPick(t,bs[Math.max(0,i)].dataset.nm);t.dispatchEvent(new Event('input',{bubbles:true}))}
  else if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();box.remove()}});
-document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.tk-sug button');if(!b)return;e.preventDefault();tkPick(b.closest('form').querySelector('input[name=t]'),b.dataset.nm)});
+document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.tk-sug button');if(!b)return;e.preventDefault();tkPick(b.closest('form').querySelector('[name=t]'),b.dataset.nm)});
 let tkDrag=null;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tk]');if(!b)return;const u=tkU(),a=b.dataset.tk,v=b.dataset.v;
  if(e.target.closest('.tk-cn'))return;
@@ -816,6 +821,10 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   case 'msgDel':u.delMsg=+v;break;
   case 'msgDelNo':u.delMsg=null;break;
   case 'msgDelYes':{const c=tkCur();c.msgs.splice(+v,1);u.delMsg=null;if(!(u.draft&&u.draft.id===c.id))save();toast('Comentário excluído.');break}
+  case 'fmt':{const ta=document.querySelector('[data-tkform=msg] textarea');if(!ta)return;const a=ta.selectionStart,z=ta.selectionEnd,v0=ta.value,sel=v0.slice(a,z);let ins,c0,c1;
+   if(v==='ul'){const ls=(sel||'').split('\n').map(l=>l.startsWith('- ')?l:'- '+l).join('\n');ins=ls;c0=a;c1=a+ls.length}
+   else{const m=v==='b'?'**':'_';ins=m+sel+m;c0=a+m.length;c1=c0+sel.length}
+   ta.value=v0.slice(0,a)+ins+v0.slice(z);ta.focus();ta.setSelectionRange(c0,c1);ta.dispatchEvent(new Event('input',{bubbles:true}));return}
   case 'atbtn':{const i=document.querySelector('[data-tkform=msg] input');if(!i)return;const p=i.selectionStart??i.value.length;i.value=i.value.slice(0,p)+(p&&!/\s$/.test(i.value.slice(0,p))?' ':'')+'@'+i.value.slice(p);i.focus();const q=i.value.indexOf('@',Math.max(0,p-1))+1;i.setSelectionRange(q,q);tkSug(i);return}
   case 'concl':{const c=tkCur();c.feito=!c.feito;c.concluidaEm=c.feito?today():'';tkLog(c,c.feito?'marcou este cartão como concluído':'reabriu este cartão');if(c.feito&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id))S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});if(!(u.draft&&u.draft.id===c.id))save();if(c.feito){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}break}
   case 'salvar':{const t=tkCur();if(!t.titulo.trim()){toast('Digite o nome da tarefa.');return}if(u.draft&&u.draft.id===t.id){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);u.draft=null}save();u.sel=null;ui.modal=null;toast('Tarefa salva.');break}
@@ -858,7 +867,7 @@ document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.t
   else if(k==='msgedit'){const m=c.msgs[u.editMsg];if(m&&m.t!==val){m.t=val;m.ed=true}u.editMsg=null}
   else if(k==='msg'){if(!u.me)return toast('Selecione quem você é, antes de enviar.');(c.msgs=c.msgs||[]).push({a:u.me,t:val,h:Date.now()})}}
  save();render();
- if(k==='msg'){const m=document.querySelector('.tk-msgs');if(m)m.scrollTop=m.scrollHeight;const i=document.querySelector('[data-tkform=msg] input');if(i)i.focus()}
+ if(k==='msg'){const m=document.querySelector('.tk-msgs');if(m)m.scrollTop=m.scrollHeight;const i=document.querySelector('[data-tkform=msg] textarea');if(i)i.focus()}
  if(k==='chk'){const i=document.querySelector('[data-tkform=chk] input');if(i)i.focus()}});
 document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-tkc]');if(!b)return;tkDrag=b.dataset.tkc;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',tkDrag)}catch(_){}b.classList.add('ag-dragging')});
 document.addEventListener('dragend',()=>{tkDrag=null;document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'))});
