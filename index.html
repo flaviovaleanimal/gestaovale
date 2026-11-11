@@ -1184,7 +1184,7 @@ function modalHtml(){
     body=`<h3>Relatório de estoque de sêmen</h3>
     <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Estoque de sêmen · ${esc(f.name)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}${flt?'<br>'+esc(flt):''}</span></div>
     <div class="paper-b">${list.length?`<table><thead><tr><th>Reprodutor</th><th>Raça</th><th>Indicação</th><th class="num">Entrada</th><th class="num">Saída</th><th class="num">Saldo</th></tr></thead><tbody>
-    ${list.map(o=>`<tr><td>${esc(o.name)}${Object.entries(o.tanks).filter(([,q])=>q>0).map(([t,q])=>`<div class="loc-l">${esc(F(ui.farm).name)} — Botijão ${esc(T(t).name)} — ${fmt(q)} doses</div>`).join('')}</td>
+    ${list.map(o=>`<tr><td>${esc(o.name)}</td>
     <td>${esc(o.breed)}</td><td>${esc(o.ind)}</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td></tr>`).join('')}
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
