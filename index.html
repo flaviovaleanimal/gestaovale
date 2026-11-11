@@ -1901,7 +1901,7 @@ document.addEventListener('submit',e=>{
     done('Lançamento salvo.');
     if(rec.dg&&etapa<3&&rec.dg!==oldDg){
       const lt=S.lotes.find(x=>x.id===rec.lote),nx=etapa+1,nome=lt?lt.name:'';
-      ask(`Será feita a ressincronização do lote ${nome}? Se sim, o sistema cria a IATF ${nx} com o lote ${nome}, categoria ${rec.cat}, protocolo de ${rec.prot} dias e data do implante em ${dt(rec.dg)} (a data do DG).`,()=>{
+      ask(`Foi feita a ressincronização do Lote "${nome}"? Se sim, o sistema cria a IATF ${nx} com o lote ${nome}, categoria ${rec.cat}, protocolo de ${rec.prot} dias e data do implante em ${dt(rec.dg)} (a data do DG).`,()=>{
         if(S.lancs.some(x=>x.est===est&&x.lote===rec.lote&&Number(x.etapa)===nx)){done(`O lote ${nome} já tem lançamento na IATF ${nx}. Nada foi criado.`);return}
         const re2=addDays(rec.dg,rec.prot);
         S.lancs.push({id:nid('la'),est,etapa:nx,lote:rec.lote,cat:rec.cat,carimbo:rec.carimbo,prot:rec.prot,im:rec.dg,re:re2,ia:addDays(re2,2),dg:''});
