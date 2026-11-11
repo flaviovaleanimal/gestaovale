@@ -516,6 +516,7 @@ const brl=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL
 const r2=n=>Math.round((Number(n)||0)*100)/100;
 const fnum=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:2});
 const finTot=r=>r2((Number(r.qty)||0)*(Number(r.unit)||0));
+const tecFicha=()=>[...new Set(S.contacts.filter(c=>['tecnico vale animal','veterinario vale animal'].includes(nrm(c.role))).map(c=>c.name))].sort((a,b)=>a.localeCompare(b));
 const tecVA=()=>[...new Set(S.contacts.filter(c=>nrm(c.role)==='tecnico vale animal').map(c=>c.name))].sort((a,b)=>a.localeCompare(b));
 const VALDIA=[150,250];
 function finRead(form){const fd=new FormData(form),n=form.querySelectorAll('[name^="date."]').length,rows=[];
@@ -1420,7 +1421,7 @@ function vOrdens(){
   <div class="form" style="margin-bottom:16px">
    ${fldHtml('Data do serviço',`<input type="date" data-os="date" value="${esc(o.date)}">`)}
    ${fldHtml('Nome da fazenda',`<select data-os="farm">${opts(FZ(o.farm).map(x=>[x.id,x.name]),o.farm,'Selecione…')}</select>`)}
-   ${fldHtml('Técnico',`<select data-os="tech">${opts([...tecVA(),...(o.tech&&!tecVA().includes(o.tech)?[o.tech]:[])].map(x=>[x,x]),o.tech,tecVA().length?'Selecione…':'Nenhum contato com cargo Técnico Vale Animal')}</select>`)}
+   ${fldHtml('Técnico',`<select data-os="tech">${opts([...tecFicha(),...(o.tech&&!tecFicha().includes(o.tech)?[o.tech]:[])].map(x=>[x,x]),o.tech,tecFicha().length?'Selecione…':'Nenhum contato com cargo Veterinário ou Técnico Vale Animal')}</select>`)}
    ${fldHtml('Cidade (da fazenda)',`<input value="${esc(o.farm?(F(o.farm).city||''):'')}" placeholder="${o.farm?'Fazenda sem cidade cadastrada':'Escolha a fazenda'}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
   </div>
   <h3 style="margin:0 0 8px">Serviços</h3>${sv}
@@ -1470,7 +1471,7 @@ function vFicha(){
    ${fldHtml('Data inicial',`<input type="date" data-fi="from" value="${esc(f.from)}">`)}
    ${fldHtml('Data final',`<input type="date" data-fi="to" value="${esc(f.to)}">`)}
    ${fldHtml('Nome da fazenda',`<select data-fi="farm">${opts(FZ(f.farm).map(x=>[x.id,x.name]),f.farm,'Selecione…')}</select>`)}
-   ${fldHtml('Técnico responsável',`<select data-fi="tech">${opts([...tecVA(),...(f.tech&&!tecVA().includes(f.tech)?[f.tech]:[])].map(x=>[x,x]),f.tech,tecVA().length?'Selecione…':'Nenhum contato com cargo Técnico Vale Animal')}</select>`)}
+   ${fldHtml('Técnico responsável',`<select data-fi="tech">${opts([...tecFicha(),...(f.tech&&!tecFicha().includes(f.tech)?[f.tech]:[])].map(x=>[x,x]),f.tech,tecFicha().length?'Selecione…':'Nenhum contato com cargo Veterinário ou Técnico Vale Animal')}</select>`)}
   </div>
   <h3 style="margin:0 0 8px">Serviços</h3>${svc}
   <h3 style="margin:16px 0 8px">Materiais utilizados</h3>${mat}
