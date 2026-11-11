@@ -664,6 +664,7 @@ const tkPerOk=t=>{const u=tkU(),p=u.per;if(p==='todos')return true;if(!t.prazo)r
 const tkOk=t=>{const u=tkU();
  if(u.resp!=='Todos'&&!(t.membros||[]).includes(u.resp))return false;
  if(!tkPerOk(t))return false;
+ if(u.modo==='arq')return true;
  if(u.st==='atrasada')return tkLate(t);
  if(u.st==='emdia')return !t.feito&&!tkLate(t);
  return true};
@@ -678,7 +679,7 @@ function tkCard(t){
 function vTarefas(){
   const u=tkU();
   if(!['conectando','lento','erro'].includes(dbState)&&(!S.tcols.length||(!S.tarefas.length&&S.tcols.map(c=>c.nome).join('|')==='A fazer|Em andamento|Concluído'))){S.tcols=[{id:'tc1',nome:'TAREFAS A FAZER',ord:1},{id:'tc2',nome:'TAREFAS (FLÁVIO)',ord:2},{id:'tc3',nome:'TAREFAS (BINA)',ord:3},{id:'tc4',nome:'TAREFAS (ISABELLA)',ord:4}];save()}
-  const cols=tkCols(),all=S.tarefas,vis=all.filter(tkOk),fil=u.resp!=='Todos'||u.per!=='todos'||u.st!=='todos';
+  const cols=tkCols(),all=S.tarefas.filter(t=>!t.feito),arqs=S.tarefas.filter(t=>t.feito),vis=(u.modo==='arq'?arqs:all).filter(tkOk),fil=u.resp!=='Todos'||u.per!=='todos'||u.st!=='todos';
   const so=(v,l)=>`<option value="${v}"${v===u.per?' selected':''}>${l}</option>`;
   const filt=`<div class="filters" style="margin-bottom:12px">
    ${fldHtml('Responsável',`<select data-tkf="fresp"><option value="Todos">Todos</option>${TK_TEAM.map(n=>`<option${u.resp===n?' selected':''}>${n}</option>`).join('')}</select>`)}
@@ -694,11 +695,14 @@ function vTarefas(){
       <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div>
       <form data-tkform="card" data-col="${c.id}"><input name="t" placeholder="+ Adicionar cartão" autocomplete="off" aria-label="Título do novo cartão"></form></div>`}).join('')}
      <form class="tk-col tk-new" data-tkform="col"><input name="n" placeholder="+ Nova coluna" autocomplete="off" aria-label="Nome da nova coluna"></form></div>`;
+  }else if(u.modo==='arq'){
+    const rows=vis.slice().sort((a,b)=>(b.concluidaEm||'').localeCompare(a.concluidaEm||''));
+    body=`<div class="tw">${rows.length?`<table><thead><tr><th>Concluída em</th><th>Tarefa</th><th>Coluna</th><th>Responsáveis</th><th>Prazo</th><th></th></tr></thead><tbody>${rows.map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<tr class="tk-row" data-tk="open" data-v="${t.id}"><td>${t.concluidaEm?dt(t.concluidaEm):'—'}</td><td><b>${esc(t.titulo)}</b></td><td>${esc(c?c.nome:'')}</td><td>${(t.membros||[]).join(', ')||'—'}</td><td>${t.prazo?dt(t.prazo):'—'}</td><td style="white-space:nowrap"><button class="btn sm" data-tk="reabrir" data-v="${t.id}">Reabrir</button></td></tr>`}).join('')}</tbody><tfoot><tr><td colspan="6">${rows.length} ${rows.length===1?'tarefa arquivada':'tarefas arquivadas'}</td></tr></tfoot></table>`:'<p>Nenhuma tarefa arquivada.</p>'}</div>`;
   }else{
     const rows=vis.slice().sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999'));
     body=`<div class="tw">${rows.length?`<table><thead><tr><th>Prazo</th><th>Tarefa</th><th>Coluna</th><th>Responsáveis</th><th>Situação</th><th>Itens</th></tr></thead><tbody>${rows.map(t=>{const c=S.tcols.find(x=>x.id===t.col),ck=t.check||[];return `<tr class="tk-row" data-tk="open" data-v="${t.id}"><td>${t.prazo?dt(t.prazo):'—'}</td><td><b>${esc(t.titulo)}</b></td><td>${esc(c?c.nome:'')}</td><td>${(t.membros||[]).join(', ')||'—'}</td><td>${tkLate(t)?'<span class="tk-b red">Atrasada</span>':t.feito?'Concluída':'Em dia'}</td><td class="muted">${ck.length?'☑ '+ck.filter(x=>x.ok).length+'/'+ck.length:''}${(t.anexos||[]).length?' 📎'+t.anexos.length:''}${(t.msgs||[]).length?' 💬'+t.msgs.length:''}</td></tr>`}).join('')}</tbody><tfoot><tr><td colspan="6">${rows.length} ${rows.length===1?'tarefa':'tarefas'}${fil?' de '+all.length:''}</td></tr></tfoot></table>`:'<p>Nenhuma tarefa com esses filtros.</p>'}</div>`;
   }
-  return `<div class="card"><div class="card-h"><h3>Tarefas</h3><div class="acts"><span class="ag-seg"><button class="btn sm ${u.modo==='quadro'?'pri':''}" data-tk="modo" data-v="quadro">Quadro</button><button class="btn sm ${u.modo==='lista'?'pri':''}" data-tk="modo" data-v="lista">Lista</button></span><button class="btn pri" data-tk="novo">Nova tarefa</button></div></div>${filt}${body}</div>`}
+  return `<div class="card"><div class="card-h"><h3>Tarefas</h3><div class="acts"><span class="ag-seg"><button class="btn sm ${u.modo==='quadro'?'pri':''}" data-tk="modo" data-v="quadro">Quadro</button><button class="btn sm ${u.modo==='lista'?'pri':''}" data-tk="modo" data-v="lista">Lista</button><button class="btn sm ${u.modo==='arq'?'pri':''}" data-tk="modo" data-v="arq">Arquivadas (${arqs.length})</button></span><button class="btn pri" data-tk="novo">Nova tarefa</button></div></div>${filt}${body}</div>`}
 function tkModal(){
   const u=tkU(),t=S.tarefas.find(x=>x.id===u.sel);if(!t)return '';
   const ck=t.check||[],cd=ck.filter(x=>x.ok).length;
@@ -729,6 +733,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
  if(e.target.closest('.tk-cn'))return;
  switch(a){
   case 'modo':u.modo=v;break;
+  case 'reabrir':{const t=S.tarefas.find(x=>x.id===v);t.feito=false;t.concluidaEm='';save();toast('Tarefa reaberta.');break}
   case 'novo':{const id=nid('t');S.tarefas.push({id,col:tkCols()[0].id,titulo:'Nova tarefa',desc:'',membros:[],prazo:'',check:[],anexos:[],msgs:[]});save();u.sel=id;ui.modal={type:'tk'};break}
   case 'fclear':Object.assign(u,{resp:'Todos',per:'todos',st:'todos',de:'',ate:''});break;
   case 'open':u.sel=v;ui.modal={type:'tk'};break;
@@ -745,7 +750,7 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
  else if(c){
   if(k==='titulo'){const n=t.value.trim();if(n)c.titulo=n;else t.value=c.titulo}
   else if(k==='col')c.col=t.value;
-  else if(k==='feito')c.feito=t.checked;
+  else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';save();if(t.checked){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}return render()}
   else if(k==='prazo')c.prazo=t.value;
   else if(k==='desc')c.desc=t.value;
   else if(k==='memb'){const m=new Set(c.membros||[]);t.checked?m.add(t.dataset.v):m.delete(t.dataset.v);c.membros=TK_TEAM.filter(n=>m.has(n))}
