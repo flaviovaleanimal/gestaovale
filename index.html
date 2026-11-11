@@ -1391,7 +1391,7 @@ function vLotes(){
   <div class="tw">${list.length?`<table><thead><tr><th>Fazenda / Lote</th><th class="num">Total</th><th>Início Parição</th><th>Final Parição</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead><tbody>
   ${list.map(l=>`<tr><td><b>${esc(F(l.farm).name)}</b> / ${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td><td>${esc(l.category)}</td>
    <td><span class="pill ${l.status==='Aberto'?'in':'ok'}">${esc(l.status)}</span></td>
-   <td><div class="acts"><button class="btn sm" data-a="editLote" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLote" data-v="${l.id}">Excluir</button></div></td></tr>`).join('')}
+   <td><div class="acts">${l.status==='Aberto'?`<button class="btn sm pri" data-a="iniAgendar" data-v="${l.id}">Agendar</button>`:''}<button class="btn sm" data-a="editLote" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLote" data-v="${l.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty(S.lotes.length?'Nenhum lote com esses filtros.':'Nenhum lote agendado. Clique em Agendar lote para começar.')}</div></div>`;
 }
 
