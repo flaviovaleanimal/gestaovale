@@ -883,11 +883,10 @@ function modalHtml(){
     body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form">
     ${fldHtml('Data Serviço',`<input name="date" type="date" value="${esc(e.date||today())}" required>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
-    ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
+    ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,x]),e.title,'Selecione…')}</select>`)}
-    ${fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" list="dl-evlotes" autocomplete="off" style="text-transform:uppercase" placeholder="Escolha um lote agendado"><datalist id="dl-evlotes">${evLoteOpts(e.farm)}</datalist>`)}
-    ${fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`)}
-    ${fldHtml('Categoria',`<select name="cat">${opts(catOpts(e.cat),e.cat,'Selecione…')}</select>`)}
+    ${e.lock?fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
+    ${e.lock?'':fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" list="dl-evlotes" autocomplete="off" style="text-transform:uppercase" placeholder="Escolha um lote agendado"><datalist id="dl-evlotes">${evLoteOpts(e.farm)}</datalist>`)+fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`)+fldHtml('Categoria',`<select name="cat">${opts(catOpts(e.cat),e.cat,'Selecione…')}</select>`)}
     ${fldHtml('Equipe',`<input name="team" value="${esc(e.team||'')}" autocomplete="off" placeholder="Digite o nome da equipe">`)}
     ${fldHtml('Agenda Técnico',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`,'wide')}
     ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`,'wide')}
@@ -1701,7 +1700,7 @@ document.addEventListener('click',e=>{
    case 'newFarm':ui.modal={type:'farm'};render();break;
    case 'finPrint':ui.modal={type:'finpdf',kind:v};render();break;
    case 'agPrint':ui.modal={type:'agpdf'};render();break;
-   case 'iniAgendar':{const l=S.lotes.find(x=>x.id===v);ui.modal={type:'ev',data:{date:today(),periodo:'Dia Inteiro',farm:l.farm,lote:String(l.name||'').toUpperCase(),total:l.total,cat:NCATS.includes(l.category)?l.category:''}};render();break}
+   case 'iniAgendar':{const l=S.lotes.find(x=>x.id===v);ui.modal={type:'ev',data:{lock:true,date:today(),periodo:'Dia Inteiro',farm:l.farm,lote:String(l.name||'').toUpperCase(),total:l.total,cat:NCATS.includes(l.category)?l.category:''}};render();break}
    case 'agFil':ui.modal={type:'agfil'};render();break;
    case 'agFilClear':ui.ag.tec='';ui.ag.f={farm:'',title:'',cat:'',periodo:'',lote:'',q:''};ui.modal=null;render();break;
    case 'agTec':ui.ag.tec=v;render();break;
