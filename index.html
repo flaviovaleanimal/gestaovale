@@ -1787,7 +1787,7 @@ const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el[
 document.addEventListener('input',e=>{const t=e.target;if(t.name==='lote'&&t.form&&t.form.dataset.form==='ev'){t.dataset.auto='';evLoteFill(t.form)}});
 document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
   {
-    const pend=S.lotes.filter(l=>l.farm===t.value&&l.status!=='Arquivado'&&!loteTemServico(l)).sort((a,b)=>(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true}))[0];
+    const pend=S.lotes.find(l=>l.farm===t.value&&l.status!=='Arquivado'&&String(l.name).toUpperCase()===(lo.options[1]||{}).value);
     if(pend){lo.value=String(pend.name).toUpperCase();lo.dataset.auto='1';evLoteFill(t.form)}
     else{t.form.elements['total'].value='';t.form.elements['cat'].value=''}
   }}});
