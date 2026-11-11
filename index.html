@@ -670,6 +670,7 @@ function vInicio(){
   const done=S.lancs.filter(iatfDone),byE=[1,2,3].map(i=>done.filter(l=>l.etapa===i).length),ins=done.reduce((a,l)=>a+(Number(l.ins)||0),0);
   const abertos=S.lotes.filter(l=>l.status!=='Arquivado'),pend=abertos.filter(l=>!loteTemServico(l));
   abertos.sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));pend.sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));
+  const faltaDg=S.lancs.filter(l=>l.ia&&!l.dg&&addDays(l.ia,28)<=td).map(l=>{const es=S.estacoes.find(x=>x.id===l.est)||{},lt=S.lotes.find(x=>x.id===l.lote),prev=addDays(l.ia,28);return {l,farm:es.farm,lt,prev,atraso:Math.round((new Date(td+'T12:00:00')-new Date(prev+'T12:00:00'))/864e5)}}).sort((a,b)=>a.prev.localeCompare(b.prev));
   const hoje=S.eventos.filter(e=>e.date<=td&&(e.end||e.date)>=td).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||''));
   return `<div class="ini-grid">
    <div class="kpi"><div class="k-n">${fmt(fazAt.size)}</div><div class="k-l">Fazendas atendidas</div></div>
@@ -682,7 +683,9 @@ function vInicio(){
     ${hoje.length?hoje.map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><span><b>${esc(evLabel(e))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
    <div class="card"><div class="card-h"><h3>Lotes para agendar serviço <small class="muted">(em aberto: ${abertos.length})</small></h3><button class="btn sm" data-a="go" data-v="i-lotes">Agendar Lotes</button></div>
     ${abertos.length?abertos.map(l=>`<div class="ini-row"><div><b>${esc(farmShort(l.farm)||F(l.farm).name)}</b> / ${esc(l.name)}<small>${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${l.start?' · parição '+dt(l.start)+' a '+dt(l.end):''}</small></div><span style="display:flex;gap:8px;align-items:center">${loteTemServico(l)?'<span class="muted" style="font-size:12px">✓ Com serviço</span>':'<span style="font-size:12px;font-weight:600">Falta agendar</span>'}<button class="btn sm ${loteTemServico(l)?'':'pri'}" data-a="iniAgendar" data-v="${l.id}">Agendar</button></span></div>`).join(''):empty('Nenhum lote em aberto.')}</div>
-  </div>`}
+  </div>
+  <div class="card" style="margin-top:14px"><div class="card-h"><h3>Lotes falta para diagnóstico <small class="muted">(${faltaDg.length} · 28 dias após a inseminação)</small></h3><button class="btn sm" data-a="go" data-v="i-estacao">Controle da Estação</button></div>
+   ${faltaDg.length?faltaDg.map(x=>`<div class="ini-row"><div><b>${esc(farmShort(x.farm)||(x.farm?F(x.farm).name:'—'))}</b> / ${esc(x.lt?x.lt.name:'?')}<small>IATF ${esc(x.l.etapa)} · inseminação ${dt(x.l.ia)} · DG previsto ${dt(x.prev)}${x.l.cat?' · '+esc(x.l.cat):''}</small></div><span style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;font-weight:600">${x.atraso>0?x.atraso+(x.atraso===1?' dia':' dias')+' de atraso':'DG hoje'}</span><button class="btn sm pri" data-a="editLanc" data-v="${x.l.id}">Lançar DG</button></span></div>`).join(''):empty('Nenhum lote aguardando diagnóstico.')}</div>`}
 function vFazendas(){
   const nC=id=>S.contacts.filter(c=>c.farm===id).length;
   const segs=[...new Set(S.farms.map(f=>segTxt(f)).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),cids=[...new Set(S.farms.map(f=>f.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
