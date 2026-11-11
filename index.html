@@ -214,6 +214,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-fbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid var(--navy-soft);background:var(--navy-soft);color:var(--navy);font:inherit;font-weight:600;cursor:pointer}.tk-fbtn.open{background:var(--navy);color:var(--navy-ink)}
 .tk-fp{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:10px;padding:12px;background:var(--bg);border-radius:10px}.tk-fp label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}.tk-fp label.tk-chk{flex-direction:row;font-size:14px;color:var(--ink);min-height:44px}.tk-fp input[type=date],.tk-fp input[type=text]{min-height:44px;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit}
 .tk-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}.tk-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 4px 4px 10px;font-size:12.5px;font-weight:600}.tk-chip svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}.tk-chip button{border:0;background:transparent;cursor:pointer;color:var(--muted);min-width:28px;min-height:28px;border-radius:4px}.tk-chip button:hover{background:var(--line)}
+.modal .form.c2,.modal.xl .form.c2{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
 .tk-board{display:flex;gap:12px;align-items:stretch;overflow-x:auto;padding-bottom:10px;min-height:420px}
@@ -678,6 +679,11 @@ const tkOk=t=>{const u=tkU();
  if(u.st==='emdia')return !t.feito&&!tkLate(t);
  return true};
 const tkNF=u=>(u.resp!=='Todos')+(u.per!=='todos')+(!!u.col)+(u.st!=='todos')+(!!u.q)+(!!u.semResp)+(!!u.anx);
+const tkCur=()=>{const u=tkU();return u.draft&&u.draft.id===u.sel?u.draft:S.tarefas.find(x=>x.id===u.sel)};
+const tkColResp=c=>TK_TEAM.find(n=>c&&c.nome.toUpperCase().includes('('+n.toUpperCase()+')'))||'';
+const tkNext=(d,r)=>{if(!d)return '';if(r==='diaria')return addDays(d,1);if(r==='semanal')return addDays(d,7);const x=new Date(d+'T12:00:00');x.setMonth(x.getMonth()+1);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const TK_REC={'':'Não se repete',diaria:'Todos os dias',semanal:'Toda semana',mensal:'Todo mês'};
+const TK_LEMB={'':'Sem lembrete',0:'Na hora',15:'15 minutos antes',60:'1 hora antes',1440:'1 dia antes'};
 const tkHora=h=>new Date(h).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const tkAv=n=>`<span class="tk-av" title="${esc(n)}">${esc(n.charAt(0))}</span>`;
 const tkKB=n=>n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
@@ -685,7 +691,7 @@ function tkCard(t){
   const ck=t.check||[],cd=ck.filter(x=>x.ok).length;
   return `<div class="tk-c${tkLate(t)?' late':''}" draggable="true" data-tkc="${t.id}" data-tk="open" data-v="${t.id}">
    <div class="tk-ct1"${t.feito?' style="text-decoration:line-through;color:var(--muted)"':''}>${t.feito?'✓ ':''}${esc(t.titulo)}</div>
-   <div class="tk-meta">${t.prazo?`<span class="tk-b${tkLate(t)?' red':''}">${tkLate(t)?'Atrasada · ':''}${dt(t.prazo)}</span>`:''}${ck.length?`<span class="tk-b">☑ ${cd}/${ck.length}</span>`:''}${(t.anexos||[]).length?`<span class="tk-b">📎 ${t.anexos.length}</span>`:''}${(t.msgs||[]).length?`<span class="tk-b">💬 ${t.msgs.length}</span>`:''}<span class="tk-avs">${(t.membros||[]).map(tkAv).join('')}</span></div></div>`}
+   <div class="tk-meta">${t.prazo?`<span class="tk-b${tkLate(t)?' red':''}">${tkLate(t)?'Atrasada · ':''}${dt(t.prazo)}${t.hora?' '+esc(t.hora):''}${t.rec?' ↻':''}</span>`:''}${ck.length?`<span class="tk-b">☑ ${cd}/${ck.length}</span>`:''}${(t.anexos||[]).length?`<span class="tk-b">📎 ${t.anexos.length}</span>`:''}${(t.msgs||[]).length?`<span class="tk-b">💬 ${t.msgs.length}</span>`:''}<span class="tk-avs">${(t.membros||[]).map(tkAv).join('')}</span></div></div>`}
 function vTarefas(){
   const u=tkU();
   if(!['conectando','lento','erro'].includes(dbState)&&(!S.tcols.length||(!S.tarefas.length&&S.tcols.map(c=>c.nome).join('|')==='A fazer|Em andamento|Concluído'))){S.tcols=[{id:'tc1',nome:'TAREFAS A FAZER',ord:1},{id:'tc2',nome:'TAREFAS (FLÁVIO)',ord:2},{id:'tc3',nome:'TAREFAS (BINA)',ord:3},{id:'tc4',nome:'TAREFAS (ISABELLA)',ord:4}];save()}
@@ -729,16 +735,18 @@ function vTarefas(){
   }
   return `<div class="card"><div class="card-h"><h3>Tarefas</h3><div class="acts"><span class="ag-seg"><button class="btn sm ${u.modo==='quadro'?'pri':''}" data-tk="modo" data-v="quadro">Quadro</button><button class="btn sm ${u.modo==='lista'?'pri':''}" data-tk="modo" data-v="lista">Lista</button><button class="btn sm ${u.modo==='arq'?'pri':''}" data-tk="modo" data-v="arq">Arquivadas (${arqs.length})</button></span><button class="btn pri" data-tk="novo">Criar tarefa</button></div></div>${filt}${body}</div>`}
 function tkModal(){
-  const u=tkU(),t=S.tarefas.find(x=>x.id===u.sel);if(!t)return '';
+  const u=tkU(),t=tkCur();if(!t)return '';
   const ck=t.check||[],cd=ck.filter(x=>x.ok).length;
   return `<div class="ov"><div class="modal xl tk-m" role="dialog" aria-modal="true">
-   <div class="tk-mh"><input class="tk-tt" data-tkf="titulo" value="${esc(t.titulo)}" aria-label="Título"><button class="btn" data-a="close">Fechar</button></div>
+   <div class="tk-mh"><input class="tk-tt" data-tkf="titulo" value="${esc(t.titulo)}" placeholder="Nome da tarefa" aria-label="Nome da tarefa"><button class="btn" data-a="close">Fechar</button></div>
    <div class="tk-mg"><div>
-    <div class="form c4" style="margin-bottom:10px">
-     <label class="fld"><span>Coluna</span><select data-tkf="col">${tkCols().map(c=>`<option value="${c.id}"${c.id===t.col?' selected':''}>${esc(c.nome)}</option>`).join('')}</select></label>
-     <label class="fld"><span>Prazo</span><input type="date" data-tkf="prazo" value="${esc(t.prazo||'')}"></label>
-     <label class="fld"><span>Situação</span><span class="tk-chk" style="min-height:44px"><input type="checkbox" data-tkf="feito"${t.feito?' checked':''}> Tarefa concluída</span></label>
-     <div class="fld"><span>Responsáveis</span><div class="tk-mb">${TK_TEAM.map(n=>`<label class="tk-chk"><input type="checkbox" data-tkf="memb" data-v="${n}"${(t.membros||[]).includes(n)?' checked':''}> ${n}</label>`).join('')}</div></div></div>
+    <div class="form c3" style="margin-bottom:10px">
+     <label class="fld"><span>Quadro</span><select data-tkf="col">${tkCols().map(c=>`<option value="${c.id}"${c.id===t.col?' selected':''}>${esc(c.nome)}</option>`).join('')}</select></label>
+     <div class="fld"><span>Data</span><button type="button" class="tk-dbtn${u.dtOpen?' open':''}" data-tk="dtog">${t.prazo?dt(t.prazo)+(t.hora?' · '+esc(t.hora):''):'Definir data'}${t.rec?' · ↻ '+TK_REC[t.rec]:''}${t.lemb!==undefined&&t.lemb!==''?' · 🔔':''}</button></div>
+     <label class="fld"><span>Situação</span><span class="tk-chk" style="min-height:44px"><input type="checkbox" data-tkf="feito"${t.feito?' checked':''}> Tarefa concluída</span></label></div>
+    ${u.dtOpen?`<div class="tk-dp"><div class="form c2"><label class="fld"><span>Data de entrega</span><input type="date" data-tkf="prazo" value="${esc(t.prazo||'')}"></label><label class="fld"><span>Horário</span><input type="time" data-tkf="hora" value="${esc(t.hora||'')}"></label>
+     <label class="fld"><span>Recorrente</span><select data-tkf="rec">${Object.entries(TK_REC).map(([k,v])=>`<option value="${k}"${(t.rec||'')===k?' selected':''}>${v}</option>`).join('')}</select></label>
+     <label class="fld"><span>Definir lembrete</span><select data-tkf="lemb">${Object.entries(TK_LEMB).map(([k,v])=>`<option value="${k}"${String(t.lemb??'')===k?' selected':''}>${v}</option>`).join('')}</select></label></div></div>`:''}
     <label class="fld"><span>Descrição</span><textarea data-tkf="desc" rows="3" placeholder="Detalhes da tarefa">${esc(t.desc||'')}</textarea></label>
     <h4>Checklist ${ck.length?`<small class="muted">(${cd}/${ck.length})</small>`:''}</h4>
     ${ck.map((x,i)=>`<div class="tk-ci"><label class="tk-chk"><input type="checkbox" data-tkf="chk" data-v="${i}"${x.ok?' checked':''}> <span${x.ok?' style="text-decoration:line-through;color:var(--muted)"':''}>${esc(x.t)}</span></label><button class="tk-x" data-tk="chkDel" data-v="${i}" aria-label="Remover item">✕</button></div>`).join('')}
@@ -752,45 +760,50 @@ function tkModal(){
     <label class="fld"><span>Você é</span><select data-tkf="me"><option value="">Selecione…</option>${TK_TEAM.map(n=>`<option${u.me===n?' selected':''}>${n}</option>`).join('')}</select></label>
     <form data-tkform="msg" class="tk-send"><input name="t" placeholder="Escreva uma mensagem…" autocomplete="off"><button class="btn pri" type="submit">Enviar</button></form>
    </div></div>
-   <div class="mf"><button class="btn" data-tk="delCard" style="margin-right:auto">Excluir cartão</button><button class="btn pri" data-a="close">Pronto</button></div></div></div>`}
+   <div class="mf"><button class="btn" data-tk="delCard" style="margin-right:auto">Remover</button><button class="btn pri" data-tk="salvar">Salvar</button></div></div></div>`}
 let tkDrag=null;
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tk]');if(!b)return;const u=tkU(),a=b.dataset.tk,v=b.dataset.v;
  if(e.target.closest('.tk-cn'))return;
  switch(a){
   case 'modo':u.modo=v;break;
   case 'reabrir':{const t=S.tarefas.find(x=>x.id===v);t.feito=false;t.concluidaEm='';save();toast('Tarefa reaberta.');break}
-  case 'novo':{const id=nid('t');S.tarefas.push({id,col:tkCols()[0].id,titulo:'Nova tarefa',desc:'',membros:[],prazo:'',check:[],anexos:[],msgs:[]});save();u.sel=id;ui.modal={type:'tk'};break}
+  case 'novo':{const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.dtOpen=false;ui.modal={type:'tk'};break}
+  case 'dtog':u.dtOpen=!u.dtOpen;break;
+  case 'salvar':{const t=tkCur();if(!t.titulo.trim()){toast('Digite o nome da tarefa.');return}if(u.draft&&u.draft.id===t.id){S.tarefas.push(t);u.draft=null}save();u.sel=null;ui.modal=null;toast('Tarefa salva.');break}
   case 'fclear':Object.assign(u,{resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false});break;
   case 'fpanel':u.fp=!u.fp;break;
   case 'chipx':{const m={resp:{resp:'Todos'},per:{per:'todos',de:'',ate:''},col:{col:''},st:{st:'todos'},q:{q:''},semResp:{semResp:false},anx:{anx:false}};Object.assign(u,m[v]);break}
-  case 'open':u.sel=v;ui.modal={type:'tk'};break;
+  case 'open':u.draft=null;u.dtOpen=false;u.sel=v;ui.modal={type:'tk'};break;
   case 'colDel':{if(S.tarefas.some(t=>t.col===v))return toast('Mova ou exclua os cartões desta coluna antes.');if(S.tcols.length<2)return toast('Mantenha pelo menos uma coluna.');const c=S.tcols.find(x=>x.id===v);return ask(`Excluir a coluna "${c.nome}"?`,()=>{S.tcols=S.tcols.filter(x=>x.id!==v);done('Coluna excluída.')})}
-  case 'chkDel':{const t=S.tarefas.find(x=>x.id===u.sel);t.check.splice(+v,1);save();break}
-  case 'anxDel':{const t=S.tarefas.find(x=>x.id===u.sel);t.anexos.splice(+v,1);save();break}
-  case 'delCard':{const t=S.tarefas.find(x=>x.id===u.sel);return ask(`Excluir o cartão "${t.titulo}"?`,()=>{S.tarefas=S.tarefas.filter(x=>x.id!==t.id);u.sel=null;done('Cartão excluído.')})}
+  case 'chkDel':{const t=tkCur();t.check.splice(+v,1);save();break}
+  case 'anxDel':{const t=tkCur();t.anexos.splice(+v,1);save();break}
+  case 'delCard':{const t=tkCur();if(u.draft&&u.draft.id===t.id){u.draft=null;u.sel=null;ui.modal=null;break}return ask(`Remover a tarefa "${t.titulo||'sem nome'}"?`,()=>{S.tarefas=S.tarefas.filter(x=>x.id!==t.id);u.sel=null;done('Tarefa removida.')},{ok:'Remover'})}
   default:return}
  render()});
-document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.tkf;if(!k)return;const u=tkU(),c=S.tarefas.find(x=>x.id===u.sel);
+document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.tkf;if(!k)return;const u=tkU(),c=tkCur();
  if(k==='fresp')u.resp=t.value;else if(k==='fper')u.per=t.value;else if(k==='fst')u.st=t.value;else if(k==='fde')u.de=t.value;else if(k==='fcol')u.col=t.value;else if(k==='fsem')u.semResp=t.checked;else if(k==='fanx')u.anx=t.checked;else if(k==='fq')u.q=t.value.trim();else if(k==='fate')u.ate=t.value;
  else if(k==='me'){u.me=t.value;try{localStorage.setItem('gs_tk_me',t.value)}catch(_){}}
  else if(k==='colname'){const col=S.tcols.find(x=>x.id===t.dataset.v);const n=t.value.trim();if(col&&n){col.nome=n;save()}else if(col)t.value=col.nome;return render()}
  else if(c){
   if(k==='titulo'){const n=t.value.trim();if(n)c.titulo=n;else t.value=c.titulo}
-  else if(k==='col')c.col=t.value;
-  else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';save();if(t.checked){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}return render()}
+  else if(k==='col'){c.col=t.value;const cl=S.tcols.find(x=>x.id===c.col),r=tkColResp(cl);if(r)c.membros=[r];else if(cl&&cl.id===tkCols()[0].id)c.membros=[]}
+  else if(k==='hora')c.hora=t.value;
+  else if(k==='rec')c.rec=t.value;
+  else if(k==='lemb')c.lemb=t.value;
+  else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';if(t.checked&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id)){S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[]})}
+  if(!(u.draft&&u.draft.id===c.id))save();if(t.checked){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}return render()}
   else if(k==='prazo')c.prazo=t.value;
   else if(k==='desc')c.desc=t.value;
-  else if(k==='memb'){const m=new Set(c.membros||[]);t.checked?m.add(t.dataset.v):m.delete(t.dataset.v);c.membros=TK_TEAM.filter(n=>m.has(n))}
   else if(k==='chk'){c.check[+t.dataset.v].ok=t.checked}
   else if(k==='file'){const fs=[...t.files];t.value='';let n=fs.length;if(!n)return;
    fs.forEach(f=>{if(f.size>1572864){toast('"'+f.name+'" passa de 1,5 MB.');if(!--n)render();return}
     const r=new FileReader();r.onload=()=>{(c.anexos=c.anexos||[]).push({n:f.name,s:f.size,d:r.result});save();if(!--n)render()};r.onerror=()=>{if(!--n)render()};r.readAsDataURL(f)});return}
-  save()}
+  if(!(u.draft&&u.draft.id===c.id))save()}
  render()});
 document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.tkform;if(!k)return;e.preventDefault();const u=tkU(),val=(f.elements[k==='col'?'n':'t'].value||'').trim();if(!val)return;
  if(k==='card'){S.tarefas.push({id:nid('t'),col:f.dataset.col,titulo:val,desc:'',membros:[],prazo:'',check:[],anexos:[],msgs:[]})}
  else if(k==='col'){S.tcols.push({id:nid('tc'),nome:val,ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1})}
- else{const c=S.tarefas.find(x=>x.id===u.sel);if(!c)return;
+ else{const c=tkCur();if(!c)return;
   if(k==='chk')(c.check=c.check||[]).push({t:val,ok:false});
   else if(k==='msg'){if(!u.me)return toast('Selecione quem você é, antes de enviar.');(c.msgs=c.msgs||[]).push({a:u.me,t:val,h:Date.now()})}}
  save();render();
@@ -799,7 +812,7 @@ document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.t
 document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-tkc]');if(!b)return;tkDrag=b.dataset.tkc;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',tkDrag)}catch(_){}b.classList.add('ag-dragging')});
 document.addEventListener('dragend',()=>{tkDrag=null;document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'))});
 document.addEventListener('dragover',e=>{const t=tkDrag&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();if(!t.classList.contains('tk-over')){document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'));t.classList.add('tk-over')}});
-document.addEventListener('drop',e=>{const t=tkDrag&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();const c=S.tarefas.find(x=>x.id===tkDrag);tkDrag=null;if(c&&c.col!==t.dataset.tkdrop){c.col=t.dataset.tkdrop;save();render();toast('Cartão movido.')}else render()});
+document.addEventListener('drop',e=>{const t=tkDrag&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();const c=S.tarefas.find(x=>x.id===tkDrag);tkDrag=null;if(c&&c.col!==t.dataset.tkdrop){c.col=t.dataset.tkdrop;{const cl=S.tcols.find(x=>x.id===c.col),r=tkColResp(cl);if(r)c.membros=[r];else if(cl&&cl.id===tkCols()[0].id)c.membros=[]}save();render();toast('Cartão movido.')}else render()});
 
 let dragId=null;
 document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-ev]');if(!b)return;dragId=b.dataset.ev;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',dragId)}catch(_){}b.classList.add('ag-dragging')});
