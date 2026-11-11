@@ -69,6 +69,7 @@
       sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
       const {data}=await sb.auth.getSession();
       if(!data.session)await askLogin();
+      try{const g=await sb.auth.getSession();window.GS_EMAIL=(g.data.session&&g.data.session.user&&g.data.session.user.email)||''}catch(e){window.GS_EMAIL=''}
       sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT')location.reload()});
       window.GS_ADMIN=false;
       try{const r=await sb.rpc('me_admin');window.GS_ADMIN=r.data===true}catch(e){window.GS_ADMIN=false}
