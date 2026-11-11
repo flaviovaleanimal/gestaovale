@@ -869,7 +869,7 @@ document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.t
   else if(k==='msgedit'){const m=c.msgs[u.editMsg];if(m&&m.t!==val){m.t=val;m.ed=true}u.editMsg=null}
   else if(k==='msg'){(c.msgs=c.msgs||[]).push({a:tkMe(),t:val,h:Date.now()})}}
  save();render();
- if(k==='msg'){const m=document.querySelector('.tk-msgs');if(m)m.scrollTop=m.scrollHeight;const i=document.querySelector('[data-tkform=msg] textarea');if(i)i.focus()}
+ if(k==='msg'){const i=document.querySelector('[data-tkform=msg] textarea');if(i)i.focus({preventScroll:true});const n=document.querySelector('.tk-ev .tk-msg');if(n)n.scrollIntoView({block:'nearest'})}
  if(k==='chk'){const i=document.querySelector('[data-tkform=chk] input');if(i)i.focus()}});
 document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-tkc]');if(!b)return;tkDrag=b.dataset.tkc;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',tkDrag)}catch(_){}b.classList.add('ag-dragging')});
 document.addEventListener('dragend',()=>{tkDrag=null;document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'))});
