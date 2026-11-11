@@ -706,8 +706,8 @@ const tkFmt=t=>{let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[
  const out=[];let ul='';h.split('\n').forEach(l=>{const m=/^(- |• )(.*)$/.exec(l),k=m?(m[1]==='- '?'dash':'bol'):'';if(k){if(ul!==k){if(ul)out.push('</ul>');out.push('<ul class="tk-ul '+k+'">');ul=k}out.push('<li>'+m[2]+'</li>')}else{if(ul){out.push('</ul>');ul=''}out.push(l+'<br>')}});if(ul)out.push('</ul>');return out.join('').replace(/<br>$/,'')};
 const tkMen=tkFmt;
 function tkCommit(){const u=tkU();
- if(u.draft){const t=u.draft;u.draft=null;if((t.titulo||'').trim()){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);save();toast('Tarefa salva.')}u.sel=null;return}
- const c=S.tarefas.find(x=>x.id===u.sel);if(c){if(!(c.titulo||'').trim())c.titulo='Sem nome';save()}u.sel=null}
+ if(u.draft){const t=u.draft;u.draft=null;if((t.titulo||'').trim()){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);setTimeout(save,0);toast('Tarefa salva.')}u.sel=null;return}
+ const c=S.tarefas.find(x=>x.id===u.sel);if(c){if(!(c.titulo||'').trim())c.titulo='Sem nome';if(JSON.stringify(c)!==u.snap)setTimeout(save,0)}u.sel=null}
 const tkCur=()=>{const u=tkU();return u.draft&&u.draft.id===u.sel?u.draft:S.tarefas.find(x=>x.id===u.sel)};
 const tkColResp=c=>TK_TEAM.find(n=>c&&c.nome.toUpperCase().includes('('+n.toUpperCase()+')'))||'';
 const tkNext=(d,r)=>{if(!d)return '';if(r==='diaria')return addDays(d,1);if(r==='semanal')return addDays(d,7);const x=new Date(d+'T12:00:00');x.setMonth(x.getMonth()+1);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
@@ -845,7 +845,7 @@ document.addEventListener('click',e=>{if(tkU().menu&&!(e.target.closest&&e.targe
   case 'fclear':Object.assign(u,{resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false});break;
   case 'fpanel':u.fp=!u.fp;break;
   case 'chipx':{const m={resp:{resp:'Todos'},per:{per:'todos',de:'',ate:''},col:{col:''},st:{st:'todos'},q:{q:''},semResp:{semResp:false},anx:{anx:false}};Object.assign(u,m[v]);break}
-  case 'open':u.cOpen=false;u.menu=false;u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
+  case 'open':{const cc=S.tarefas.find(x=>x.id===v);u.snap=cc?JSON.stringify(cc):''}u.cOpen=false;u.menu=false;u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
   case 'colDel':{if(S.tarefas.some(t=>t.col===v))return toast('Mova ou exclua os cartões desta coluna antes.');if(S.tcols.length<2)return toast('Mantenha pelo menos uma coluna.');const c=S.tcols.find(x=>x.id===v);return ask(`Excluir a coluna "${c.nome}"?`,()=>{S.tcols=S.tcols.filter(x=>x.id!==v);done('Coluna excluída.')})}
   case 'chkDel':{const t=tkCur();t.check.splice(+v,1);save();break}
   case 'anxDel':{const t=tkCur();t.anexos.splice(+v,1);save();break}
