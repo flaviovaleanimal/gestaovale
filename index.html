@@ -790,7 +790,7 @@ function tkModal(){
    ${ck.length?`<div class="tk-prog"><span>${pc}%</span><div><i style="width:${pc}%"></i></div></div>`:''}
    ${ck.map((x,i)=>`<div class="tk-ci"><label class="tk-chk"><input type="checkbox" data-tkf="chk" data-v="${i}"${x.ok?' checked':''}> <span${x.ok?' style="text-decoration:line-through;color:var(--muted)"':''}>${esc(x.t)}</span></label><button class="tk-x" data-tk="chkDel" data-v="${i}" aria-label="Remover item">✕</button></div>`).join('')}
    <form data-tkform="chk"><input name="t" placeholder="+ Adicionar item" autocomplete="off"></form>`:''}
-   ${(t.anexos||[]).length?`<h4 class="tk-h">${ico('<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>')}Anexos</h4>${t.anexos.map((a,i)=>`<div class="tk-ci"><a href="${a.d}" download="${esc(a.n)}">📎 ${esc(a.n)}</a><span class="muted" style="font-size:12px">${tkKB(a.s||0)}</span><button class="tk-x" data-tk="anxDel" data-v="${i}" aria-label="Remover anexo">✕</button></div>`).join('')}`:''}
+   ${(t.anexos||[]).length?`<h4 class="tk-h">${ico('<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>')}Anexos</h4>${t.anexos.map((a,i)=>`<div class="tk-ci">${a.p?`<a href="#" data-tk="anxOpen" data-v="${i}">📎 ${esc(a.n)}</a>`:`<a href="${a.d}" download="${esc(a.n)}">📎 ${esc(a.n)}</a>`}<span class="muted" style="font-size:12px">${tkKB(a.s||0)}</span><button class="tk-x" data-tk="anxDel" data-v="${i}" aria-label="Remover anexo">✕</button></div>`).join('')}`:''}
    
   </div><div class="tk-chat">
    <h4 class="tk-h" style="margin-top:0">${ico('<path d="M4 5h16v11H9l-5 4z"/>')}Comentários e atividade</h4>
@@ -848,8 +848,9 @@ document.addEventListener('click',e=>{if(tkU().menu&&!(e.target.closest&&e.targe
   case 'open':{const cc=S.tarefas.find(x=>x.id===v);u.snap=cc?JSON.stringify(cc):''}u.cOpen=false;u.menu=false;u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
   case 'colDel':{if(S.tarefas.some(t=>t.col===v))return toast('Mova ou exclua os cartões desta coluna antes.');if(S.tcols.length<2)return toast('Mantenha pelo menos uma coluna.');const c=S.tcols.find(x=>x.id===v);return ask(`Excluir a coluna "${c.nome}"?`,()=>{S.tcols=S.tcols.filter(x=>x.id!==v);done('Coluna excluída.')})}
   case 'chkDel':{const t=tkCur();t.check.splice(+v,1);save();break}
-  case 'anxDel':{const t=tkCur();t.anexos.splice(+v,1);save();break}
-  case 'delCard':{u.menu=false;const t=tkCur();if(u.draft&&u.draft.id===t.id){u.draft=null;u.sel=null;ui.modal=null;break}return ask(`Remover a tarefa "${t.titulo||'sem nome'}"?`,()=>{S.tarefas=S.tarefas.filter(x=>x.id!==t.id);u.sel=null;done('Tarefa removida.')},{ok:'Remover'})}
+  case 'anxOpen':{e.preventDefault();const t=tkCur(),a=t.anexos[+v];if(!a||!a.p||!window.GS_CLOUD)return;const w=window.open('','_blank');GS_CLOUD.url(a.p).then(u=>{if(w)w.location=u;else location.href=u}).catch(()=>{if(w)w.close();toast('Não foi possível abrir o anexo.')});return}
+  case 'anxDel':{const t=tkCur(),a=t.anexos[+v];if(a&&a.p&&window.GS_CLOUD&&GS_CLOUD.remove)GS_CLOUD.remove([a.p]).catch(()=>{});t.anexos.splice(+v,1);save();break}
+  case 'delCard':{u.menu=false;const t=tkCur();if(u.draft&&u.draft.id===t.id){u.draft=null;u.sel=null;ui.modal=null;break}return ask(`Remover a tarefa "${t.titulo||'sem nome'}"?`,()=>{{const ps=(t.anexos||[]).filter(a=>a.p).map(a=>a.p);if(ps.length&&window.GS_CLOUD&&GS_CLOUD.remove)GS_CLOUD.remove(ps).catch(()=>{})}S.tarefas=S.tarefas.filter(x=>x.id!==t.id);u.sel=null;done('Tarefa removida.')},{ok:'Remover'})}
   default:return}
  render()});
 document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.tkf;if(!k)return;const u=tkU(),c=tkCur();
@@ -867,9 +868,12 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
   else if(k==='prazo')c.prazo=t.value;
   else if(k==='desc'){c.desc=t.value;if(!(u.draft&&u.draft.id===c.id))save();return}
   else if(k==='chk'){c.check[+t.dataset.v].ok=t.checked}
-  else if(k==='file'){const fs=[...t.files];t.value='';let n=fs.length;if(!n)return;
-   fs.forEach(f=>{if(f.size>1572864){toast('"'+f.name+'" passa de 1,5 MB.');if(!--n)render();return}
-    const r=new FileReader();r.onload=()=>{(c.anexos=c.anexos||[]).push({n:f.name,s:f.size,d:r.result});save();if(!--n)render()};r.onerror=()=>{if(!--n)render()};r.readAsDataURL(f)});return}
+  else if(k==='file'){const fs=[...t.files];t.value='';if(!fs.length)return;const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;let n=fs.length;
+   const fin=()=>{if(!--n){if(!(u.draft&&u.draft.id===c.id))save();render()}};
+   fs.forEach(f=>{if(f.size>lim){toast('"'+f.name+'" passa de '+(cloud?'10':'1,5')+' MB.');fin();return}
+    if(cloud){toast('Enviando "'+f.name+'"…');const path=c.id+'/'+Date.now().toString(36)+'-'+f.name.replace(/[^\w.\-]+/g,'_');
+     GS_CLOUD.upload(path,f).then(()=>{(c.anexos=c.anexos||[]).push({n:f.name,s:f.size,p:path});toast('Anexo enviado.')}).catch(()=>toast('Não foi possível enviar "'+f.name+'".')).finally(fin)}
+    else{const r=new FileReader();r.onload=()=>{(c.anexos=c.anexos||[]).push({n:f.name,s:f.size,d:r.result});fin()};r.onerror=fin;r.readAsDataURL(f)}});return}
   if(!(u.draft&&u.draft.id===c.id))save()}
  render()});
 document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.tkform;if(!k)return;e.preventDefault();const u=tkU(),val=(f.elements[k==='col'?'n':'t'].value||'').trim();if(!val)return;

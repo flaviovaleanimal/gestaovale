@@ -75,6 +75,9 @@
       try{const r=await sb.rpc('me_admin');window.GS_ADMIN=r.data===true}catch(e){window.GS_ADMIN=false}
       return makeDB();
     },
+    async upload(path,file){const {error}=await sb.storage.from('anexos').upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false});if(error)throw error},
+    async url(path){const {data,error}=await sb.storage.from('anexos').createSignedUrl(path,3600);if(error)throw error;return data.signedUrl},
+    async remove(paths){const {error}=await sb.storage.from('anexos').remove(paths);if(error)throw error},
     async logout(){if(sb)await sb.auth.signOut();location.reload()}
   };
 })();

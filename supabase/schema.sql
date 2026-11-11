@@ -40,3 +40,9 @@ end $$;
 -- update private.allowed_users set is_admin = true where lower(email) = 'seu@email.com';
 -- Funções private.is_admin() e public.me_admin() e a política "apagar" (farms, contacts, breeders,
 -- products, tanks, estacoes só podem ser apagados por administrador) já estão no projeto.
+
+-- Anexos das Tarefas (JÁ APLICADO): bucket privado "anexos", até 10 MB por arquivo,
+-- só usuários autorizados leem/gravam (links temporários de 1 hora).
+-- insert into storage.buckets (id,name,public,file_size_limit) values ('anexos','anexos',false,10485760);
+-- create policy "anexos autorizados" on storage.objects for all to authenticated
+--   using (bucket_id='anexos' and (select private.is_allowed())) with check (bucket_id='anexos' and (select private.is_allowed()));
