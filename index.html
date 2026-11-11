@@ -1147,7 +1147,7 @@ function modalHtml(){
      <table><tbody><tr><td><b>Data inicial:</b> ${f.from?dt(f.from):'—'}</td><td><b>Data final:</b> ${f.to?dt(f.to):'—'}</td></tr>
      <tr><td><b>Fazenda:</b> ${esc(farm)}</td><td><b>Técnico responsável:</b> ${esc(f.tech||'—')}</td></tr></tbody></table>
      <h4 style="margin:16px 0 6px">Serviços</h4>
-     ${rows.length?`<table><thead><tr><th>Data do serviço</th><th>Procedimento</th><th>Lote</th><th>Etapa</th><th class="num">Total animais</th></tr></thead><tbody>
+     ${rows.length?`<table><thead><tr><th>Data</th><th>Procedimento</th><th>Lote</th><th>Etapa</th><th class="num">Total animais</th></tr></thead><tbody>
      ${rows.map(r=>{const l=S.lotes.find(x=>x.id===r.lote);return `<tr><td>${dt(r.date)}</td><td>${esc(r.proc||'')}</td><td>${l?esc(l.name):''}</td><td>${esc(r.etapa||'')}</td><td class="num">${r.total?fmt(r.total):''}</td></tr>`}).join('')}</tbody></table>`:'<p>Nenhum serviço lançado.</p>'}
      <h4 style="margin:16px 0 6px">Materiais utilizados</h4>
      ${mats.length?`<table><thead><tr><th>Produto</th><th class="num">Quantidade</th><th class="num">Saída</th><th class="num">Saldo</th></tr></thead><tbody>
@@ -1449,7 +1449,7 @@ function vFicha(){
   const f=ui.fi,lots=S.lotes.filter(l=>l.farm===f.farm).sort((a,b)=>a.name.localeCompare(b.name));
   const o=ficOptions(),mm=ficMats();
   const svc=f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Serviço ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delFS" data-v="${i}">Remover</button>`:''}</div><div class="form svc5">
-    ${fldHtml('Data do serviço',`<input type="date" data-fs="${i}.date" value="${esc(r.date||'')}">`)}
+    ${fldHtml('Data',`<input type="date" data-fs="${i}.date" value="${esc(r.date||'')}">`)}
     ${fldHtml('Procedimento',`<select data-fs="${i}.proc">${opts(PROCS.map(x=>[x,x]),r.proc,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<select data-fs="${i}.lote" data-r="1"${f.farm?'':' disabled'}>${opts(lots.map(l=>[l.id,l.name+' ('+l.category+')']),r.lote,f.farm?(lots.length?'Selecione…':'Sem lotes agendados'):'Escolha a fazenda')}</select>`)}
     ${fldHtml('Etapa',`<select data-fs="${i}.etapa">${opts(ETAPAS.map(x=>[x,x]),r.etapa,'Selecione…')}</select>`)}
