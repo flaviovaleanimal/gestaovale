@@ -489,11 +489,12 @@ function vCadastro(){
   return `<div class="card"><div class="card-h"><h3>${inat?'Reprodutores inativos':'Reprodutores'}</h3><button class="btn pri" data-a="newBreeder">Novo reprodutor</button></div>
   ${S.breeders.length?`<div class="filters" style="margin-bottom:12px;align-items:flex-end">${searchBox('br')}<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button></div>`:''}
   <div class="tw">${list.length?`<table><thead><tr><th>Nome do reprodutor</th><th>Raça</th><th class="num">Saldo doses</th><th>Ações</th></tr></thead><tbody>
-   ${list.map(b=>{const l0=breederAllLocs(b.id),lc=l0.length>1?l0:[];return `<tr${qHide('br',b.name+' '+b.breed+' '+lc.map(o=>F(o.f).name+' '+T(o.t).name).join(' '))}><td>${lc.length?`<button class="tog" data-a="toggle" data-v="cad|${b.id}" aria-expanded="${!!ui.open['cad|'+b.id]}">${ui.open['cad|'+b.id]?'▼':'▶'} ${esc(b.name)}</button><span style="display:none">${esc(lc.map(o=>F(o.f).name+' '+T(o.t).name).join(' '))}</span>${ui.open['cad|'+b.id]?lc.map(o=>`<div class="cad-loc">${esc(F(o.f).name)} — Botijão ${esc(T(o.t).name)} — ${fmt(o.q)} doses</div>`).join(''):''}`:`<b>${esc(b.name)}</b>`}</td><td>${esc(b.breed)}</td><td class="num">${fmt(breederBal(b.id))}</td>
+   ${list.map(b=>{const l0=breederAllLocs(b.id),lc=l0.length>1?l0:[];return `<tr${qHide('br',b.name+' '+b.breed+' '+lc.map(o=>F(o.f).name+' '+T(o.t).name).join(' '))}><td>${lc.length?`<button class="tog" data-a="toggle" data-v="cad|${b.id}" aria-expanded="${!!ui.open['cad|'+b.id]}">${ui.open['cad|'+b.id]?'▼':'▶'} ${esc(b.name)}</button><span style="display:none">${esc(lc.map(o=>F(o.f).name+' '+T(o.t).name).join(' '))}</span>${ui.open['cad|'+b.id]?lc.map(o=>`<div class="cad-loc">${esc(F(o.f).name)} — ${esc(tkn(o.t))} — ${fmt(o.q)} doses</div>`).join(''):''}`:`<b>${esc(b.name)}</b>`}</td><td>${esc(b.breed)}</td><td class="num">${fmt(breederBal(b.id))}</td>
    <td><div class="acts"><button class="btn sm" data-a="editBreeder" data-v="${b.id}">Editar</button>${inat?`<button class="btn sm pri" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn sm" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`}<button class="btn sm dng" data-a="delBreeder" data-v="${b.id}">Excluir</button></div></td></tr>`}).join('')}
   </tbody></table>`:empty(inat?'Nenhum reprodutor inativo.':(S.breeders.length?'Nenhum reprodutor ativo.':'Nenhum reprodutor cadastrado.'))}</div></div>`;
 }
 
+const tkn=id=>{const n=String(T(id).name||'');return /^botij[aã]o(\s|$)/i.test(n.normalize('NFC'))?n:'Botijão '+n};
 const az=p=>[...p].sort((x,y)=>String(x[1]).localeCompare(String(y[1]),'pt-BR',{sensitivity:'base'}));
 const nrm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const searchBox=k=>`<div class="fld" style="max-width:340px;flex:1 1 240px"><label>Pesquisar</label><input type="search" data-q="${k}" value="${esc(ui.q[k])}" placeholder="Digite para pesquisar…" autocomplete="off"></div>`;
@@ -713,7 +714,7 @@ function vEstoque(){
       const many=tk.length>1, op=ui.open[ui.farm+o.key];
       return `<tr><td>${many?`<button class="tog" data-a="toggle" data-v="${esc(ui.farm+o.key)}" aria-expanded="${!!op}">${op?'▼':'▶'} ${esc(o.name)}</button>`:esc(o.name)}</td>
       <td>${esc(o.breed)}</td><td>${esc(o.ind)}</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td></tr>
-      ${many&&op?tk.map(([t,q],i)=>`<tr class="loc"><td colspan="6">${i+1}. ${esc(f.name)} — Botijão ${esc(T(t).name)} — ${fmt(q)} doses</td></tr>`).join(''):''}`}).join('')}
+      ${many&&op?tk.map(([t,q],i)=>`<tr class="loc"><td colspan="6">${i+1}. ${esc(f.name)} — ${esc(tkn(t))} — ${fmt(q)} doses</td></tr>`).join(''):''}`}).join('')}
     </tbody><tfoot><tr><td colspan="3">Totais</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`
     :empty('Nenhum sêmen em estoque com esses filtros.')}</div></div>`;
 }
@@ -784,7 +785,7 @@ function entradaRow(r,i,n){
    ${fldHtml('Indicação',sel('ind',INDS.map(x=>[x,x]),'Selecione…'))}
    ${fldHtml('Observação',`<textarea data-row="${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
    </div>
-   ${locs.length?`<div class="locbox"><b>Este reprodutor já tem sêmen nesta fazenda:</b>${locs.map(o=>`<div>${esc(F(fz).name)} - ${esc(B(r.breeder).name)} ${fmt(o.q)} doses - Botijão ${esc(T(o.t).name)}</div>`).join('')}</div>`:''}
+   ${locs.length?`<div class="locbox"><b>Este reprodutor já tem sêmen nesta fazenda:</b>${locs.map(o=>`<div>${esc(F(fz).name)} - ${esc(B(r.breeder).name)} ${fmt(o.q)} doses - ${esc(tkn(o.t))}</div>`).join('')}</div>`:''}
    <div class="plus"><button type="button" class="plusbtn" data-a="addRow" data-v="${i}" aria-label="Adicionar outro sêmen abaixo" title="Adicionar outro sêmen">+</button></div></div>`;
 }
 function entradaFields(){
