@@ -567,7 +567,7 @@ const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tec||ev
 const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Indução','Andrológico'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Primíparas','Secundíparas','Multíparas','Solteiras'];
 const catOpts=cur=>[...NCATS,...(cur&&!NCATS.includes(cur)?[cur]:[])].map(x=>[x,x]);
-const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Arquivado').sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${esc(String(l.name).toUpperCase())} · ${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${loteTemServico(l)?' · já agendado':''}</option>`).join('');
+const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Arquivado').sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${esc(String(l.name).toUpperCase())}</option>`).join('');
 const PERIODOS=['Manhã','Tarde','Dia Inteiro'],EVCATS=NCATS,PERH={'Manhã':['07:00','12:00'],'Tarde':['13:00','18:00']};
 const perOf=e=>e.periodo||(e.allday!==false?'Dia Inteiro':(tmin(e.start)<720?'Manhã':'Tarde'));
 const tcTeam=v=>tc(v).replace(/\sE\s/g,' e ');
