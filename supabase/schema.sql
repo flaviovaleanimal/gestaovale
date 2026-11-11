@@ -34,3 +34,9 @@ end $$;
 
 -- Para autorizar alguém (depois de criar o usuário em Authentication > Users):
 -- insert into private.allowed_users (email) values ('pessoa@exemplo.com');
+
+-- Administrador (JÁ APLICADO): is_admin libera Zerar dados, Importar e excluir cadastros
+-- alter table private.allowed_users add column is_admin boolean not null default false;
+-- update private.allowed_users set is_admin = true where lower(email) = 'seu@email.com';
+-- Funções private.is_admin() e public.me_admin() e a política "apagar" (farms, contacts, breeders,
+-- products, tanks, estacoes só podem ser apagados por administrador) já estão no projeto.

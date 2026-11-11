@@ -1564,6 +1564,9 @@ function responsive(){
         i+=sp})})});
 }
 let lastMK='';
+const ADM_ACTS=['wipe','import','delFarm','delBreeder','delProduct','delTank','delContact','delEst'];
+const isAdm=()=>window.GS_ADMIN!==false;
+function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelectorAll('[data-a="'+a+'"]').forEach(x=>x.remove()))}
 function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;
@@ -1583,7 +1586,7 @@ function render(){
   responsive();
   lastMK=ui.modal?ui.modal.type+(ui.modal.kind||''):'';
   if(_ap)_ap.scrollTop=_sa;
-  agAfter();
+  agAfter();admStrip();
   const _ov2=document.querySelector('#modal-root .ov');if(_ov2&&_mk0&&_mk0===lastMK)_ov2.scrollTop=_so;
 }
 function goNew(sel,i){const el=document.querySelectorAll(sel)[i];if(!el)return;el.scrollIntoView({block:'center'});const f=el.querySelector('input,select,textarea');if(f)try{f.focus({preventScroll:true})}catch(e){}}
@@ -1594,6 +1597,7 @@ const ask=(msg,ok,o={})=>{ui.confirm={msg,okFn:ok,...o};render()};
 /* ---------- ações ---------- */
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
+  if(!isAdm()&&ADM_ACTS.includes(b.dataset.a)){toast('Somente o administrador pode fazer isso.');return}
   const a=b.dataset.a,v=b.dataset.v;
   switch(a){
    case 'tab':ui.tab=v;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;

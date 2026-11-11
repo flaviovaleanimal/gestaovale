@@ -70,6 +70,8 @@
       const {data}=await sb.auth.getSession();
       if(!data.session)await askLogin();
       sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT')location.reload()});
+      window.GS_ADMIN=false;
+      try{const r=await sb.rpc('me_admin');window.GS_ADMIN=r.data===true}catch(e){window.GS_ADMIN=false}
       return makeDB();
     },
     async logout(){if(sb)await sb.auth.signOut();location.reload()}
