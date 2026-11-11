@@ -559,7 +559,7 @@ const weekStart=x=>addDays(x,-Dt(x).getDay());
 const tmin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[2]):0};
 const evFarm=e=>(S.farms.find(f=>f.id===e.farm)||{}).name||'';
 const AGTEC=['Flávio','Hiago','Joaquim'],AGTECF=['Flávio Alves','Hiago Miguel','Joaquim Gomes'];
-const evTec=(e,t)=>(e.tecs||[]).some(x=>nrm(x).includes(nrm(t)))||nrm(e.team).includes(nrm(t));
+const evTec=(e,t)=>(e.tecs||[]).length?e.tecs.some(x=>nrm(x).includes(nrm(t))):nrm(e.team).includes(nrm(t));
 const agMatch=e=>{const f=ui.ag.f;return (!f.farm||e.farm===f.farm)&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
 const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tec&&'Técnico: '+ui.ag.tec,f.farm&&'Fazenda: '+farmShort(f.farm),f.title&&'Serviço: '+f.title,f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
@@ -1793,6 +1793,7 @@ document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.fo
   }}});
 document.addEventListener('change',e=>{
   const t=e.target,d=t.dataset;
+  if(t.name==='tecs'&&t.checked&&t.form)t.form.querySelectorAll('input[name=tecs]').forEach(x=>{if(x!==t)x.checked=false});
   if(t.name==='category'&&t.form&&t.form.dataset.form==='lote'){const bx=t.form.querySelector('.lote-dates');if(bx)bx.style.display=!t.value||LPAR.includes(t.value)?'contents':'none'}
   if(d.f){const [f,n]=d.f.split('.');ui.f[f][n]=t.value;
     if(f==='saida'&&n==='farm'){ui.f.saida.rows=(ui.f.saida.rows||[{}]).map(r=>({qty:r.qty,note:r.note}))}
