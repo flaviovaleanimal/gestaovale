@@ -980,14 +980,14 @@ function vInicio(){
   abertos.sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));pend.sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));
   const faltaDg=S.lancs.filter(l=>l.ia&&!l.dg&&addDays(l.ia,28)<=td).map(l=>{const es=S.estacoes.find(x=>x.id===l.est)||{},lt=S.lotes.find(x=>x.id===l.lote),prev=addDays(l.ia,28);return {l,farm:es.farm,lt,prev,atraso:Math.round((new Date(td+'T12:00:00')-new Date(prev+'T12:00:00'))/864e5)}}).sort((a,b)=>a.prev.localeCompare(b.prev));
   const hoje=S.eventos.filter(e=>e.date<=td&&(e.end||e.date)>=td).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||''));
-  const tkHoje=S.tarefas.filter(t=>!t.feito&&t.prazo&&t.prazo<=td).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
+  const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkHoje=S.tarefas.filter(t=>!t.feito&&t.prazo&&t.prazo<=td&&(!tkSo||(t.membros||[]).includes(tkEu))).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
   return `<div class="ini-grid">
    <div class="kpi"><div class="k-n">${fmt(fazAt.size)}</div><div class="k-l">Fazendas atendidas</div></div>
    <div class="kpi"><div class="k-n">${fmt(done.length)}</div><div class="k-l">IATFs realizadas</div></div>
    <div class="kpi"><div class="k-n">${fmt(hoje.length)}</div><div class="k-l">Eventos de hoje</div></div>
    <div class="kpi"><div class="k-n">${fmt(pend.length)}</div><div class="k-l">Lotes para agendar serviço</div></div>
   </div>
-  <div class="card" style="margin-bottom:14px"><div class="card-h"><h3>Tarefas de hoje <small class="muted">(${tkHoje.length})</small></h3><button class="btn sm" data-a="go" data-v="tarefas">Abrir Tarefas</button></div>
+  <div class="card" style="margin-bottom:14px"><div class="card-h"><h3>${tkSo?'Minhas tarefas de hoje':'Tarefas de hoje'} <small class="muted">(${tkHoje.length}${tkSo?' · '+esc(tkEu):''})</small></h3><button class="btn sm" data-a="go" data-v="tarefas">Abrir Tarefas</button></div>
    ${tkHoje.length?tkHoje.map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty('Nenhuma tarefa para hoje.')}</div>
   <div class="ini-two">
    <div class="card"><div class="card-h"><h3>Eventos de hoje</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Agenda</button></div>
