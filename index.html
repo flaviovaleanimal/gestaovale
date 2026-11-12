@@ -256,6 +256,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-mg{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px}@media(max-width:820px){.tk-mg{grid-template-columns:minmax(0,1fr)}}
 .tk-m h4{margin:14px 0 6px}.tk-mb{display:flex;flex-wrap:wrap;gap:10px;min-height:44px;align-items:center}.tk-chk{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
 .tk-ci{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)}
+.tk-an{display:grid;grid-template-columns:minmax(0,1fr) 76px 76px 24px;gap:8px}.tk-an>a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.tk-an .tk-as,.tk-an .tk-ad{text-align:center;font-size:12px;white-space:nowrap}.tk-anh{border-bottom:1px solid var(--line);padding:2px 0;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.tk-anh span:nth-child(2),.tk-anh span:nth-child(3){text-align:center}@media(max-width:520px){.tk-an{grid-template-columns:minmax(0,1fr) 60px 64px 24px;gap:4px}.tk-anh{font-size:9px;letter-spacing:0}}
 .tk-chat h4{margin-top:0}.tk-msgs{max-height:none;overflow:visible;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}.tk-msg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;overflow-wrap:anywhere}
 .tk-send{display:flex;gap:8px}.tk-send input{flex:1;min-width:0;min-height:44px;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit}
 
@@ -740,6 +741,7 @@ const TK_REC={'':'Não se repete',diaria:'Todos os dias',semanal:'Toda semana',m
 const TK_LEMB={'':'Sem lembrete',0:'Na hora',15:'15 minutos antes',60:'1 hora antes',1440:'1 dia antes'};
 const tkHora=h=>new Date(h).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const tkAv=n=>`<span class="tk-av" title="${esc(n)}">${esc(n.charAt(0))}</span>`;
+const tkDM=m=>{if(!m)return '—';const d=new Date(m);return isNaN(d)?'—':d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'})};
 const tkKB=n=>n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
 function tkCard(t){
   const ck=t.check||[],cd=ck.filter(x=>x.ok).length;
@@ -820,7 +822,7 @@ function tkModal(){
    ${ck.length?`<div class="tk-prog"><span>${pc}%</span><div><i style="width:${pc}%"></i></div></div>`:''}
    ${ck.map((x,i)=>`<div class="tk-ci"><label class="tk-chk"><input type="checkbox" data-tkf="chk" data-v="${i}"${x.ok?' checked':''}> <span${x.ok?' style="text-decoration:line-through;color:var(--muted)"':''}>${esc(x.t)}</span></label><button class="tk-x" data-tk="chkDel" data-v="${i}" aria-label="Remover item">✕</button></div>`).join('')}
    <form data-tkform="chk"><input name="t" placeholder="+ Adicionar item" autocomplete="off"></form>`:''}
-   ${(t.anexos||[]).length?`<h4 class="tk-h">${ico('<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>')}Anexos</h4>${t.anexos.map((a,i)=>`<div class="tk-ci">${a.p?`<a href="#" data-tk="anxOpen" data-v="${i}">${tkIc('clip')} ${esc(a.n)}</a>`:`<a href="${a.d}" download="${esc(a.n)}">${tkIc('clip')} ${esc(a.n)}</a>`}<span class="muted" style="font-size:12px">${tkKB(a.s||0)}</span><button class="tk-x" data-tk="anxDel" data-v="${i}" aria-label="Remover anexo">✕</button></div>`).join('')}`:''}
+   ${(t.anexos||[]).length?`<h4 class="tk-h">${ico('<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>')}Anexos</h4><div class="tk-ci tk-an tk-anh"><span>Arquivo</span><span>Tamanho</span><span>Modificado</span><span></span></div>${t.anexos.map((a,i)=>`<div class="tk-ci tk-an">${a.p?`<a href="#" data-tk="anxOpen" data-v="${i}">${tkIc('clip')} ${esc(a.n)}</a>`:`<a href="${a.d}" download="${esc(a.n)}">${tkIc('clip')} ${esc(a.n)}</a>`}<span class="muted tk-as">${tkKB(a.s||0)}</span><span class="muted tk-ad">${tkDM(a.m)}</span><button class="tk-x" data-tk="anxDel" data-v="${i}" aria-label="Remover anexo">✕</button></div>`).join('')}`:''}
    
   </div><div class="tk-chat">
    <h4 class="tk-h" style="margin-top:0">${ico('<path d="M4 5h16v11H9l-5 4z"/>')}Comentários e atividade</h4>
@@ -939,8 +941,8 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
    const fin=()=>{if(!--n){res.filter(Boolean).forEach(x=>(c.anexos=c.anexos||[]).push(x));if(!(u.draft&&u.draft.id===c.id))save();render()}};
    fs.forEach((f,fi)=>{if(f.size>lim){toast('"'+f.name+'" passa de '+(cloud?'10':'1,5')+' MB.');fin();return}
     if(cloud){toast('Enviando "'+f.name+'"…');const path=c.id+'/'+Date.now().toString(36)+'-'+f.name.replace(/[^\w.\-]+/g,'_');
-     GS_CLOUD.upload(path,f).then(()=>{res[fi]={n:f.name,s:f.size,p:path};toast('Anexo enviado.')}).catch(()=>toast('Não foi possível enviar "'+f.name+'".')).finally(fin)}
-    else{const r=new FileReader();r.onload=()=>{res[fi]={n:f.name,s:f.size,d:r.result};fin()};r.onerror=fin;r.readAsDataURL(f)}});return}
+     GS_CLOUD.upload(path,f).then(()=>{res[fi]={n:f.name,s:f.size,p:path,m:f.lastModified||Date.now()};toast('Anexo enviado.')}).catch(()=>toast('Não foi possível enviar "'+f.name+'".')).finally(fin)}
+    else{const r=new FileReader();r.onload=()=>{res[fi]={n:f.name,s:f.size,d:r.result,m:f.lastModified||Date.now()};fin()};r.onerror=fin;r.readAsDataURL(f)}});return}
   if(!(u.draft&&u.draft.id===c.id))save()}
  render()});
 document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.tkform;if(!k)return;e.preventDefault();const u=tkU(),val=(f.elements[k==='col'?'n':'t'].value||'').trim();if(!val)return;
