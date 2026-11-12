@@ -763,7 +763,7 @@ function vTarefas(){
   let body;
   if(u.modo==='quadro'){
     body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id);return `<div class="tk-col" data-tkdrop="${c.id}">
-      <div class="tk-ch"><span class="tk-grip" draggable="true" data-tkcol="${c.id}" title="Arraste para mover a coluna" aria-label="Mover coluna">⠿</span><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><span class="tk-n">${cs.length}</span><button class="tk-x" data-tk="colDel" data-v="${c.id}" title="Excluir coluna" aria-label="Excluir coluna">✕</button></div>
+      <div class="tk-ch"><span class="tk-grip" draggable="true" data-tkcol="${c.id}" title="Arraste para mover a coluna" aria-label="Mover coluna">⠿</span><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><span class="tk-n">${cs.length}</span></div>
       <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div>
       <form data-tkform="card" data-col="${c.id}"><input name="t" placeholder="+ Adicionar cartão" autocomplete="off" aria-label="Título do novo cartão"></form></div>`}).join('')}
      <form class="tk-col tk-new" data-tkform="col"><input name="n" placeholder="+ Nova coluna" autocomplete="off" aria-label="Nome da nova coluna"></form></div>`;
