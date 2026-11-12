@@ -774,7 +774,7 @@ function vTarefas(){
     const rows=vis.slice().sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999'));
     body=`<div class="tw">${rows.length?`<table><thead><tr><th>Prazo</th><th>Tarefa</th><th>Coluna</th><th>Responsáveis</th><th>Situação</th><th>Itens</th></tr></thead><tbody>${rows.map(t=>{const c=S.tcols.find(x=>x.id===t.col),ck=t.check||[];return `<tr class="tk-row" data-tk="open" data-v="${t.id}"><td>${t.prazo?dt(t.prazo):'—'}</td><td><b>${esc(t.titulo)}</b></td><td>${esc(c?c.nome:'')}</td><td>${(t.membros||[]).join(', ')||'—'}</td><td><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></td><td class="muted">${ck.length?`<span class="tk-li">${tkIc('chk')}${ck.filter(x=>x.ok).length}/${ck.length}</span>`:''}${(t.anexos||[]).length?`<span class="tk-li">${tkIc('clip')}${t.anexos.length}</span>`:''}${(t.msgs||[]).length?`<span class="tk-li">${tkIc('msg')}${t.msgs.length}</span>`:''}</td></tr>`}).join('')}</tbody><tfoot><tr><td colspan="6">${rows.length} ${rows.length===1?'tarefa':'tarefas'}${fil?' de '+all.length:''}</td></tr></tfoot></table>`:'<p>Nenhuma tarefa com esses filtros.</p>'}</div>`;
   }
-  return `<div class="card"><div class="card-h"><h3>Tarefas</h3>${tkSeg}<span class="tk-sp"></span><div class="acts"><button class="btn pri" data-tk="novo">Criar tarefa</button></div></div>${filt}${body}</div>`}
+  return `<div class="card"><div class="card-h"><h3>Tarefas</h3>${tkSeg}<span class="tk-sp"></span><div class="acts">${u.modo==='lista'?'<button class="btn" data-tk="tkprint">Imprimir</button>':''}<button class="btn pri" data-tk="novo">Criar tarefa</button></div></div>${filt}${body}</div>`}
 function tkModal(){
   const u=tkU(),t=tkCur();if(!t)return '';
   const ck=t.check||[],cd=ck.filter(x=>x.ok).length,pc=ck.length?Math.round(cd/ck.length*100):0;
@@ -810,6 +810,14 @@ function tkModal(){
    <div class="tk-msgs">${feed.map(m=>`<div class="tk-ev">${tkAv(m.a)}<div><b>${esc(m.a)}</b> ${m.c?`<small class="muted">${tkHora(m.h)}${m.ed?' · editado':''}</small>${u.editMsg===m.i?`<form data-tkform="msgedit" class="tk-edit"><textarea name="t" rows="2">${esc(m.t)}</textarea><button class="btn sm pri" type="submit">Salvar</button><button class="btn sm" type="button" data-tk="msgCancel">Cancelar</button></form>`:`<div class="tk-msg">${tkMen(m.t)}</div>`}${m.a===tkMe()&&u.editMsg!==m.i?(u.delMsg===m.i?`<div class="tk-act">Excluir este comentário? <button type="button" data-tk="msgDelYes" data-v="${m.i}">Sim</button> · <button type="button" data-tk="msgDelNo">Não</button></div>`:`<div class="tk-act"><button type="button" data-tk="msgEdit" data-v="${m.i}">Editar</button> · <button type="button" data-tk="msgDel" data-v="${m.i}">Excluir</button></div>`):''}`:`${esc(m.t)}<div><small class="muted">${tkHora(m.h)}</small></div>`}</div></div>`).join('')||'<p class="muted" style="margin:0">Nenhuma atividade ainda.</p>'}</div>
   </div></div></div></div>`}
 function tkAuto1(t){t.style.height='auto';t.style.height=Math.max(t.classList.contains('tk-desc')?44:60,t.scrollHeight+2)+'px'}
+function tkPrintHtml(){
+  const u=tkU(),pt={hoje:'Hoje',semana:'Esta semana',mes:'Este mês','7':'Últimos 7 dias','14':'Últimos 14 dias','30':'Últimos 30 dias','180':'Últimos 6 meses',custom:'Período personalizado'},rows=S.tarefas.filter(t=>!t.feito).filter(tkOk).sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999'));
+  const flt=[u.resp!=='Todos'?'Responsável: '+u.resp:'',u.per!=='todos'?'Período: '+(pt[u.per]||u.per):'',u.st!=='todos'?'Status: '+u.st:'',u.q?'Busca: '+u.q:'',u.semResp?'Sem responsável':'',u.anx?'Com anexos':''].filter(Boolean).join(' · ')||'Todas as tarefas';
+  return `<div class="ov"><div class="modal xl" role="dialog" aria-modal="true"><h3>Lista de tarefas</h3>
+   <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Lista de Tarefas</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+   <div class="paper-b"><p style="margin:0 0 10px"><b>Filtros:</b> ${esc(flt)} &nbsp; <b>Total:</b> ${rows.length}</p>
+   ${rows.length?`<table><thead><tr><th>Prazo</th><th>Tarefa</th><th>Coluna</th><th>Responsáveis</th><th>Situação</th><th>Checklist</th></tr></thead><tbody>${rows.map(t=>{const c=S.tcols.find(x=>x.id===t.col),ck=t.check||[];return `<tr><td>${t.prazo?dt(t.prazo)+(t.hora?' '+esc(t.hora):''):'—'}</td><td>${esc(t.titulo)}</td><td>${esc(c?c.nome:'')}</td><td>${esc((t.membros||[]).join(', ')||'—')}</td><td>${tkSt(t)[0]}</td><td>${ck.length?ck.filter(x=>x.ok).length+'/'+ck.length:'—'}</td></tr>`}).join('')}</tbody></table>`:'<p>Nenhuma tarefa com esses filtros.</p>'}</div></div>
+   <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-tk="tkprintgo">Imprimir / Salvar como PDF</button></div></div></div>`}
 function tkPatch(){
   const old=document.querySelector('#app .card');if(!old||ui.tab!=='tarefas'){render();return}
   const tmp=document.createElement('div');tmp.innerHTML=vTarefas();const nw=tmp.firstElementChild;
@@ -844,6 +852,8 @@ document.addEventListener('click',e=>{if(tkU().menu&&!(e.target.closest&&e.targe
   case 'modo':u.modo=v;break;
   case 'reabrir':{const t=S.tarefas.find(x=>x.id===v);t.feito=false;t.concluidaEm='';save();toast('Tarefa reaberta.');break}
   case 'novo':{u.cOpen=false;u.editDesc=false;const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};break}
+  case 'tkprint':ui.modal={type:'tkprint'};render();return
+  case 'tkprintgo':{const o=document.title;document.title='Lista de Tarefas';window.print();document.title=o;return}
   case 'busca':{const i=document.querySelector('[data-tkf=fqtop]');if(i)i.focus();return}
   case 'buscaX':u.q='';u.focusQ=true;break;
   case 'pdatas':u.pop=u.pop==='datas'?'':'datas';break;
@@ -1160,6 +1170,7 @@ function modalHtml(){
     <div class="mf"><button class="btn" data-a="close">${esc(c.cancel||'Cancelar')}</button><button class="btn pri" data-a="confirmYes">${esc(c.ok||'Excluir')}</button></div></div></div>`;
   if(!m)return '';
   if(m.type==='tk')return tkModal();
+  if(m.type==='tkprint')return tkPrintHtml();
   const err=m.err?`<div class="err" role="alert">${esc(m.err)}</div>`:'';
   const foot=lbl=>`<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${lbl}</button></div>`;
   const foot2=()=>`<div class="mf"><button class="btn" type="button" data-a="close">${ui.added?'Fechar':'Cancelar'}</button><button class="btn" type="submit" data-more="1">Registrar e adicionar outro</button><button class="btn pri" type="submit">Registrar e fechar</button></div>`;
