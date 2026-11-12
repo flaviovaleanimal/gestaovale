@@ -924,12 +924,11 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
   if(k==='titulo'){const n=t.value.trim();if(n)c.titulo=n;if(!(u.draft&&u.draft.id===c.id))save();return}
   else if(k==='col'){const ant=S.tcols.find(x=>x.id===c.col);c.col=t.value;{const nw=S.tcols.find(x=>x.id===c.col);if(ant&&nw&&ant.id!==nw.id)tkLog(c,'moveu este cartão de '+ant.nome+' para '+nw.nome)}const cl=S.tcols.find(x=>x.id===c.col),r=tkColResp(cl);if(r)c.membros=[r];else if(cl&&cl.id===tkCols()[0].id)c.membros=[]}
   else if(k==='memb'){const m=new Set(c.membros||[]);t.checked?m.add(t.dataset.v):m.delete(t.dataset.v);c.membros=TK_TEAM.filter(n=>m.has(n))}
-  else if(k==='hora')c.hora=t.value;
+  else if(k==='hora'||k==='prazo'){c[k]=t.value;if(!(u.draft&&u.draft.id===c.id)){clearTimeout(window.__dtT);window.__dtT=setTimeout(save,800)}return}
   else if(k==='rec')c.rec=t.value;
   else if(k==='lemb')c.lemb=t.value;
   else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';if(t.checked&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id)){S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[]})}
   if(!(u.draft&&u.draft.id===c.id))save();if(t.checked){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}return render()}
-  else if(k==='prazo')c.prazo=t.value;
   else if(k==='desc'){c.desc=t.value;if(!(u.draft&&u.draft.id===c.id))save();return}
   else if(k==='chk'){c.check[+t.dataset.v].ok=t.checked}
   else if(k==='file'){const fs=[...t.files];t.value='';if(!fs.length)return;const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;let n=fs.length;const res=[];
