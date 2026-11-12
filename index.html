@@ -460,6 +460,11 @@ function normData(){let ch=false;const fix=(o,k,fn)=>{if(o[k]){const v=fn(o[k]);
   S.farms.forEach(f=>{fix(f,'city',canonCity);if(f.segment&&!(f.segment in OLDSEG))fix(f,'segment',tc)});
   S.contacts.forEach(c=>{fix(c,'city',canonCity);fix(c,'role',tc)});
   S.estacoes.forEach(e=>fix(e,'city',canonCity));S.ordens.forEach(o=>fix(o,'city',canonCity));
+  if(!['conectando','lento','erro'].includes(dbState))S.tarefas.forEach(t=>{let c2=false;const nm=n=>TK_OLD[n]||n,mn=x=>x.replace(/@(Flávio|Bina|Isabella)(?! Alves| Galdioli)/g,(_,a)=>'@'+TK_OLD[a]);
+    if((t.membros||[]).some(n=>TK_OLD[n])){t.membros=t.membros.map(nm);c2=true}
+    (t.msgs||[]).forEach(m=>{if(TK_OLD[m.a]){m.a=TK_OLD[m.a];c2=true}const x=mn(m.t||'');if(x!==m.t){m.t=x;c2=true}});
+    (t.log||[]).forEach(m=>{if(TK_OLD[m.a]){m.a=TK_OLD[m.a];c2=true}});
+    if(c2)ch=true});
   if(ch&&DB&&dbState!=='conectando')save();}
 const OLDSEG={'CLIENTE ATIVO':'Cliente ativo','CLIENTE INATIVO':'Cliente inativo','FORNECEDOR':'Fornecedor','OUTRO':''};
 const tipoOf=f=>f.tipo||OLDSEG[f.segment]||'Cliente ativo';
@@ -683,7 +688,7 @@ function vAgenda(){
    ${agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8)}
 /* ===== TAREFAS (quadro estilo Trello) ===== */
-const TK_TEAM=['Flávio','Isabella','Bina'];
+const TK_TEAM=['Flávio Alves','Bina Alves','Isabella Galdioli'],TK_OLD={'Flávio':'Flávio Alves','Bina':'Bina Alves','Isabella':'Isabella Galdioli'};
 const tkU=()=>{if(!ui.tk)ui.tk={modo:'quadro',resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false,fp:false,sel:null};return ui.tk};
 const tkCols=()=>S.tcols.slice().sort((a,b)=>(a.ord||0)-(b.ord||0));
 const tkDoneCol=()=>{const c=tkCols();return c.length?c[c.length-1].id:''};
@@ -710,16 +715,16 @@ const tkOk=t=>{const u=tkU();
  if(u.st==='emdia')return !t.feito&&!tkLate(t);
  return true};
 const tkNF=u=>(u.resp!=='Todos')+(u.per!=='todos')+(!!u.col)+(u.st!=='todos')+(!!u.q)+(!!u.semResp)+(!!u.anx);
-const tkMe=()=>{const e=(window.GS_EMAIL||'').toLowerCase().split('@')[0];if(!e)return 'Flávio';if(/flavio|flávio/.test(e))return 'Flávio';if(/isabel/.test(e))return 'Isabella';if(/bina/.test(e))return 'Bina';const w=e.replace(/[0-9._-]+/g,' ').trim().split(' ')[0]||e;return w.charAt(0).toUpperCase()+w.slice(1)};
+const tkMe=()=>{const e=(window.GS_EMAIL||'').toLowerCase().split('@')[0];if(!e)return 'Flávio Alves';if(/flavio|flávio/.test(e))return 'Flávio Alves';if(/isabel/.test(e))return 'Isabella Galdioli';if(/bina/.test(e))return 'Bina Alves';const w=e.replace(/[0-9._-]+/g,' ').trim().split(' ')[0]||e;return w.charAt(0).toUpperCase()+w.slice(1)};
 const tkLog=(c,tx)=>{(c.log=c.log||[]).push({a:tkMe(),t:tx,h:Date.now()})};
-const tkFmt=t=>{let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[\s(])_(.+?)_(?=[\s).,!?]|$)/g,'$1<i>$2</i>').replace(new RegExp('@('+TK_TEAM.join('|')+')','g'),'<span class="tk-men">@$1</span>');
+const tkFmt=t=>{let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[\s(])_(.+?)_(?=[\s).,!?]|$)/g,'$1<i>$2</i>').replace(new RegExp('@('+TK_TEAM.concat(Object.keys(TK_OLD)).join('|')+')','g'),'<span class="tk-men">@$1</span>');
  const out=[];let ul='';h.split('\n').forEach(l=>{const m=/^(- |• )(.*)$/.exec(l),k=m?(m[1]==='- '?'dash':'bol'):'';if(k){if(ul!==k){if(ul)out.push('</ul>');out.push('<ul class="tk-ul '+k+'">');ul=k}out.push('<li>'+m[2]+'</li>')}else{if(ul){out.push('</ul>');ul=''}out.push(l+'<br>')}});if(ul)out.push('</ul>');return out.join('').replace(/<br>$/,'')};
 const tkMen=tkFmt;
 function tkCommit(){const u=tkU();
  if(u.draft){const t=u.draft;u.draft=null;if((t.titulo||'').trim()){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);setTimeout(save,0);toast('Tarefa salva.')}u.sel=null;return}
  const c=S.tarefas.find(x=>x.id===u.sel);if(c){if(!(c.titulo||'').trim())c.titulo='Sem nome';if(JSON.stringify(c)!==u.snap)setTimeout(save,0)}u.sel=null}
 const tkCur=()=>{const u=tkU();return u.draft&&u.draft.id===u.sel?u.draft:S.tarefas.find(x=>x.id===u.sel)};
-const tkColResp=c=>TK_TEAM.find(n=>c&&c.nome.toUpperCase().includes('('+n.toUpperCase()+')'))||'';
+const tkColResp=c=>TK_TEAM.find(n=>c&&(c.nome.toUpperCase().includes('('+n.toUpperCase()+')')||c.nome.toUpperCase().includes('('+n.split(' ')[0].toUpperCase()+')')))||'';
 const tkNext=(d,r)=>{if(!d)return '';if(r==='diaria')return addDays(d,1);if(r==='semanal')return addDays(d,7);const x=new Date(d+'T12:00:00');x.setMonth(x.getMonth()+1);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
 const TK_REC={'':'Não se repete',diaria:'Todos os dias',semanal:'Toda semana',mensal:'Todo mês'};
 const TK_LEMB={'':'Sem lembrete',0:'Na hora',15:'15 minutos antes',60:'1 hora antes',1440:'1 dia antes'};
