@@ -715,7 +715,7 @@ const tkOk=t=>{const u=tkU();
  if(u.st==='emdia')return !t.feito&&!tkLate(t);
  return true};
 const tkNF=u=>(u.resp!=='Todos')+(u.per!=='todos')+(!!u.col)+(u.st!=='todos')+(!!u.q)+(!!u.semResp)+(!!u.anx);
-const tkMe=()=>{const e=(window.GS_EMAIL||'').toLowerCase().split('@')[0];if(!e)return 'Flávio Alves';if(/flavio|flávio/.test(e))return 'Flávio Alves';if(/isabel/.test(e))return 'Isabella Galdioli';if(/bina/.test(e))return 'Bina Alves';const w=e.replace(/[0-9._-]+/g,' ').trim().split(' ')[0]||e;return w.charAt(0).toUpperCase()+w.slice(1)};
+const tkMe=()=>{const e=(window.GS_EMAIL||'').toLowerCase().split('@')[0];if(!e)return 'Flávio Alves';if(/flavio|flávio/.test(e))return 'Flávio Alves';if(/isabel/.test(e))return 'Isabella Galdioli';if(/bina|atendimento/.test(e))return 'Bina Alves';const w=e.replace(/[0-9._-]+/g,' ').trim().split(' ')[0]||e;return w.charAt(0).toUpperCase()+w.slice(1)};
 const tkLog=(c,tx)=>{(c.log=c.log||[]).push({a:tkMe(),t:tx,h:Date.now()})};
 const tkFmt=t=>{let h=esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[\s(])_(.+?)_(?=[\s).,!?]|$)/g,'$1<i>$2</i>').replace(new RegExp('@('+TK_TEAM.concat(Object.keys(TK_OLD)).join('|')+')','g'),'<span class="tk-men">@$1</span>');
  const out=[];let ul='';h.split('\n').forEach(l=>{const m=/^(- |• )(.*)$/.exec(l),k=m?(m[1]==='- '?'dash':'bol'):'';if(k){if(ul!==k){if(ul)out.push('</ul>');out.push('<ul class="tk-ul '+k+'">');ul=k}out.push('<li>'+m[2]+'</li>')}else{if(ul){out.push('</ul>');ul=''}out.push(l+'<br>')}});if(ul)out.push('</ul>');return out.join('').replace(/<br>$/,'')};
