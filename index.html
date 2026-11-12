@@ -833,7 +833,9 @@ function tkPatch(){
     return oc.every((c,i)=>walk(c,nc[i]))};
   if(!nw||!walk(old,nw))render();else tkAutosize()
 }
-function tkAutosize(){document.querySelectorAll('.tk-desc,.tk-ed textarea,.tk-edit textarea').forEach(tkAuto1);const u=ui.tk;if(!u)return;if(u.focusDesc){u.focusDesc=false;const d=document.querySelector('.tk-desc');if(d){d.focus();d.setSelectionRange(d.value.length,d.value.length)}}if(u.focusQ){u.focusQ=false;const q=document.querySelector('[data-tkf=fqtop]');if(q)q.focus()}if(u.focusC){u.focusC=false;const d=document.querySelector('.tk-chat textarea');if(d)d.focus()}}
+function tkFit(){const b=document.querySelector('.tk-board');if(!b)return;const ap=document.getElementById('app'),t=b.getBoundingClientRect().top+window.scrollY+(ap?ap.scrollTop:0);b.style.height=Math.max(420,innerHeight-t-8)+'px'}
+window.addEventListener('resize',()=>tkFit());
+function tkAutosize(){tkFit();document.querySelectorAll('.tk-desc,.tk-ed textarea,.tk-edit textarea').forEach(tkAuto1);const u=ui.tk;if(!u)return;if(u.focusDesc){u.focusDesc=false;const d=document.querySelector('.tk-desc');if(d){d.focus();d.setSelectionRange(d.value.length,d.value.length)}}if(u.focusQ){u.focusQ=false;const q=document.querySelector('[data-tkf=fqtop]');if(q)q.focus()}if(u.focusC){u.focusC=false;const d=document.querySelector('.tk-chat textarea');if(d)d.focus()}}
 function tkSug(inp){
  const f=inp.form,old=f.querySelector('.tk-sug'),pos=inp.selectionStart,m=/(^|\s)@([^\s@]*)$/.exec(inp.value.slice(0,pos));
  if(!m){if(old)old.remove();return}
