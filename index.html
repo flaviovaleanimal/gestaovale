@@ -1283,7 +1283,7 @@ function modalHtml(){
     const k=m.kind,c=FIN[k],f=ui.ff[k],list=finList(k),tot=r2(list.reduce((a,r)=>a+finTot(r),0));
     const arq=ui.fa[k]==='p',flt=['Aba: '+(arq?'Arquivadas (pagas)':'Em aberto'),f.from&&'De '+dt(f.from),f.to&&'até '+dt(f.to),f.prest&&'Prestador: '+f.prest,f.farm&&'Fazenda: '+F(f.farm).name,f.q&&'Pesquisa: '+f.q].filter(Boolean).join(' · ')||'';
     body=`<h3>${c.title}</h3>
-    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Gestão Financeira · ${c.title}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Financeiro · ${c.title}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b" style="font-size:12px"><p style="margin:0 0 10px"><b>Filtros:</b> ${esc(flt)}</p>
     ${list.length?`<table><thead><tr><th>${c.dl}</th>${arq?'<th>Data Pagamento</th>':''}<th>Prestador</th><th>Fazenda</th><th class="num">${c.ql}</th><th class="num">Valor Unitário</th><th class="num">Valor Total</th></tr></thead><tbody>
     ${list.map(r=>`<tr><td>${dt(r.date)}</td>${arq?`<td>${r.paidAt?dt(r.paidAt):'—'}</td>`:''}<td>${esc(r.prest||'—')}</td><td>${esc(F(r.farm).name)}</td><td class="num">${fnum(r.qty)}</td><td class="num">${brl(r.unit)}</td><td class="num">${brl(finTot(r))}</td></tr>`).join('')}
@@ -1437,7 +1437,7 @@ function modalHtml(){
      ${chk('estacoes','Estações de monta (Controle da Estação)','Apaga todas as estações e os lançamentos de IATF delas.',false)}
      ${chk('ordens','Ordens de serviços','Apaga o histórico de ordens de serviços.',false)}
      ${chk('fichas','Fichas de serviços','Apaga o histórico de fichas.',false)}
-     ${chk('fin','Gestão Financeira: diárias e km rodado','Apaga todos os lançamentos de diárias técnicas e km rodado.',false)}
+     ${chk('fin','Financeiro: diárias e km rodado','Apaga todos os lançamentos de diárias técnicas e km rodado.',false)}
      ${chk('eventos','Agenda: eventos','Apaga todos os eventos da agenda.',false)}
      ${chk('products','Produtos cadastrados','Apaga o cadastro de produtos e as movimentações ligadas a eles.',false)}
     </div>${foot('Zerar dados')}</form>`}
@@ -1578,7 +1578,7 @@ const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
 const ptitle=()=>({'p-painel':'Produtos','p-cadastro':'Produtos › Cadastro','p-estoque':'Produtos › Estoque','p-movs':'Produtos › Movimentações'}[ui.tab]);
-const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Gestão Financeira':(ui.tab==='fazendas'||ui.tab==='contatos')?'Cadastro':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços da IATF':'Sêmen';
+const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos')?'Cadastro':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços da IATF':'Sêmen';
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
@@ -1871,7 +1871,7 @@ const NAV=[
   {tab:'estoque',label:'Estoque',icon:'box'},
   {tab:'botijoes',label:'Botijões',icon:'tank'},
   {tab:'movs',msub:'hist',label:'Movimentações',icon:'swap'}]},
- {id:'fin',label:'Gestão Financeira',icon:'coin',kids:[
+ {id:'fin',label:'Financeiro',icon:'coin',kids:[
   {tab:'f-diarias',label:'Diárias Técnicas',icon:'list'},
   {tab:'f-kms',label:'Km Rodado',icon:'list'},
   {tab:'f-comis',label:'Comissões Vendedores',icon:'list'}]}];
@@ -1909,7 +1909,7 @@ function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
   const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Gestão Financeira › '+FTIT[ui.tab]:ui.tab==='fazendas'?'Cadastro › Empresas':ui.tab==='contatos'?'Cadastro › Contatos':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'Cadastro › Empresas':ui.tab==='contatos'?'Cadastro › Contatos':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
