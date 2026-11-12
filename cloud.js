@@ -49,7 +49,8 @@
       onSnapshot:(onOk,onErr)=>{
         let t=null,dead=false;
         const load=async()=>{
-          const {data,error}=await sb.from('docs').select('data').eq('collection',c);
+          let data=[],error=null;
+          for(let f=0;;f+=1000){const r=await sb.from('docs').select('data').eq('collection',c).order('id').range(f,f+999);if(r.error){error=r.error;break}data=data.concat(r.data);if(r.data.length<1000)break}
           if(dead)return;
           if(error){onErr&&onErr(wrap(error));return}
           onOk({docs:data.map(r=>({data:()=>r.data})),metadata:{fromCache:false}});
