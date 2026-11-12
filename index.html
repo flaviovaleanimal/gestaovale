@@ -1577,7 +1577,7 @@ const qtyU=q=>fmt(q);
 const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
-const ptitle=()=>({'p-painel':'Produtos','p-cadastro':'Produtos › Cadastro','p-estoque':'Produtos › Estoque','p-movs':'Produtos › Movimentações'}[ui.tab]);
+const ptitle=()=>({'p-painel':'Estoque › Produtos','p-cadastro':'Estoque › Produtos › Cadastro','p-estoque':'Estoque › Produtos › Estoque','p-movs':'Estoque › Produtos › Movimentações'}[ui.tab]);
 const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
 function pItems(fid,cat){
   const m={};
@@ -1863,15 +1863,16 @@ const NAV=[
   {tab:'i-fichas',label:'Fichas Serviços',icon:'list'},
   {tab:'i-ordens',label:'Ordens Serviços',icon:'list'},
   {tab:'i-estacao',label:'Controle da Estação',icon:'grid'}]},
- {id:'prod',label:'Produtos',icon:'pack',home:'p-painel',kids:[
-  {tab:'p-cadastro',label:'Cadastro',icon:'list'},
-  {tab:'p-estoque',label:'Estoque',icon:'box'},
-  {tab:'p-movs',label:'Movimentações',icon:'swap'}]},
- {id:'semen',label:'Sêmen',icon:'drop',home:'painel',kids:[
-  {tab:'cadastro',label:'Cadastro',icon:'user'},
-  {tab:'estoque',label:'Estoque',icon:'box'},
-  {tab:'botijoes',label:'Botijões',icon:'tank'},
-  {tab:'movs',msub:'hist',label:'Movimentações',icon:'swap'}]},
+ {id:'est',label:'Estoque',icon:'box',kids:[
+  {id:'prod',label:'Produtos',icon:'pack',home:'p-painel',kids:[
+   {tab:'p-cadastro',label:'Cadastro',icon:'list'},
+   {tab:'p-estoque',label:'Estoque',icon:'box'},
+   {tab:'p-movs',label:'Movimentações',icon:'swap'}]},
+  {id:'semen',label:'Sêmen',icon:'drop',home:'painel',kids:[
+   {tab:'cadastro',label:'Cadastro',icon:'user'},
+   {tab:'estoque',label:'Estoque',icon:'box'},
+   {tab:'botijoes',label:'Botijões',icon:'tank'},
+   {tab:'movs',msub:'hist',label:'Movimentações',icon:'swap'}]}]},
  {id:'fin',label:'Financeiro',icon:'coin',kids:[
   {tab:'f-fatur',label:'Faturamento',icon:'coin'},
   {tab:'f-diarias',label:'Diárias Técnicas',icon:'list'},
@@ -1913,7 +1914,7 @@ function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
   const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vFatur,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
