@@ -1433,7 +1433,7 @@ function modalHtml(){
      ${chk('contacts','Contatos','Apaga o cadastro de contatos.',false)}
      ${chk('tanks','Botijões e nitrogênio','Apaga os botijões, as medições, os abastecimentos e as movimentações ligadas a eles.',false)}
      ${chk('pmovs','Produtos: movimentações e estoque','Apaga todas as entradas e saídas de produtos. O saldo de todas as fazendas volta a zero.',false)}
-     ${chk('lotes','Lotes agendados (Serviços da IATF)','Apaga todos os lotes agendados.',false)}
+     ${chk('lotes','Lotes agendados (Serviços)','Apaga todos os lotes agendados.',false)}
      ${chk('estacoes','Estações de monta (Controle da Estação)','Apaga todas as estações e os lançamentos de IATF delas.',false)}
      ${chk('ordens','Ordens de serviços','Apaga o histórico de ordens de serviços.',false)}
      ${chk('fichas','Fichas de serviços','Apaga o histórico de fichas.',false)}
@@ -1578,7 +1578,7 @@ const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
 const ptitle=()=>({'p-painel':'Produtos','p-cadastro':'Produtos › Cadastro','p-estoque':'Produtos › Estoque','p-movs':'Produtos › Movimentações'}[ui.tab]);
-const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos')?'Cadastro':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços da IATF':'Sêmen';
+const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
@@ -1603,7 +1603,7 @@ function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;r
 function pChart(){
   const va=S.farms.find(f=>f.name.trim().toLowerCase()==='vale animal');
   const rows=S.products.map(p=>({p,v:va?pBal(va.id,p.id):0})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name));
-  if(!rows.length)return `<div class="card"><div class="card-h"><h3>Estoque atual por produto</h3></div>${empty(va?'Nenhum produto com estoque na Vale Animal no momento.':'Cadastre a fazenda Vale Animal em Cadastro › Fazendas para ver o gráfico.')}</div>`;
+  if(!rows.length)return `<div class="card"><div class="card-h"><h3>Estoque atual por produto</h3></div>${empty(va?'Nenhum produto com estoque na Vale Animal no momento.':'Cadastre a fazenda Vale Animal em CRM › Empresas para ver o gráfico.')}</div>`;
   const max=niceMax(rows[0].v);
   return `<div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Somente Vale Animal</span></div>
    <div class="bars" role="img" aria-label="Gráfico de barras com o estoque atual de cada produto">
@@ -1627,7 +1627,7 @@ function vPCadastro_(){
 function vPEstoque(){
   if(!ui.pfarm||!FZ().some(f=>f.id===ui.pfarm)){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
-    ${FZ().length?FZ().map(f=>{const n=pItems(f.id).length;return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'produto':'produtos'} em estoque</div></div><button class="btn" data-a="pfarm" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em Cadastro › Fazendas.')}
+    ${FZ().length?FZ().map(f=>{const n=pItems(f.id).length;return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'produto':'produtos'} em estoque</div></div><button class="btn" data-a="pfarm" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}
     <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
   const f=F(ui.pfarm),list=pItems(ui.pfarm,ui.pcat);
@@ -1685,7 +1685,7 @@ function pSaidaFields(){
 const LCAT=NCATS;
 const LPAR=['Primíparas','Secundíparas','Multíparas'];
 const ITIT={'i-painel':'Painel','i-lotes':'Agendar Lotes','i-fichas':'Fichas Serviços','i-ordens':'Ordens Serviços','i-estacao':'Controle da Estação'};
-const ititle=()=>ui.tab==='i-painel'?'Serviços da IATF':'Serviços da IATF › '+ITIT[ui.tab];
+const ititle=()=>ui.tab==='i-painel'?'Serviços':'Serviços › '+ITIT[ui.tab];
 function vEmBreve(){
   return `<div class="card"><div class="card-h"><h3>${ITIT[ui.tab]}</h3></div>${empty('Esta tela está em construção. Envie a estrutura para eu montar.')}</div>`;
 }
@@ -1853,11 +1853,12 @@ const chev='<svg class="chev CLS" viewBox="0 0 24 24" aria-hidden="true"><path d
 const NAV=[
  {tab:'inicio',label:'Início',icon:'grid'},
  {tab:'tarefas',label:'Tarefas',icon:'list'},
- {tab:'agenda',label:'Agenda',icon:'cal'},
- {id:'cad',label:'Cadastro',icon:'list',kids:[
+ {id:'crm',label:'CRM',icon:'user',kids:[
   {tab:'contatos',label:'Contatos',icon:'user'},
-  {tab:'fazendas',label:'Empresas',icon:'farm'}]},
- {id:'iatf',label:'Serviços da IATF',icon:'cal',home:'i-painel',kids:[
+  {tab:'fazendas',label:'Empresas',icon:'farm'},
+  {tab:'negociacoes',label:'Negociações',icon:'coin'}]},
+ {id:'iatf',label:'Serviços',icon:'cal',home:'i-painel',kids:[
+  {tab:'agenda',label:'Agenda',icon:'cal'},
   {tab:'i-lotes',label:'Agendar Lotes',icon:'cal'},
   {tab:'i-fichas',label:'Fichas Serviços',icon:'list'},
   {tab:'i-ordens',label:'Ordens Serviços',icon:'list'},
@@ -1888,7 +1889,8 @@ function navHtml(list,d){
     return `<button class="ni ${isOn(n)?'cur':''}" style="--d:${d}" data-a="go" data-v="${n.tab}" data-sub="${n.msub||''}" title="${n.label}">${n.icon?ic(n.icon):'<span class="dot"></span>'}<span class="lbl">${n.label}</span></button>`;
   }).join('');
 }
-const LBL={painel:'Sêmen',cadastro:'Cadastro',estoque:'Estoque',botijoes:'Botijões',movs:'Movimentações',fazendas:'Empresas',contatos:'Contatos'};
+const vNegoc=()=>`<div class="card"><div class="card-h"><h3>Negociações</h3></div><p class="muted" style="padding:8px 2px">Em construção. Esta área será configurada em breve.</p></div>`;
+const LBL={painel:'Sêmen',cadastro:'Cadastro',estoque:'Estoque',botijoes:'Botijões',movs:'Movimentações',fazendas:'Empresas',contatos:'Contatos',negociacoes:'Negociações'};
 const SUBL={entrada:'Entrada de sêmen',saida:'Saída de sêmen',hist:'Histórico'};
 
 /* ---------- render ---------- */
@@ -1908,8 +1910,8 @@ function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelector
 function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'Cadastro › Empresas':ui.tab==='contatos'?'Cadastro › Contatos':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
