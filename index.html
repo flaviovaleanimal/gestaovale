@@ -576,7 +576,7 @@ const farmsFilt=()=>{const e=ui.ef;return [...S.farms].filter(f=>(!e.seg||nrm(se
 const farmTxt=f=>[f.name,segTxt(f),f.city,CIDADES.includes(f.city)?'MT':f.state,tipoOf(f)].join(' ');
 const FIN={diarias:{col:'diarias',title:'Diárias Técnicas',dl:'Data Serviço',ql:'Quantidade',btn:'Lançar diária',one:'diária técnica',pre:'d'},
   kms:{col:'kms',title:'Km Rodado',dl:'Data Viagem',ql:'Total Km',btn:'Lançar km rodado',one:'km rodado',pre:'k'}};
-const FTIT={'f-diarias':'Diárias Técnicas','f-kms':'Km Rodado','f-comis':'Comissões Vendedores'};
+const FTIT={'f-fatur':'Faturamento','f-diarias':'Diárias Técnicas','f-kms':'Km Rodado','f-comis':'Comissões Vendedores'};
 const SITS=['Aberta','Paga'];
 const brl=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const r2=n=>Math.round((Number(n)||0)*100)/100;
@@ -1873,6 +1873,7 @@ const NAV=[
   {tab:'botijoes',label:'Botijões',icon:'tank'},
   {tab:'movs',msub:'hist',label:'Movimentações',icon:'swap'}]},
  {id:'fin',label:'Financeiro',icon:'coin',kids:[
+  {tab:'f-fatur',label:'Faturamento',icon:'coin'},
   {tab:'f-diarias',label:'Diárias Técnicas',icon:'list'},
   {tab:'f-kms',label:'Km Rodado',icon:'list'},
   {tab:'f-comis',label:'Comissões Vendedores',icon:'list'}]}];
@@ -1889,6 +1890,7 @@ function navHtml(list,d){
     return `<button class="ni ${isOn(n)?'cur':''}" style="--d:${d}" data-a="go" data-v="${n.tab}" data-sub="${n.msub||''}" title="${n.label}">${n.icon?ic(n.icon):'<span class="dot"></span>'}<span class="lbl">${n.label}</span></button>`;
   }).join('');
 }
+const vFatur=()=>`<div class="card"><div class="card-h"><h3>Faturamento</h3></div><p class="muted" style="padding:8px 2px">Em construção. Esta área será configurada em breve.</p></div>`;
 const vNegoc=()=>`<div class="card"><div class="card-h"><h3>Negociações</h3></div><p class="muted" style="padding:8px 2px">Em construção. Esta área será configurada em breve.</p></div>`;
 const LBL={painel:'Sêmen',cadastro:'Cadastro',estoque:'Estoque',botijoes:'Botijões',movs:'Movimentações',fazendas:'Empresas',contatos:'Contatos',negociacoes:'Negociações'};
 const SUBL={entrada:'Entrada de sêmen',saida:'Saída de sêmen',hist:'Histórico'};
@@ -1910,7 +1912,7 @@ function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelector
 function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vFatur,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
   const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
