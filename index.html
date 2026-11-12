@@ -242,7 +242,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
 .tk-board{display:flex;gap:12px;align-items:stretch;overflow-x:auto;padding-bottom:10px;min-height:420px}
 .tk-col{flex:0 0 280px;width:280px;box-sizing:border-box;background:color-mix(in srgb,var(--ink) 9%,var(--surface));border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}.tk-col.tk-over{outline:2px dashed var(--navy);outline-offset:-2px;background:var(--navy-soft)}.tk-new{flex:0 0 220px;width:220px;background:transparent;border-style:dashed;align-self:flex-start;height:auto}
-.tk-ch{display:flex;align-items:center;gap:6px}.tk-cn{flex:1;min-width:0;font-weight:600;border:1px solid transparent;background:transparent;padding:6px;border-radius:6px;color:var(--ink);font-family:inherit;font-size:14px}.tk-cn:focus{border-color:var(--line);background:var(--bg)}.tk-n{font-size:12px;color:var(--muted)}
+.tk-ch{display:flex;align-items:center;gap:6px}.tk-grip{cursor:grab;color:var(--muted);padding:4px 2px;font-size:16px;line-height:1;user-select:none}.tk-grip:hover{color:var(--ink)}.tk-col.tk-colmv{opacity:.45}.tk-col.tk-colover{outline:2px dashed var(--navy);outline-offset:-2px}.tk-cn{flex:1;min-width:0;font-weight:600;border:1px solid transparent;background:transparent;padding:6px;border-radius:6px;color:var(--ink);font-family:inherit;font-size:14px}.tk-cn:focus{border-color:var(--line);background:var(--bg)}.tk-n{font-size:12px;color:var(--muted)}
 .tk-x{border:0;background:transparent;color:var(--muted);cursor:pointer;min-width:32px;min-height:32px;border-radius:6px;font-size:13px}.tk-x:hover{background:var(--bg);color:var(--ink)}
 .tk-cl{display:flex;flex-direction:column;gap:8px;flex:1}.tk-vz{font-size:12px;color:var(--muted);text-align:center;padding:14px 0}
 .tk-c{background:var(--surface);box-shadow:0 1px 2px rgba(20,33,61,.12);border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer}.tk-c:hover{border-color:var(--navy)}.tk-c.late{border-left:3px solid #c0432a}.tk-ct1{font-size:14px;font-weight:500;margin-bottom:6px;overflow-wrap:anywhere}
@@ -730,6 +730,7 @@ function tkCard(t){
 function vTarefas(){
   const u=tkU();
   if(!['conectando','lento','erro'].includes(dbState)&&(!S.tcols.length||(!S.tarefas.length&&S.tcols.map(c=>c.nome).join('|')==='A fazer|Em andamento|Concluído'))){S.tcols=[{id:'tc1',nome:'TAREFAS A FAZER',ord:1},{id:'tc2',nome:'TAREFAS (FLÁVIO)',ord:2},{id:'tc3',nome:'TAREFAS (BINA)',ord:3},{id:'tc4',nome:'TAREFAS (ISABELLA)',ord:4}];save()}
+  else if(!['conectando','lento','erro'].includes(dbState)&&!S.tcols.some(c=>/isabel/i.test(c.nome))){let fl=0;try{fl=localStorage.getItem('gs_tk_isa')}catch(_){}if(!fl){try{localStorage.setItem('gs_tk_isa','1')}catch(_){}S.tcols.push({id:nid('tc'),nome:'TAREFAS (ISABELLA)',ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1});save()}}
   const cols=tkCols(),all=S.tarefas.filter(t=>!t.feito),arqs=S.tarefas.filter(t=>t.feito),vis=(u.modo==='arq'?arqs:all).filter(tkOk),nf=tkNF(u),fil=nf>0;
   const so=(v,l)=>`<option value="${v}"${v===u.per?' selected':''}>${l}</option>`;
   const pill=(ic,k,inner,on)=>`<label class="tk-pill${on?' on':''}">${ic}<select data-tkf="${k}">${inner}</select></label>`;
@@ -757,7 +758,7 @@ function vTarefas(){
   let body;
   if(u.modo==='quadro'){
     body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id);return `<div class="tk-col" data-tkdrop="${c.id}">
-      <div class="tk-ch"><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><span class="tk-n">${cs.length}</span><button class="tk-x" data-tk="colDel" data-v="${c.id}" title="Excluir coluna" aria-label="Excluir coluna">✕</button></div>
+      <div class="tk-ch"><span class="tk-grip" draggable="true" data-tkcol="${c.id}" title="Arraste para mover a coluna" aria-label="Mover coluna">⠿</span><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><span class="tk-n">${cs.length}</span><button class="tk-x" data-tk="colRen" data-v="${c.id}" title="Renomear coluna" aria-label="Renomear coluna">✎</button><button class="tk-x" data-tk="colDel" data-v="${c.id}" title="Excluir coluna" aria-label="Excluir coluna">✕</button></div>
       <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div>
       <form data-tkform="card" data-col="${c.id}"><input name="t" placeholder="+ Adicionar cartão" autocomplete="off" aria-label="Título do novo cartão"></form></div>`}).join('')}
      <form class="tk-col tk-new" data-tkform="col"><input name="n" placeholder="+ Nova coluna" autocomplete="off" aria-label="Nome da nova coluna"></form></div>`;
@@ -855,6 +856,7 @@ document.addEventListener('click',e=>{if(tkU().menu&&!(e.target.closest&&e.targe
   case 'fpanel':u.fp=!u.fp;break;
   case 'chipx':{const m={resp:{resp:'Todos'},per:{per:'todos',de:'',ate:''},col:{col:''},st:{st:'todos'},q:{q:''},semResp:{semResp:false},anx:{anx:false}};Object.assign(u,m[v]);break}
   case 'open':{const cc=S.tarefas.find(x=>x.id===v);u.snap=cc?JSON.stringify(cc):''}u.cOpen=false;u.menu=false;u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=v;ui.modal={type:'tk'};break;
+  case 'colRen':{const i=document.querySelector('.tk-cn[data-v="'+v+'"]');if(i){i.focus();i.select()}return}
   case 'colDel':{if(S.tarefas.some(t=>t.col===v))return toast('Mova ou exclua os cartões desta coluna antes.');if(S.tcols.length<2)return toast('Mantenha pelo menos uma coluna.');const c=S.tcols.find(x=>x.id===v);return ask(`Excluir a coluna "${c.nome}"?`,()=>{S.tcols=S.tcols.filter(x=>x.id!==v);done('Coluna excluída.')})}
   case 'chkDel':{const t=tkCur();t.check.splice(+v,1);save();break}
   case 'anxOpen':{e.preventDefault();const t=tkCur(),a=t.anexos[+v];if(!a||!a.p||!window.GS_CLOUD)return;const w=window.open('','_blank');GS_CLOUD.url(a.p).then(u=>{if(w)w.location=u;else location.href=u}).catch(()=>{if(w)w.close();toast('Não foi possível abrir o anexo.')});return}
@@ -902,6 +904,11 @@ document.addEventListener('dragover',e=>{const t=tkDrag&&e.target.closest&&e.tar
 document.addEventListener('drop',e=>{const t=tkDrag&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();const c=S.tarefas.find(x=>x.id===tkDrag);tkDrag=null;const oldCol=c&&S.tcols.find(x=>x.id===c.col);if(c&&c.col!==t.dataset.tkdrop){c.col=t.dataset.tkdrop;{const cl=S.tcols.find(x=>x.id===c.col),r=tkColResp(cl);if(r)c.membros=[r];else if(cl&&cl.id===tkCols()[0].id)c.membros=[];if(cl&&oldCol)tkLog(c,'moveu este cartão de '+oldCol.nome+' para '+cl.nome)}save();render();toast('Cartão movido.')}else render()});
 
 let dragId=null;
+let tkCD=null;
+document.addEventListener('dragstart',e=>{const g=e.target.closest&&e.target.closest('[data-tkcol]');if(!g)return;tkCD=g.dataset.tkcol;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',tkCD)}catch(_){}const col=g.closest('.tk-col');if(col){try{e.dataTransfer.setDragImage(col,20,20)}catch(_){}setTimeout(()=>col.classList.add('tk-colmv'),0)}});
+document.addEventListener('dragover',e=>{const t=tkCD&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();if(!t.classList.contains('tk-colover')){document.querySelectorAll('.tk-colover').forEach(x=>x.classList.remove('tk-colover'));t.classList.add('tk-colover')}});
+document.addEventListener('dragend',()=>{if(!tkCD)return;tkCD=null;document.querySelectorAll('.tk-colover,.tk-colmv').forEach(x=>x.classList.remove('tk-colover','tk-colmv'))});
+document.addEventListener('drop',e=>{const t=tkCD&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();const id=tkCD;tkCD=null;const list=tkCols(),to=list.findIndex(x=>x.id===t.dataset.tkdrop),m=list.find(x=>x.id===id);if(!m||to<0||m.id===t.dataset.tkdrop){render();return}list.splice(list.indexOf(m),1);list.splice(to,0,m);list.forEach((x,i)=>x.ord=i+1);save();render()});
 document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-ev]');if(!b)return;dragId=b.dataset.ev;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',dragId)}catch(_){}b.classList.add('ag-dragging')});
 document.addEventListener('dragend',()=>{dragId=null;document.querySelectorAll('.ag-dragging,.ag-over').forEach(x=>x.classList.remove('ag-dragging','ag-over'))});
 document.addEventListener('dragover',e=>{const t=dragId&&e.target.closest&&e.target.closest('[data-drop]');if(!t)return;e.preventDefault();e.dataTransfer.dropEffect='move';if(!t.classList.contains('ag-over')){document.querySelectorAll('.ag-over').forEach(x=>x.classList.remove('ag-over'));t.classList.add('ag-over')}});
