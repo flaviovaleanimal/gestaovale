@@ -429,7 +429,7 @@ function onSnap(c,snap){
   const cur={};(S[c]||[]).forEach(x=>{cur[x.id]=cn(x)});const nw={};arr.forEach(x=>{nw[x.id]=cn(x)});
   const ch=[];for(const id in nw)if(cur[id]!==nw[id])ch.push(id);for(const id in cur)if(!(id in nw))ch.push(id);
   if(!ch.length){applyCol(c,arr);return}
-  if(c==='tarefas'&&ui.modal&&ui.modal.type==='tk'&&ui.tk&&ui.tk.sel&&!ch.includes(ui.tk.sel)){applyCol(c,arr);return}
+  if(c==='tarefas'&&ui.modal&&ui.modal.type==='tk'&&tkU().sel&&!ch.includes(tkU().sel)){applyCol(c,arr);return}
   applyCol(c,arr);softRender();
 }
 function softRender(){
@@ -696,8 +696,10 @@ function vAgenda(){
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8)}
 /* ===== TAREFAS (quadro estilo Trello) ===== */
 const TK_TEAM=['Flávio Alves','Bina Alves','Isabella Galdioli'],TK_OLD={'Flávio':'Flávio Alves','Bina':'Bina Alves','Isabella':'Isabella Galdioli'};
-const tkU=()=>{if(!ui.tk)ui.tk={modo:'quadro',resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false,fp:false,sel:null};return ui.tk};
-const tkCols=()=>S.tcols.slice().sort((a,b)=>(a.ord||0)-(b.ord||0));
+const tkA=()=>ui.tab==='f-fatur'?'fat':'';
+const inA=x=>(x.area||'')===tkA();
+const tkU=()=>{const K=tkA()?'fk':'tk';if(!ui[K])ui[K]={modo:'quadro',resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false,fp:false,sel:null};return ui[K]};
+const tkCols=()=>S.tcols.filter(inA).sort((a,b)=>(a.ord||0)-(b.ord||0));
 const tkDoneCol=()=>{const c=tkCols();return c.length?c[c.length-1].id:''};
 const tkLate=t=>!!t.prazo&&!t.feito&&(t.prazo<today()||(t.prazo===today()&&!!t.hora&&t.hora<new Date().toTimeString().slice(0,5)));
 const TKI={clip:'<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>',msg:'<path d="M4 4h16v12H9l-5 4z"/><path d="M8 8.5h8M8 12h5"/>',chk:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>'};
@@ -745,8 +747,8 @@ function tkCard(t){
    ${t.prazo?`<div class="tk-meta tk-meta1"><span class="tk-b tkst-${tkSt(t)[1]}">${dt(t.prazo)}${t.hora?' '+esc(t.hora):''}${t.rec?' ↻':''} · <b>${tkSt(t)[0]}</b></span></div>`:''}<div class="tk-meta">${ck.length?`<span class="tk-b">${tkIc('chk')}${cd}/${ck.length}</span>`:''}${(t.anexos||[]).length?`<span class="tk-b">${tkIc('clip')}${t.anexos.length}</span>`:''}${(t.msgs||[]).length?`<span class="tk-b">${tkIc('msg')}${t.msgs.length}</span>`:''}<span class="tk-avs">${(t.membros||[]).map(tkAv).join('')}</span></div></div>`}
 function vTarefas(){
   const u=tkU();
-  if(!['conectando','lento','erro'].includes(dbState)&&(!S.tcols.length||(!S.tarefas.length&&S.tcols.map(c=>c.nome).join('|')==='A fazer|Em andamento|Concluído'))){S.tcols=[{id:'tc1',nome:'TAREFAS A FAZER',ord:1},{id:'tc2',nome:'TAREFAS (FLÁVIO)',ord:2},{id:'tc3',nome:'TAREFAS (BINA)',ord:3},{id:'tc4',nome:'TAREFAS (ISABELLA)',ord:4}];save()}
-  const cols=tkCols(),all=S.tarefas.filter(t=>!t.feito),arqs=S.tarefas.filter(t=>t.feito),vis=(u.modo==='arq'?arqs:all).filter(tkOk),nf=tkNF(u),fil=nf>0;
+  {const tc0=S.tcols.filter(c=>!c.area);if(!tkA()&&!['conectando','lento','erro'].includes(dbState)&&(!tc0.length||(!S.tarefas.filter(t=>!t.area).length&&tc0.map(c=>c.nome).join('|')==='A fazer|Em andamento|Concluído'))){S.tcols=[...S.tcols.filter(c=>c.area),{id:'tc1',nome:'TAREFAS A FAZER',ord:1},{id:'tc2',nome:'TAREFAS (FLÁVIO)',ord:2},{id:'tc3',nome:'TAREFAS (BINA)',ord:3},{id:'tc4',nome:'TAREFAS (ISABELLA)',ord:4}];save()}}
+  const cols=tkCols(),all=S.tarefas.filter(inA).filter(t=>!t.feito),arqs=S.tarefas.filter(inA).filter(t=>t.feito),vis=(u.modo==='arq'?arqs:all).filter(tkOk),nf=tkNF(u),fil=nf>0;
   const so=(v,l)=>`<option value="${v}"${v===u.per?' selected':''}>${l}</option>`;
   const pill=(ic,k,inner,on)=>`<label class="tk-pill${on?' on':''}">${ic}<select data-tkf="${k}">${inner}</select></label>`;
   const I={u:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg>',c:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',l:'<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h6"/></svg>',s:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',f:'<svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>'};
@@ -776,7 +778,7 @@ function vTarefas(){
     body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id);return `<div class="tk-col" data-tkdrop="${c.id}">
       <div class="tk-ch"><span class="tk-grip" draggable="true" data-tkcol="${c.id}" title="Arraste para mover a coluna" aria-label="Mover coluna">⠿</span><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><button type="button" class="tk-plus" data-tk="addc" data-v="${c.id}" title="Adicionar cartão" aria-label="Adicionar cartão em ${esc(c.nome)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><span class="tk-mw"><button type="button" class="tk-plus" data-tk="cmenu" data-v="${c.id}" title="Mais opções da coluna" aria-label="Mais opções da coluna ${esc(c.nome)}">•••</button>${u.colMenu===c.id?`<div class="tk-menu"><button type="button" data-tk="delcol" data-v="${c.id}" class="red">Excluir coluna</button></div>`:''}</span><span class="tk-n">${cs.length}</span></div>
       ${u.addCol===c.id?`<form data-tkform="card" data-col="${c.id}" class="tk-addf"><input name="t" placeholder="Título do cartão…" autocomplete="off" aria-label="Título do novo cartão"></form>`:''}
-      <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div></div>`}).join('')}</div>`;
+      <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div></div>`}).join('')}${tkA()?`<form class="tk-col tk-new" data-tkform="col"><input name="n" placeholder="+ Nova coluna" autocomplete="off" aria-label="Nome da nova coluna"></form>`:''}</div>`;
   }else if(u.modo==='arq'){
     const rows=vis.slice().sort((a,b)=>(b.concluidaEm||'').localeCompare(a.concluidaEm||''));
     const PG=50,sg=rows.length+'|'+(rows[0]?rows[0].id:'');if(u.arqSig!==sg){u.arqSig=sg;u.arqPg=0}
@@ -789,7 +791,7 @@ function vTarefas(){
     const rows=vis.slice().sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999'));
     body=`<div class="tw">${rows.length?`<table><thead><tr><th>Prazo</th><th>Tarefa</th><th>Coluna</th><th>Responsáveis</th><th>Situação</th></tr></thead><tbody>${rows.map(t=>{const c=S.tcols.find(x=>x.id===t.col),ck=t.check||[];return `<tr class="tk-row" data-tk="open" data-v="${t.id}"><td>${t.prazo?dt(t.prazo):'—'}</td><td><b>${esc(t.titulo)}</b></td><td>${esc(c?c.nome:'')}</td><td>${(t.membros||[]).join(', ')||'—'}</td><td><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></td></tr>`}).join('')}</tbody><tfoot><tr><td colspan="5">${rows.length} ${rows.length===1?'tarefa':'tarefas'}${fil?' de '+all.length:''}</td></tr></tfoot></table>`:'<p>Nenhuma tarefa com esses filtros.</p>'}</div>`;
   }
-  return `<div class="card"><div class="card-h"><h3>Tarefas</h3>${tkSeg}<span class="tk-sp"></span><div class="acts">${u.modo==='lista'?'<button class="btn" data-tk="tkprint">Imprimir</button>':''}<button class="btn pri" data-tk="novo">Criar tarefa</button></div></div>${filt}${body}</div>`}
+  return `<div class="card"><div class="card-h"><h3>${tkA()?'Faturamento':'Tarefas'}</h3>${tkSeg}<span class="tk-sp"></span><div class="acts">${u.modo==='lista'?'<button class="btn" data-tk="tkprint">Imprimir</button>':''}<button class="btn pri" data-tk="novo">${tkA()?'Criar cartão':'Criar tarefa'}</button></div></div>${filt}${body}</div>`}
 function tkModal(){
   const u=tkU(),t=tkCur();if(!t)return '';
   const ck=t.check||[],cd=ck.filter(x=>x.ok).length,pc=ck.length?Math.round(cd/ck.length*100):0;
@@ -826,7 +828,7 @@ function tkModal(){
   </div></div></div></div>`}
 function tkAuto1(t){t.style.height='auto';t.style.height=Math.max(t.classList.contains('tk-desc')?44:60,t.scrollHeight+2)+'px'}
 function tkPrintHtml(){
-  const u=tkU(),pt={hoje:'Hoje',semana:'Esta semana',mes:'Este mês','7':'Últimos 7 dias','14':'Últimos 14 dias','30':'Últimos 30 dias','180':'Últimos 6 meses',custom:'Período personalizado'},rows=S.tarefas.filter(t=>!t.feito).filter(tkOk).sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999'));
+  const u=tkU(),pt={hoje:'Hoje',semana:'Esta semana',mes:'Este mês','7':'Últimos 7 dias','14':'Últimos 14 dias','30':'Últimos 30 dias','180':'Últimos 6 meses',custom:'Período personalizado'},rows=S.tarefas.filter(inA).filter(t=>!t.feito).filter(tkOk).sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999'));
   const flt=[u.resp!=='Todos'?'Responsável: '+u.resp:'',u.per!=='todos'?'Período: '+(pt[u.per]||u.per):'',u.st!=='todos'?'Status: '+u.st:'',u.q?'Busca: '+u.q:'',u.semResp?'Sem responsável':'',u.anx?'Com anexos':''].filter(Boolean).join(' · ')||'Todas as tarefas';
   return `<div class="ov"><div class="modal xl" role="dialog" aria-modal="true"><h3>Lista de tarefas</h3>
    <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Lista de Tarefas</span></div><span>Emitido em ${new Date().toLocaleDateString('pt-BR')}</span></div>
@@ -845,7 +847,7 @@ function tkPatch(){
 }
 function tkFit(){const b=document.querySelector('.tk-board');if(!b)return;const ap=document.getElementById('app'),t=b.getBoundingClientRect().top+window.scrollY+(ap?ap.scrollTop:0);b.style.height=Math.max(420,innerHeight-t-8)+'px'}
 window.addEventListener('resize',()=>tkFit());
-function tkAutosize(){tkFit();document.querySelectorAll('.tk-desc,.tk-ed textarea,.tk-edit textarea').forEach(tkAuto1);const u=ui.tk;if(!u)return;if(u.focusDesc){u.focusDesc=false;const d=document.querySelector('.tk-desc');if(d){d.focus();d.setSelectionRange(d.value.length,d.value.length)}}if(u.focusQ){u.focusQ=false;const q=document.querySelector('[data-tkf=fqtop]');if(q)q.focus()}if(u.focusC){u.focusC=false;const d=document.querySelector('.tk-chat textarea');if(d)d.focus()}}
+function tkAutosize(){tkFit();document.querySelectorAll('.tk-desc,.tk-ed textarea,.tk-edit textarea').forEach(tkAuto1);const u=tkU();if(u.focusDesc){u.focusDesc=false;const d=document.querySelector('.tk-desc');if(d){d.focus();d.setSelectionRange(d.value.length,d.value.length)}}if(u.focusQ){u.focusQ=false;const q=document.querySelector('[data-tkf=fqtop]');if(q)q.focus()}if(u.focusC){u.focusC=false;const d=document.querySelector('.tk-chat textarea');if(d)d.focus()}}
 function tkSug(inp){
  const f=inp.form,old=f.querySelector('.tk-sug'),pos=inp.selectionStart,m=/(^|\s)@([^\s@]*)$/.exec(inp.value.slice(0,pos));
  if(!m){if(old)old.remove();return}
@@ -870,7 +872,7 @@ document.addEventListener('click',e=>{if(tkU().colMenu&&!(e.target.closest&&e.ta
  switch(a){
   case 'modo':u.modo=v;u.selArq=[];break;
   case 'reabrir':{const t=S.tarefas.find(x=>x.id===v);t.feito=false;t.concluidaEm='';save();toast('Tarefa reaberta.');break}
-  case 'novo':{u.cOpen=false;u.editDesc=false;const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};break}
+  case 'novo':{if(!tkCols().length){toast('Crie uma coluna primeiro.');break}u.cOpen=false;u.editDesc=false;const id=nid('t');u.draft={id,...(tkA()?{area:tkA()}:{}),col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};break}
   case 'tkprint':ui.modal={type:'tkprint'};render();return
   case 'tkprintgo':{const o=document.title;document.title='Lista de Tarefas';window.print();document.title=o;return}
   case 'busca':{const i=document.querySelector('[data-tkf=fqtop]');if(i)i.focus();return}
@@ -889,7 +891,7 @@ document.addEventListener('click',e=>{if(tkU().colMenu&&!(e.target.closest&&e.ta
    ta.value=v0.slice(0,a)+ins+v0.slice(z);ta.focus();ta.setSelectionRange(c0,c1);ta.dispatchEvent(new Event('input',{bubbles:true}));return}
   case 'cardDone':{const c=S.tarefas.find(x=>x.id===v);if(!c)return;c.feito=true;c.concluidaEm=today();tkLog(c,'concluiu e arquivou este cartão');if(c.rec&&c.prazo)S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});save();toast('Tarefa concluída e arquivada.');break}
   case 'cmenu':u.colMenu=u.colMenu===v?null:v;break;
-  case 'delcol':{u.colMenu=null;const col=S.tcols.find(x=>x.id===v);if(!col)break;const outras=tkCols().filter(x=>x.id!==v);if(!outras.length){toast('Mantenha pelo menos uma coluna.');break}const dest=outras[0],n=S.tarefas.filter(t=>t.col===v).length;
+  case 'delcol':{u.colMenu=null;const col=S.tcols.find(x=>x.id===v);if(!col)break;const outras=tkCols().filter(x=>x.id!==v),n=S.tarefas.filter(t=>t.col===v).length;if(!outras.length&&(!tkA()||n)){toast(tkA()?'Mova ou exclua os cartões desta coluna antes.':'Mantenha pelo menos uma coluna.');break}const dest=outras[0]||{};
    return ask(`Excluir a coluna "${col.nome}"?${n?` Os ${n} ${n===1?'cartão será movido':'cartões serão movidos'} para "${dest.nome}" (nada é apagado).`:' Ela está vazia.'}`,()=>{S.tarefas.forEach(t=>{if(t.col===v)t.col=dest.id});S.tcols=S.tcols.filter(x=>x.id!==v);if(u.col===v)u.col='';done('Coluna excluída.')})}
   case 'menu':u.menu=!u.menu;break;
   case 'selarq':{const a=u.selArq||(u.selArq=[]),i=a.indexOf(v);if(i<0)a.push(v);else a.splice(i,1);break}
@@ -941,8 +943,8 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
   if(!(u.draft&&u.draft.id===c.id))save()}
  render()});
 document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.tkform;if(!k)return;e.preventDefault();const u=tkU(),val=(f.elements[k==='col'?'n':'t'].value||'').trim();if(!val)return;
- if(k==='card'){{const nc={id:nid('t'),col:f.dataset.col,titulo:val,desc:'',membros:[],prazo:'',check:[],anexos:[],msgs:[]};const cc=S.tcols.find(x=>x.id===nc.col),r=tkColResp(cc);if(r)nc.membros=[r];tkLog(nc,'adicionou este cartão a '+cc.nome);S.tarefas.push(nc)}}
- else if(k==='col'){S.tcols.push({id:nid('tc'),nome:val,ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1})}
+ if(k==='card'){{const nc={id:nid('t'),...(tkA()?{area:tkA()}:{}),col:f.dataset.col,titulo:val,desc:'',membros:[],prazo:'',check:[],anexos:[],msgs:[]};const cc=S.tcols.find(x=>x.id===nc.col),r=tkColResp(cc);if(r)nc.membros=[r];tkLog(nc,'adicionou este cartão a '+cc.nome);S.tarefas.push(nc)}}
+ else if(k==='col'){S.tcols.push({id:nid('tc'),...(tkA()?{area:tkA()}:{}),nome:val,ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1})}
  else{const c=tkCur();if(!c)return;
   if(k==='chk')(c.check=c.check||[]).push({t:val,ok:false});
   else if(k==='msgedit'){const m=c.msgs[u.editMsg];if(m&&m.t!==val){m.t=val;m.ed=true}u.editMsg=null}
@@ -1004,7 +1006,7 @@ function vInicio(){
   abertos.sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));pend.sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));
   const faltaDg=S.lancs.filter(l=>l.ia&&!l.dg&&addDays(l.ia,28)<=td).map(l=>{const es=S.estacoes.find(x=>x.id===l.est)||{},lt=S.lotes.find(x=>x.id===l.lote),prev=addDays(l.ia,28);return {l,farm:es.farm,lt,prev,atraso:Math.round((new Date(td+'T12:00:00')-new Date(prev+'T12:00:00'))/864e5)}}).sort((a,b)=>a.prev.localeCompare(b.prev));
   const hoje=S.eventos.filter(e=>e.date<=td&&(e.end||e.date)>=td).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||''));
-  const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkHoje=S.tarefas.filter(t=>!t.feito&&t.prazo&&t.prazo<=td&&(!tkSo||(t.membros||[]).includes(tkEu))).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
+  const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkHoje=S.tarefas.filter(t=>!t.area&&!t.feito&&t.prazo&&t.prazo<=td&&(!tkSo||(t.membros||[]).includes(tkEu))).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
   return `<div class="ini-grid">
    <div class="kpi"><div class="k-n">${fmt(fazAt.size)}</div><div class="k-l">Fazendas atendidas</div></div>
    <div class="kpi"><div class="k-n">${fmt(done.length)}</div><div class="k-l">IATFs realizadas</div></div>
@@ -1891,7 +1893,6 @@ function navHtml(list,d){
     return `<button class="ni ${isOn(n)?'cur':''}" style="--d:${d}" data-a="go" data-v="${n.tab}" data-sub="${n.msub||''}" title="${n.label}">${n.icon?ic(n.icon):'<span class="dot"></span>'}<span class="lbl">${n.label}</span></button>`;
   }).join('');
 }
-const vFatur=()=>`<div class="card"><div class="card-h"><h3>Faturamento</h3></div><p class="muted" style="padding:8px 2px">Em construção. Esta área será configurada em breve.</p></div>`;
 const vNegoc=()=>`<div class="card"><div class="card-h"><h3>Negociações</h3></div><p class="muted" style="padding:8px 2px">Em construção. Esta área será configurada em breve.</p></div>`;
 const LBL={painel:'Sêmen',cadastro:'Cadastro',estoque:'Estoque',botijoes:'Botijões',movs:'Movimentações',fazendas:'Empresas',contatos:'Contatos',negociacoes:'Negociações'};
 const SUBL={entrada:'Entrada de sêmen',saida:'Saída de sêmen',hist:'Histórico'};
@@ -1913,7 +1914,7 @@ function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelector
 function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vFatur,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
   const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
