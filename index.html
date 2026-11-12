@@ -776,8 +776,7 @@ function vTarefas(){
     body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id);return `<div class="tk-col" data-tkdrop="${c.id}">
       <div class="tk-ch"><span class="tk-grip" draggable="true" data-tkcol="${c.id}" title="Arraste para mover a coluna" aria-label="Mover coluna">⠿</span><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><button type="button" class="tk-plus" data-tk="addc" data-v="${c.id}" title="Adicionar cartão" aria-label="Adicionar cartão em ${esc(c.nome)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><span class="tk-mw"><button type="button" class="tk-plus" data-tk="cmenu" data-v="${c.id}" title="Mais opções da coluna" aria-label="Mais opções da coluna ${esc(c.nome)}">•••</button>${u.colMenu===c.id?`<div class="tk-menu"><button type="button" data-tk="delcol" data-v="${c.id}" class="red">Excluir coluna</button></div>`:''}</span><span class="tk-n">${cs.length}</span></div>
       ${u.addCol===c.id?`<form data-tkform="card" data-col="${c.id}" class="tk-addf"><input name="t" placeholder="Título do cartão…" autocomplete="off" aria-label="Título do novo cartão"></form>`:''}
-      <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div></div>`}).join('')}
-     <form class="tk-col tk-new" data-tkform="col"><input name="n" placeholder="+ Nova coluna" autocomplete="off" aria-label="Nome da nova coluna"></form></div>`;
+      <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div></div>`}).join('')}</div>`;
   }else if(u.modo==='arq'){
     const rows=vis.slice().sort((a,b)=>(b.concluidaEm||'').localeCompare(a.concluidaEm||''));
     const PG=50,sg=rows.length+'|'+(rows[0]?rows[0].id:'');if(u.arqSig!==sg){u.arqSig=sg;u.arqPg=0}
