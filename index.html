@@ -927,12 +927,12 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
   else if(k==='prazo')c.prazo=t.value;
   else if(k==='desc'){c.desc=t.value;if(!(u.draft&&u.draft.id===c.id))save();return}
   else if(k==='chk'){c.check[+t.dataset.v].ok=t.checked}
-  else if(k==='file'){const fs=[...t.files];t.value='';if(!fs.length)return;const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;let n=fs.length;
-   const fin=()=>{if(!--n){if(!(u.draft&&u.draft.id===c.id))save();render()}};
-   fs.forEach(f=>{if(f.size>lim){toast('"'+f.name+'" passa de '+(cloud?'10':'1,5')+' MB.');fin();return}
+  else if(k==='file'){const fs=[...t.files];t.value='';if(!fs.length)return;const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;let n=fs.length;const res=[];
+   const fin=()=>{if(!--n){res.filter(Boolean).forEach(x=>(c.anexos=c.anexos||[]).push(x));if(!(u.draft&&u.draft.id===c.id))save();render()}};
+   fs.forEach((f,fi)=>{if(f.size>lim){toast('"'+f.name+'" passa de '+(cloud?'10':'1,5')+' MB.');fin();return}
     if(cloud){toast('Enviando "'+f.name+'"…');const path=c.id+'/'+Date.now().toString(36)+'-'+f.name.replace(/[^\w.\-]+/g,'_');
-     GS_CLOUD.upload(path,f).then(()=>{(c.anexos=c.anexos||[]).push({n:f.name,s:f.size,p:path});toast('Anexo enviado.')}).catch(()=>toast('Não foi possível enviar "'+f.name+'".')).finally(fin)}
-    else{const r=new FileReader();r.onload=()=>{(c.anexos=c.anexos||[]).push({n:f.name,s:f.size,d:r.result});fin()};r.onerror=fin;r.readAsDataURL(f)}});return}
+     GS_CLOUD.upload(path,f).then(()=>{res[fi]={n:f.name,s:f.size,p:path};toast('Anexo enviado.')}).catch(()=>toast('Não foi possível enviar "'+f.name+'".')).finally(fin)}
+    else{const r=new FileReader();r.onload=()=>{res[fi]={n:f.name,s:f.size,d:r.result};fin()};r.onerror=fin;r.readAsDataURL(f)}});return}
   if(!(u.draft&&u.draft.id===c.id))save()}
  render()});
 document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.tkform;if(!k)return;e.preventDefault();const u=tkU(),val=(f.elements[k==='col'?'n':'t'].value||'').trim();if(!val)return;
