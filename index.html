@@ -746,7 +746,6 @@ function tkCard(t){
 function vTarefas(){
   const u=tkU();
   if(!['conectando','lento','erro'].includes(dbState)&&(!S.tcols.length||(!S.tarefas.length&&S.tcols.map(c=>c.nome).join('|')==='A fazer|Em andamento|Concluído'))){S.tcols=[{id:'tc1',nome:'TAREFAS A FAZER',ord:1},{id:'tc2',nome:'TAREFAS (FLÁVIO)',ord:2},{id:'tc3',nome:'TAREFAS (BINA)',ord:3},{id:'tc4',nome:'TAREFAS (ISABELLA)',ord:4}];save()}
-  else if(!['conectando','lento','erro'].includes(dbState)&&!S.tcols.some(c=>/isabel/i.test(c.nome))){let fl=0;try{fl=localStorage.getItem('gs_tk_isa')}catch(_){}if(!fl){try{localStorage.setItem('gs_tk_isa','1')}catch(_){}S.tcols.push({id:nid('tc'),nome:'TAREFAS (ISABELLA)',ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1});save()}}
   const cols=tkCols(),all=S.tarefas.filter(t=>!t.feito),arqs=S.tarefas.filter(t=>t.feito),vis=(u.modo==='arq'?arqs:all).filter(tkOk),nf=tkNF(u),fil=nf>0;
   const so=(v,l)=>`<option value="${v}"${v===u.per?' selected':''}>${l}</option>`;
   const pill=(ic,k,inner,on)=>`<label class="tk-pill${on?' on':''}">${ic}<select data-tkf="${k}">${inner}</select></label>`;
@@ -775,7 +774,7 @@ function vTarefas(){
   let body;
   if(u.modo==='quadro'){
     body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id);return `<div class="tk-col" data-tkdrop="${c.id}">
-      <div class="tk-ch"><span class="tk-grip" draggable="true" data-tkcol="${c.id}" title="Arraste para mover a coluna" aria-label="Mover coluna">⠿</span><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><button type="button" class="tk-plus" data-tk="addc" data-v="${c.id}" title="Adicionar cartão" aria-label="Adicionar cartão em ${esc(c.nome)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><span class="tk-n">${cs.length}</span></div>
+      <div class="tk-ch"><span class="tk-grip" draggable="true" data-tkcol="${c.id}" title="Arraste para mover a coluna" aria-label="Mover coluna">⠿</span><input class="tk-cn" data-tkf="colname" data-v="${c.id}" value="${esc(c.nome)}" aria-label="Nome da coluna"><button type="button" class="tk-plus" data-tk="addc" data-v="${c.id}" title="Adicionar cartão" aria-label="Adicionar cartão em ${esc(c.nome)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><span class="tk-mw"><button type="button" class="tk-plus" data-tk="cmenu" data-v="${c.id}" title="Mais opções da coluna" aria-label="Mais opções da coluna ${esc(c.nome)}">•••</button>${u.colMenu===c.id?`<div class="tk-menu"><button type="button" data-tk="delcol" data-v="${c.id}" class="red">Excluir coluna</button></div>`:''}</span><span class="tk-n">${cs.length}</span></div>
       ${u.addCol===c.id?`<form data-tkform="card" data-col="${c.id}" class="tk-addf"><input name="t" placeholder="Título do cartão…" autocomplete="off" aria-label="Título do novo cartão"></form>`:''}
       <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div></div>`}).join('')}
      <form class="tk-col tk-new" data-tkform="col"><input name="n" placeholder="+ Nova coluna" autocomplete="off" aria-label="Nome da nova coluna"></form></div>`;
@@ -867,7 +866,7 @@ document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Escape'&&t.
 document.addEventListener('focusout',e=>{const t=e.target;if(t.form&&t.form.classList&&t.form.classList.contains('tk-addf')&&!t.value.trim()){tkU().addCol=null;const f=t.form;setTimeout(()=>f.remove(),0)}});
 document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('.tk-sug button');if(!b)return;e.preventDefault();tkPick(b.closest('form').querySelector('[name=t]'),b.dataset.nm)});
 let tkDrag=null;
-document.addEventListener('click',e=>{if(tkU().menu&&!(e.target.closest&&e.target.closest('.tk-mw'))){tkU().menu=false;render()}const b=e.target.closest&&e.target.closest('[data-tk]');if(!b)return;const u=tkU(),a=b.dataset.tk,v=b.dataset.v;
+document.addEventListener('click',e=>{if(tkU().colMenu&&!(e.target.closest&&e.target.closest('.tk-mw'))){tkU().colMenu=null;render()}if(tkU().menu&&!(e.target.closest&&e.target.closest('.tk-mw'))){tkU().menu=false;render()}const b=e.target.closest&&e.target.closest('[data-tk]');if(!b)return;const u=tkU(),a=b.dataset.tk,v=b.dataset.v;
  if(e.target.closest('.tk-cn'))return;
  switch(a){
   case 'modo':u.modo=v;u.selArq=[];break;
@@ -890,6 +889,9 @@ document.addEventListener('click',e=>{if(tkU().menu&&!(e.target.closest&&e.targe
    else{const m=v==='b'?'**':'_';ins=m+sel+m;c0=a+m.length;c1=c0+sel.length}
    ta.value=v0.slice(0,a)+ins+v0.slice(z);ta.focus();ta.setSelectionRange(c0,c1);ta.dispatchEvent(new Event('input',{bubbles:true}));return}
   case 'cardDone':{const c=S.tarefas.find(x=>x.id===v);if(!c)return;c.feito=true;c.concluidaEm=today();tkLog(c,'concluiu e arquivou este cartão');if(c.rec&&c.prazo)S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});save();toast('Tarefa concluída e arquivada.');break}
+  case 'cmenu':u.colMenu=u.colMenu===v?null:v;break;
+  case 'delcol':{u.colMenu=null;const col=S.tcols.find(x=>x.id===v);if(!col)break;const outras=tkCols().filter(x=>x.id!==v);if(!outras.length){toast('Mantenha pelo menos uma coluna.');break}const dest=outras[0],n=S.tarefas.filter(t=>t.col===v).length;
+   return ask(`Excluir a coluna "${col.nome}"?${n?` Os ${n} ${n===1?'cartão será movido':'cartões serão movidos'} para "${dest.nome}" (nada é apagado).`:' Ela está vazia.'}`,()=>{S.tarefas.forEach(t=>{if(t.col===v)t.col=dest.id});S.tcols=S.tcols.filter(x=>x.id!==v);if(u.col===v)u.col='';done('Coluna excluída.')})}
   case 'menu':u.menu=!u.menu;break;
   case 'selarq':{const a=u.selArq||(u.selArq=[]),i=a.indexOf(v);if(i<0)a.push(v);else a.splice(i,1);break}
   case 'selarqall':{const ids=(b.dataset.ids||'').split(',').filter(Boolean),a=u.selArq||[];u.selArq=ids.every(x=>a.includes(x))?[]:ids;break}
