@@ -70,6 +70,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ht{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
 .ht .hs{font-size:11px;opacity:.75;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ht b{font-family:var(--f-display);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.um{position:relative;flex:none}button.hu{border:0;color:inherit;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px}button.hu:hover{background:rgba(255,255,255,.26)}.ud{width:8px;height:8px;border-radius:50%;background:#e9b44c}.ud.ok{background:#4cc38a}.ud.bad{background:#e5604d}.um-m{position:absolute;right:0;top:calc(100% + 8px);min-width:210px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(20,33,61,.2);padding:6px;z-index:60;display:flex;flex-direction:column}.um-m button{text-align:left;padding:10px 12px;border:0;background:transparent;border-radius:6px;font:inherit;font-size:14px;color:inherit;cursor:pointer}.um-m button:hover{background:var(--bg)}.um-m .danger{color:#b3261e}.um-m hr{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
 .hu{flex:none;background:rgba(255,255,255,.16);border-radius:99px;padding:5px 12px;font-weight:600;font-size:13px}
 .content{overflow:auto;min-height:0;padding:20px max(24px,env(safe-area-inset-right,0px)) 28px 24px;display:flex;flex-direction:column;gap:16px}
 .content>*{flex:none;width:100%}
@@ -1860,8 +1861,8 @@ function render(){
   sd.className='side'+(mini?' mini':'');
   sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(NAV,0)}`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
-   <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><span class="hu">Vale Animal</span>`;
-  document.getElementById('app').innerHTML=`<div class="banner ${dbState==='ok'?'ok':''}"><span>${bannerTxt()}</span><span class="acts"><button class="btn sm" data-a="export">Exportar dados</button><button class="btn sm" data-a="import">Importar dados</button><button class="btn sm" data-a="wipe">Zerar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button class="btn sm" data-a="logout">Sair</button>':''}</span></div>${view}`;
+   <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
+  document.getElementById('app').innerHTML=`${dbState==='ok'?'':`<div class="banner"><span>${bannerTxt()}</span></div>`}${view}`;
   document.getElementById('modal-root').innerHTML=modalHtml();
   responsive();
   lastMK=ui.modal?ui.modal.type+(ui.modal.kind||''):'';
@@ -1875,11 +1876,14 @@ const done=t=>{save();ui.modal=null;ui.confirm=null;render();if(t)toast(t)};
 const ask=(msg,ok,o={})=>{ui.confirm={msg,okFn:ok,...o};render()};
 
 /* ---------- ações ---------- */
+document.addEventListener('click',e=>{if(ui.umenu&&!(e.target.closest&&e.target.closest('.um'))){ui.umenu=false;render()}});
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
   if(!isAdm()&&ADM_ACTS.includes(b.dataset.a)){toast('Somente o administrador pode fazer isso.');return}
   const a=b.dataset.a,v=b.dataset.v;
+  if(a!=='umenu')ui.umenu=false;
   switch(a){
+   case 'umenu':ui.umenu=!ui.umenu;render();break;
    case 'tab':ui.tab=v;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
    case 'go':ui.tab=v;if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
    case 'grp':{const g=b.dataset.home;
