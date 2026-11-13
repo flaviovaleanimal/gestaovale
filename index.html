@@ -420,8 +420,9 @@ async function pump(){
   busy=false;
   if(fail){q=[];Object.keys(lastSnap).forEach(c=>applyCol(c,lastSnap[c]));
     toast(fail.code==='invalid_argument'?'Sem permissão para gravar. Saia e entre de novo.':'Não foi possível salvar agora. Tente de novo.')}
-  Object.keys(held).forEach(c=>{applyCol(c,held[c]);delete held[c]});
-  softRender();
+  const hk=Object.keys(held);
+  hk.forEach(c=>{applyCol(c,held[c]);delete held[c]});
+  if(fail||hk.length)softRender();
 }
 function applyCol(c,arr){S[c]=arr;synced[c]={};arr.forEach(x=>{synced[c][x.id]=JSON.stringify(x)})}
 function onSnap(c,snap){
@@ -956,8 +957,7 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
   else if(k==='col'){const ant=S.tcols.find(x=>x.id===c.col);c.col=t.value;{const nw=S.tcols.find(x=>x.id===c.col);if(ant&&nw&&ant.id!==nw.id)tkLog(c,'moveu este cartão de '+ant.nome+' para '+nw.nome)}const cl=S.tcols.find(x=>x.id===c.col),r=tkColResp(cl);if(r)c.membros=[r];else if(cl&&cl.id===tkCols()[0].id)c.membros=[]}
   else if(k==='memb'){const m=new Set(c.membros||[]);t.checked?m.add(t.dataset.v):m.delete(t.dataset.v);c.membros=TK_TEAM.filter(n=>m.has(n))}
   else if(k==='hora'||k==='prazo'){c[k]=t.value;if(!(u.draft&&u.draft.id===c.id)){clearTimeout(window.__dtT);window.__dtT=setTimeout(save,800)}return}
-  else if(k==='rec')c.rec=t.value;
-  else if(k==='lemb')c.lemb=t.value;
+  else if(k==='rec'||k==='lemb'){c[k]=t.value;if(!(u.draft&&u.draft.id===c.id)){clearTimeout(window.__dtT);window.__dtT=setTimeout(save,800)}return}
   else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';if(t.checked&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id)){S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[]})}
   if(!(u.draft&&u.draft.id===c.id))save();if(t.checked){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}return render()}
   else if(k==='desc'){c.desc=t.value;if(!(u.draft&&u.draft.id===c.id))save();return}
