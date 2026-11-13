@@ -2473,6 +2473,11 @@ document.addEventListener('submit',e=>{
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!ui.modal&&!ui.confirm){const K=(typeof tkA==='function'&&tkA())?'fk':'tk',u=ui[K];if(u&&u.arqOpen){u.arqOpen=false;u.selArq=[];render();return}}if(e.key==='Escape'&&(ui.modal||ui.confirm)){ui.modal=null;ui.confirm=null;render()}});
 matchMedia('(max-width:820px)').addEventListener('change',()=>{ui.drawer=false;render()});
+const NAVKEY='gv_nav';
+try{const n=JSON.parse(localStorage.getItem(NAVKEY)||'null');if(n&&typeof n.tab==='string'&&n.tab){const t0=ui.tab;ui.tab=n.tab;if(n.tk){tkU().modo=n.tk}if(n.fk){const t1=ui.tab;ui.tab='f-fatur';tkU().modo=n.fk;ui.tab=t1}try{render()}catch(e){ui.tab=t0;if(ui.tk)ui.tk.modo='quadro'}}}catch(e){}
+let pendCard=null;try{const n=JSON.parse(localStorage.getItem(NAVKEY)||'null');if(n&&n.card)pendCard=n.card}catch(e){}
+const saveNav=()=>{try{const K=ui.tab==='f-fatur'?'fk':'tk',sel=ui.modal&&ui.modal.type==='tk'&&ui[K]?ui[K].sel:null;if(pendCard&&!sel)return;localStorage.setItem(NAVKEY,JSON.stringify({tab:ui.tab,tk:ui.tk&&ui.tk.modo,fk:ui.fk&&ui.fk.modo,card:sel||null}))}catch(e){}};
+const _r0=render;render=function(){const r=_r0.apply(this,arguments);if(pendCard){const id=pendCard,el=document.querySelector('[data-tk="open"][data-v="'+id+'"]');if(el){pendCard=null;el.click();return r}else if(S.tarefas&&S.tarefas.length&&(ui.tab==='tarefas'||ui.tab==='f-fatur'))pendCard=null}saveNav();return r};
 render();
 init();
 </script>
