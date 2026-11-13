@@ -710,7 +710,7 @@ const tkLate=t=>t.area!=='fat'&&!!t.prazo&&!t.feito&&(t.prazo<today()||(t.prazo=
 const TKI={arq:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/>',clip:'<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>',msg:'<path d="M4 4h16v12H9l-5 4z"/><path d="M8 8.5h8M8 12h5"/>',chk:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>'};
 const tkIc=k=>`<svg class="tk-bi" viewBox="0 0 24 24" aria-hidden="true">${TKI[k]}</svg>`;
 const tkFatu=t=>{if(t.feito)return true;const c=S.tcols.find(x=>x.id===t.col),n=c?c.nome.toUpperCase():'';return /COBRAN|ARQUIV/.test(n)};
-const tkSt=t=>t.area==='fat'?(tkFatu(t)?['Faturado','done']:['Não faturado','em']):t.feito?['Concluída','done']:tkLate(t)?['Atrasada','late']:['Aberto em dia','em'];
+const tkSt=t=>t.area==='fat'?(tkFatu(t)?['Faturado','done']:['Não faturado','late']):t.feito?['Concluída','done']:tkLate(t)?['Atrasada','late']:['Aberto em dia','em'];
 const tkDData=t=>{const d=new Date(t.prazo+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'});return d+(t.hora?', '+t.hora:'')};
 const tkPerOk=t=>{const u=tkU(),p=u.per;if(p==='todos')return true;if(!t.prazo)return false;const td=today(),d=t.prazo;
  if(p==='hoje')return d===td;
