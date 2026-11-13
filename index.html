@@ -1024,10 +1024,22 @@ document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.t
  if(k==='msg'){const i=document.querySelector('[data-tkform=msg] textarea');if(i)i.focus({preventScroll:true});const n=document.querySelector('.tk-ev .tk-msg');if(n)n.scrollIntoView({block:'nearest'})}
  if(k==='chk'){const i=document.querySelector('[data-tkform=chk] input');if(i)i.focus()}
  if(k==='card'){const i=document.querySelector('.tk-col[data-tkdrop="'+f.dataset.col+'"] [data-tkform=card] input');if(i)i.focus()}});
-document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-tkc]');if(!b)return;tkDrag=b.dataset.tkc;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',tkDrag)}catch(_){}b.classList.add('ag-dragging')});
+document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-tkc]');if(!b)return;e.preventDefault();return;tkDrag=b.dataset.tkc;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',tkDrag)}catch(_){}b.classList.add('ag-dragging')});
 document.addEventListener('dragend',()=>{tkDrag=null;document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'))});
 document.addEventListener('dragover',e=>{const t=tkDrag&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();if(!t.classList.contains('tk-over')){document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'));t.classList.add('tk-over')}});
-document.addEventListener('drop',e=>{const t=tkDrag&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();const c=S.tarefas.find(x=>x.id===tkDrag);tkDrag=null;const oldCol=c&&S.tcols.find(x=>x.id===c.col);if(c&&c.col!==t.dataset.tkdrop){c.col=t.dataset.tkdrop;{const cl=S.tcols.find(x=>x.id===c.col),r=tkColResp(cl);if(r)c.membros=[r];else if(cl&&cl.id===tkCols()[0].id)c.membros=[];if(cl&&oldCol)tkLog(c,'moveu este cartão de '+oldCol.nome+' para '+cl.nome)}save();render();toast('Cartão movido.')}else render()});
+function tkMove(id,col){const c=S.tarefas.find(x=>x.id===id);const oldCol=c&&S.tcols.find(x=>x.id===c.col);if(c&&col&&c.col!==col){c.col=col;{const cl=S.tcols.find(x=>x.id===c.col),r=tkColResp(cl);if(r)c.membros=[r];else if(cl&&cl.id===tkCols()[0].id)c.membros=[];if(cl&&oldCol)tkLog(c,'moveu este cartão de '+oldCol.nome+' para '+cl.nome)}save();render();toast('Cartão movido.')}else render()}
+document.addEventListener('drop',e=>{const t=tkDrag&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();const id=tkDrag;tkDrag=null;tkMove(id,t.dataset.tkdrop)});
+/* arrastar cartões com o mouse (não depende do arrastar nativo do navegador) */
+let tkPD=null,tkNoClk=0;
+document.addEventListener('mousedown',e=>{if(e.button!==0)return;const b=e.target.closest&&e.target.closest('[data-tkc]');if(!b||e.target.closest('input,textarea,select,a'))return;tkPD={id:b.dataset.tkc,el:b,x:e.clientX,y:e.clientY,on:false,g:null,col:null}});
+document.addEventListener('mousemove',e=>{const d=tkPD;if(!d)return;
+ if(!d.on){if(Math.abs(e.clientX-d.x)+Math.abs(e.clientY-d.y)<8)return;d.on=true;tkDrag=d.id;const r=d.el.getBoundingClientRect(),g=d.el.cloneNode(true);g.removeAttribute('data-tk');g.removeAttribute('data-tkc');g.style.cssText='position:fixed;z-index:9999;pointer-events:none;opacity:.9;box-shadow:0 8px 22px rgba(20,33,61,.3);width:'+r.width+'px;left:0;top:0;transform:translate('+r.left+'px,'+r.top+'px) rotate(2deg)';g.dataset.ox=e.clientX-r.left;g.dataset.oy=e.clientY-r.top;document.body.appendChild(g);d.g=g;d.el.classList.add('ag-dragging');document.body.style.userSelect='none'}
+ e.preventDefault();const g=d.g;g.style.transform='translate('+(e.clientX-g.dataset.ox)+'px,'+(e.clientY-g.dataset.oy)+'px) rotate(2deg)';
+ const el=document.elementFromPoint(e.clientX,e.clientY),t=el&&el.closest?el.closest('[data-tkdrop]'):null;
+ document.querySelectorAll('.tk-over').forEach(x=>{if(x!==t)x.classList.remove('tk-over')});if(t)t.classList.add('tk-over');d.col=t?t.dataset.tkdrop:null;
+ const bd=document.querySelector('.tk-board');if(bd){const r=bd.getBoundingClientRect();if(e.clientX>r.right-50)bd.scrollLeft+=18;else if(e.clientX<r.left+50)bd.scrollLeft-=18}});
+document.addEventListener('mouseup',()=>{const d=tkPD;tkPD=null;if(!d||!d.on)return;if(d.g)d.g.remove();d.el.classList.remove('ag-dragging');document.body.style.userSelect='';document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'));tkDrag=null;tkNoClk=Date.now();tkMove(d.id,d.col)});
+document.addEventListener('click',e=>{if(Date.now()-tkNoClk<400){e.stopPropagation();e.preventDefault();tkNoClk=0}},true);
 
 let dragId=null;
 let tkCD=null;
