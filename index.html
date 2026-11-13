@@ -210,7 +210,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
 .ag-wd{padding:6px 2px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-transform:uppercase}
 .ag-day{min-height:108px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;overflow:hidden;min-width:0}
-.ag-chip[draggable],.ag-ev[draggable]{cursor:grab}.tk-sp{flex:1}.tk-c.conc{background:#fff6cc;border-color:#ecd982}.tk-row.conc td{background:#fff6cc}@media(prefers-color-scheme:dark){.tk-c.conc,.tk-row.conc td{background:#4a4318}.tk-c.conc{border-color:#7a6d25}}.tk-fb .tk-search{flex:0 0 260px;min-height:44px;border-radius:12px}.tk-fb .tk-search input{width:100%}.tk-ir{cursor:pointer}.tk-ir:hover{background:var(--bg)}.tk-fb{gap:8px}.tk-fb .tk-pill{flex:0 1 180px;min-width:150px}.tk-fb .tk-pill select{padding:8px 4px 8px 36px;font-size:14px}.tk-fb .tk-pill>svg{left:11px;width:17px;height:17px}.tk-fb{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}.tk-pill{position:relative;display:inline-flex;align-items:center;flex:0 1 220px;min-width:150px}.tk-pill svg,.tk-fbtn svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.tk-pill>svg{position:absolute;left:14px;pointer-events:none;color:var(--navy)}
+.ag-chip[draggable],.ag-ev[draggable]{cursor:grab}.tk-sp{flex:1}.tk-c.conc{background:#fffbe6;border-color:#f2e6a8}.tk-row.conc td{background:#fffbe6}@media(prefers-color-scheme:dark){.tk-c.conc,.tk-row.conc td{background:#4a4318}.tk-c.conc{border-color:#7a6d25}}.tk-fb .tk-search{flex:0 0 260px;min-height:44px;border-radius:12px}.tk-fb .tk-search input{width:100%}.tk-ir{cursor:pointer}.tk-ir:hover{background:var(--bg)}.tk-fb{gap:8px}.tk-fb .tk-pill{flex:0 1 180px;min-width:150px}.tk-fb .tk-pill select{padding:8px 4px 8px 36px;font-size:14px}.tk-fb .tk-pill>svg{left:11px;width:17px;height:17px}.tk-fb{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}.tk-pill{position:relative;display:inline-flex;align-items:center;flex:0 1 220px;min-width:150px}.tk-pill svg,.tk-fbtn svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.tk-pill>svg{position:absolute;left:14px;pointer-events:none;color:var(--navy)}
 .tk-pill select{width:100%;min-height:44px;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:8px 12px 8px 42px;font:inherit}.tk-pill.on select{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy-soft)}.tk-pill.dis select{background:var(--bg);color:var(--muted)}.tk-pill.dis>svg{color:var(--muted)}
 .tk-fbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid var(--navy-soft);background:var(--navy-soft);color:var(--navy);font:inherit;font-weight:600;cursor:pointer}.tk-fbtn.open{background:var(--navy);color:var(--navy-ink)}
 .tk-fp{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:10px;padding:12px;background:var(--bg);border-radius:10px}.tk-fp label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}.tk-fp label.tk-chk{flex-direction:row;font-size:14px;color:var(--ink);min-height:44px}.tk-fp input[type=date],.tk-fp input[type=text]{min-height:44px;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit}
@@ -706,11 +706,11 @@ const inA=x=>(x.area||'')===tkA();
 const tkU=()=>{const K=tkA()?'fk':'tk';if(!ui[K])ui[K]={modo:'quadro',resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false,fp:false,sel:null};return ui[K]};
 const tkCols=()=>S.tcols.filter(inA).sort((a,b)=>(a.ord||0)-(b.ord||0));
 const tkDoneCol=()=>{const c=tkCols();return c.length?c[c.length-1].id:''};
-const tkLate=t=>t.area!=='fat'&&!!t.prazo&&!t.feito&&(t.prazo<today()||(t.prazo===today()&&!!t.hora&&t.hora<new Date().toTimeString().slice(0,5)));
+const tkLate=t=>t.area!=='fat'&&!!t.prazo&&!t.feito&&!tkNaArq(t)&&(t.prazo<today()||(t.prazo===today()&&!!t.hora&&t.hora<new Date().toTimeString().slice(0,5)));
 const TKI={arq:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/>',clip:'<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>',msg:'<path d="M4 4h16v12H9l-5 4z"/><path d="M8 8.5h8M8 12h5"/>',chk:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>'};
 const tkIc=k=>`<svg class="tk-bi" viewBox="0 0 24 24" aria-hidden="true">${TKI[k]}</svg>`;
 const tkFatu=t=>{if(t.feito)return true;const c=S.tcols.find(x=>x.id===t.col),n=c?c.nome.toUpperCase():'';return /COBRAN|ARQUIV|CONCLU/.test(n)};
-const tkSt=t=>t.area==='fat'?(tkFatu(t)?['Faturado','done']:['Não faturado','late']):t.feito?['Concluída','done']:tkLate(t)?['Atrasada','late']:['Aberto em dia','em'];
+const tkSt=t=>t.area==='fat'?(tkFatu(t)?['Faturado','done']:['Não faturado','late']):t.feito||tkNaArq(t)?['Concluída','done']:tkLate(t)?['Atrasada','late']:['Aberto em dia','em'];
 const tkDData=t=>{const d=new Date(t.prazo+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'});return d+(t.hora?', '+t.hora:'')};
 const tkPerOk=t=>{const u=tkU(),p=u.per;if(p==='todos')return true;if(!t.prazo)return false;const td=today(),d=t.prazo;
  if(p==='hoje')return d===td;
@@ -729,7 +729,8 @@ const tkOk=t=>{const u=tkU();
  if(u.st==='fat')return tkSt(t)[0]==='Faturado';
  if(u.st==='nfat')return tkSt(t)[0]==='Não faturado';
  if(u.st==='atrasada')return tkLate(t);
- if(u.st==='emdia')return !t.feito&&!tkLate(t);
+ if(u.st==='emdia')return !t.feito&&!tkNaArq(t)&&!tkLate(t);
+ if(u.st==='conc')return tkSt(t)[0]==='Concluída';
  return true};
 const tkArqRows=()=>{const u=tkU(),A=tkA();const termo=nrm(u.aq||'').split(/\s+/).filter(Boolean);
  return S.tarefas.filter(t=>t.feito&&(A?t.area===A:!t.area)).filter(t=>{
@@ -799,7 +800,7 @@ function vTarefas(){
   const pill=(ic,k,inner,on)=>`<label class="tk-pill${on?' on':''}">${ic}<select data-tkf="${k}">${inner}</select></label>`;
   const I={u:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg>',c:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',l:'<svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h6"/></svg>',s:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',f:'<svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>'};
   const perTxt={hoje:'Hoje',semana:'Esta semana',mes:'Este mês','7':'Últimos 7 dias','14':'Últimos 14 dias','30':'Últimos 30 dias','180':'Últimos 6 meses',custom:'Período personalizado'};
-  const stTxt={atrasada:'Atrasada',emdia:'Aberto em dia',fat:'Faturado',nfat:'Não faturado'};
+  const stTxt={conc:'Concluída',atrasada:'Atrasada',emdia:'Aberto em dia',fat:'Faturado',nfat:'Não faturado'};
   const chips=[];
   if(u.resp!=='Todos')chips.push(['resp',I.u+esc(u.resp)]);
   if(u.per!=='todos')chips.push(['per',I.c+(u.per==='custom'?'Período: '+(u.de?dt(u.de):'…')+' a '+(u.ate?dt(u.ate):'…'):perTxt[u.per])]);
@@ -814,7 +815,7 @@ function vTarefas(){
    ${tkTotH}${tkSearch}
    ${tkA()?'':pill(I.u,'fresp',`<option value="Todos">Minhas tarefas</option>${TK_TEAM.map(n=>`<option${u.resp===n?' selected':''}>${n}</option>`).join('')}`,u.resp!=='Todos')}
    ${tkA()?'':pill(I.c,'fper',`<option value="todos">Período</option>${Object.entries(perTxt).map(([k,v])=>so(k,v)).join('')}`,u.per!=='todos')}
-   <label class="tk-pill${u.modo==='arq'?' dis':u.st!=='todos'?' on':''}">${I.s}<select data-tkf="fst"${u.modo==='arq'?' disabled':''}><option value="todos">${u.modo==='arq'?'Concluídas':'Todos os status'}</option>${tkA()?`<option value="nfat"${u.st==='nfat'?' selected':''}>Não faturado</option><option value="fat"${u.st==='fat'?' selected':''}>Faturado</option>`:`<option value="atrasada"${u.st==='atrasada'?' selected':''}>Atrasada</option><option value="emdia"${u.st==='emdia'?' selected':''}>Aberto em dia</option>`}</select></label>
+   <label class="tk-pill${u.modo==='arq'?' dis':u.st!=='todos'?' on':''}">${I.s}<select data-tkf="fst"${u.modo==='arq'?' disabled':''}><option value="todos">${u.modo==='arq'?'Concluídas':'Todos os status'}</option>${tkA()?`<option value="nfat"${u.st==='nfat'?' selected':''}>Não faturado</option><option value="fat"${u.st==='fat'?' selected':''}>Faturado</option>`:`<option value="atrasada"${u.st==='atrasada'?' selected':''}>Atrasada</option><option value="emdia"${u.st==='emdia'?' selected':''}>Aberto em dia</option><option value="conc"${u.st==='conc'?' selected':''}>Concluída</option>`}</select></label>
    <button class="tk-fbtn${u.fp?' open':''}" data-tk="fpanel">${I.f}Filtros (${nf})</button>
   </div>
   ${u.per==='custom'?`<div class="tk-fp"><label>Data inicial<input type="date" data-tkf="fde" value="${esc(u.de)}"></label><label>Data final<input type="date" data-tkf="fate" value="${esc(u.ate)}"></label></div>`:''}
