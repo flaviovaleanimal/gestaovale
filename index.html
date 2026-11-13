@@ -1663,7 +1663,7 @@ const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
 const ptitle=()=>({'p-painel':'Estoque › Produtos','p-cadastro':'Estoque › Produtos › Cadastro','p-estoque':'Estoque › Produtos › Estoque','p-movs':'Estoque › Produtos › Movimentações'}[ui.tab]);
-const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
+const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':ui.tab==='e-painel'?'Estoque':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
@@ -1694,6 +1694,33 @@ function pChart(){
    <div class="bars" role="img" aria-label="Gráfico de barras com o estoque atual de cada produto">
    ${rows.map(o=>`<div class="bar-row" title="${esc(o.p.name)}: ${fmt(o.v)}"><span class="bar-name">${esc(o.p.name)}</span><div class="bar-track"><div class="bar" style="width:${(o.v/max*100).toFixed(2)}%"></div></div><span class="bar-val">${fmt(o.v)}</span></div>`).join('')}
    <div class="bar-row axis"><span></span><div class="ticks">${[0,1,2,3,4].map(i=>`<span style="left:${i*25}%">${fmt(r3(max*i/4))}</span>`).join('')}</div><span></span></div></div></div>`;
+}
+
+function vEPainel(){
+  const doses=S.movs.reduce((a,m)=>a+sg(m),0),touros=new Set(S.movs.filter(m=>m.type).map(m=>m.b)).size;
+  const lastT=S.tanks.map(t=>({t,l:tankLast(t.id)}));
+  const lowT=lastT.filter(o=>o.l&&o.l.level<LOW);
+  const lowMeds=S.meas.filter(x=>x.kind==='medicao'&&x.level<LOW).sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0));
+  const resolv=x=>S.meas.filter(y=>y.tank===x.tank&&y.kind==='abastecimento'&&y.date>=x.date).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const medRows=lowMeds.map(x=>{const r=resolv(x);return `<tr><td>${dt(x.date)}</td><td><b>${esc(T(x.tank).name)}</b></td><td class="num"><b>${x.level} cm</b></td><td><span class="pill warn">Nitrogênio baixo</span></td><td>${r?'Reabastecido em '+dt(r.date).slice(0,5):'<span class="pill out">Precisa reabastecer</span>'}</td></tr>`}).join('');
+  const rows=S.products.map(p=>({p,v:pTotal(p.id)})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name));
+  const max=rows.length?niceMax(rows[0].v):1;
+  const chart=rows.length?`<div class="bars" role="img" aria-label="Gráfico de barras com o estoque atual de cada produto">
+   ${rows.map(o=>`<div class="bar-row" title="${esc(o.p.name)}: ${fmt(o.v)}"><span class="bar-name">${esc(o.p.name)}</span><div class="bar-track"><div class="bar" style="width:${(o.v/max*100).toFixed(2)}%"></div></div><span class="bar-val">${fmt(o.v)}</span></div>`).join('')}
+   <div class="bar-row axis"><span></span><div class="ticks">${[0,1,2,3,4].map(i=>`<span style="left:${i*25}%">${fmt(r3(max*i/4))}</span>`).join('')}</div><span></span></div></div>`:empty('Nenhum produto com estoque no momento.');
+  const items=[...S.movs.map(m=>({m,date:m.date,ts:m.ts||0,tipo:'Sêmen',item:B(m.b).name,qty:fmt(m.qty)+' doses'})),...S.pmovs.map(m=>({m,date:m.date,ts:m.ts||0,tipo:'Produto',item:PR(m.product).name,qty:fmt(m.qty)}))]
+    .sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts).slice(0,6);
+  const last=items.length?`<table><thead><tr><th>Data</th><th>Item</th><th>Fazenda</th><th>Tipo</th><th>Movimentação</th><th class="num">Total</th></tr></thead><tbody>
+   ${items.map(o=>{const m=o.m,e=m.type==='entrada';return `<tr><td>${dt(o.date)}</td><td><b>${esc(o.item)}</b></td><td>${esc(F(m.farm).name)}</td><td>${o.tipo}</td><td><span class="pill ${e?'in':'out'}">${e?'Entrada':'Saída'}</span></td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${o.qty}</td></tr>`}).join('')}</tbody></table>`:empty('Nenhuma movimentação encontrada.');
+  return `<div class="stats" style="grid-template-columns:repeat(2,1fr)">
+    <div class="card stat"><div class="n">${fmt(S.tanks.length)}</div><div class="l">Botijões cadastrados</div></div>
+    <div class="card stat"><div class="n">${fmt(doses)}</div><div class="l">Doses em estoque${touros?' · '+touros+(touros>1?' touros':' touro'):''}</div></div>
+  </div>
+  <div class="card stat ${lowT.length?'alert':''}"><div class="n">${fmt(lowT.length)} de ${fmt(S.tanks.length)}</div><div class="l">Botijões com nitrogênio baixo (abaixo de ${LOW} cm)${lowT.length?' · '+lowT.map(o=>esc(o.t.name)+' ('+o.l.level+' cm)').join(', '):''}</div>
+    <h3 style="margin:16px 0 8px;font-size:14px">Histórico de nitrogênio baixo</h3>
+    <div class="tw small">${medRows?`<table><thead><tr><th>Data</th><th>Botijão</th><th class="num">Nível</th><th>Situação</th><th>Resolução</th></tr></thead><tbody>${medRows}</tbody></table>`:empty('Nenhuma medição abaixo de '+LOW+' cm.')}</div></div>
+  <div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Saldo de todas as fazendas</span></div>${chart}</div>
+  <div class="card"><div class="card-h"><h3>Últimas movimentações</h3><button class="btn sm" data-a="tab" data-v="movs">Ver histórico</button></div><div class="tw small">${last}</div></div>`;
 }
 function vPPainel(){
   const last=[...S.pmovs].sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0)).slice(0,6);
@@ -1948,7 +1975,7 @@ const NAV=[
   {tab:'i-fichas',label:'Fichas Serviços',icon:'list'},
   {tab:'i-ordens',label:'Ordens Serviços',icon:'list'},
   {tab:'i-estacao',label:'Controle da Estação',icon:'grid'}]},
- {id:'est',label:'Estoque',icon:'box',kids:[
+ {id:'est',label:'Estoque',icon:'box',home:'e-painel',kids:[
   {id:'prod',label:'Produtos',icon:'pack',home:'p-painel',kids:[
    {tab:'p-cadastro',label:'Cadastro',icon:'list'},
    {tab:'p-estoque',label:'Estoque',icon:'box'},
@@ -1998,8 +2025,8 @@ function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelector
 function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
