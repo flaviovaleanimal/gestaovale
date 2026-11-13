@@ -60,7 +60,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .kids.o{grid-template-rows:1fr}
 .kin{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:2px}
 .kids:not(.o) .kin{visibility:hidden}
-.side.mini .lbl,.side.mini .chev,.side.mini .brand-t,.side.mini .kids .kids{display:none}
+.side.mini{visibility:hidden;overflow:hidden;padding:0;border:0;width:0;min-width:0}.side.mini .lbl,.side.mini .chev,.side.mini .brand-t,.side.mini .kids .kids{display:none}
 .side.mini .ni{justify-content:center;padding:10px 0}
 .side.mini .brand{justify-content:center;padding-inline:0}
 .col{display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0}
@@ -1966,7 +1966,7 @@ function render(){
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
-  sh.style.setProperty('--sw',mini?'68px':'252px');
+  sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
   sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(NAV,0)}`;
@@ -2004,7 +2004,7 @@ document.addEventListener('click',e=>{
      else if(goHome){ui.tab=g;if(g==='movs')ui.msub='hist';ui.nav[v]=true}
      else ui.nav[v]=!ui.nav[v];
      render();if(g)document.getElementById('app').scrollTop=0;break}
-   case 'toggleSide':if(isMob())ui.drawer=!ui.drawer;else ui.mini=!ui.mini;render();break;
+   case 'toggleSide':if(isMob())ui.drawer=!ui.drawer;else{ui.mini=!ui.mini;try{localStorage.setItem('gv_mini',ui.mini?'1':'')}catch(e){}}render();break;
    case 'scrim':ui.drawer=false;render();break;
    case 'newEntrada':ui.f.entrada={date:today(),rows:[{}]};ui.err={};ui.added=0;ui.modal={type:'entrada'};render();break;
    case 'newSaida':ui.f.saida={date:today(),rows:[{}]};ui.err={};ui.added=0;ui.modal={type:'saida'};render();break;
@@ -2477,6 +2477,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!ui.modal&&!ui.conf
 matchMedia('(max-width:820px)').addEventListener('change',()=>{ui.drawer=false;render()});
 const NAVKEY='gv_nav';
 try{const n=JSON.parse(localStorage.getItem(NAVKEY)||'null');if(n&&typeof n.tab==='string'&&n.tab){const t0=ui.tab;ui.tab=n.tab;if(n.tk){tkU().modo=n.tk}if(n.fk){const t1=ui.tab;ui.tab='f-fatur';tkU().modo=n.fk;ui.tab=t1}try{render()}catch(e){ui.tab=t0;if(ui.tk)ui.tk.modo='quadro'}}}catch(e){}
+try{ui.mini=localStorage.getItem('gv_mini')==='1'}catch(e){}
 let pendCard=null;try{const n=JSON.parse(localStorage.getItem(NAVKEY)||'null');if(n&&n.card)pendCard=n.card}catch(e){}
 const saveNav=()=>{try{const K=ui.tab==='f-fatur'?'fk':'tk',sel=ui.modal&&ui.modal.type==='tk'&&ui[K]?ui[K].sel:null;if(pendCard&&!sel)return;localStorage.setItem(NAVKEY,JSON.stringify({tab:ui.tab,tk:ui.tk&&ui.tk.modo,fk:ui.fk&&ui.fk.modo,card:sel||null}))}catch(e){}};
 const _r0=render;render=function(){const r=_r0.apply(this,arguments);document.querySelectorAll('textarea.tk-cn').forEach(e=>{e.style.height='auto';e.style.height=(e.scrollHeight+2)+'px'});if(pendCard){const id=pendCard,el=document.querySelector('[data-tk="open"][data-v="'+id+'"]');if(el){pendCard=null;el.click();return r}else if(S.tarefas&&S.tarefas.length&&(ui.tab==='tarefas'||ui.tab==='f-fatur'))pendCard=null}saveNav();return r};
