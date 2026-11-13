@@ -311,7 +311,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ch-x{display:flex;gap:6px;margin-top:6px}.ch-x span{flex:1;min-width:0;text-align:center;font-size:11px;color:var(--muted)}.ch-x span.now{color:var(--ink);font-weight:700}
 
 .tk-board .tk-ct1{font-size:12.5px;line-height:1.35;margin-bottom:5px}.tk-board .tk-c{padding:8px 9px}.tk-board .tk-b{font-size:10.5px;padding:1px 7px}.tk-board .tk-bi{width:12px;height:12px}.tk-board .tk-av{width:21px;height:21px;font-size:10px}.tk-board .tk-cn{font-size:11px;padding:5px;letter-spacing:0}
-.tk-ch{flex-wrap:wrap;row-gap:0;column-gap:4px}.tk-ch .tk-plus{order:1;width:26px;height:26px;margin-left:auto}.tk-ch .tk-n{order:2;min-width:14px;text-align:right}.tk-ch .tk-cn{order:3;flex:1 1 100%;width:100%;font-size:12.5px;padding:2px 4px;letter-spacing:0}.tk-col{padding:8px}.tk-board .tk-n{font-size:11px}.tk-board .tk-vz{font-size:11px}.tk-board .tk-col form input{font-size:12.5px;min-height:34px}.tk-board .tk-meta{gap:5px}.tk-board .tk-meta1{margin-bottom:5px}
+.tk-ch{flex-wrap:nowrap;align-items:flex-start;column-gap:2px}.tk-ch .tk-plus{order:2;width:26px;height:26px;flex:0 0 26px;margin-left:0}.tk-ch .tk-n{order:3;min-width:14px;text-align:right;padding-top:6px}.tk-ch .tk-cn{order:1;flex:1 1 0;min-width:0;width:auto;font-size:12.5px;padding:2px 4px;letter-spacing:0}.tk-col{padding:8px}.tk-board .tk-n{font-size:11px}.tk-board .tk-vz{font-size:11px}.tk-board .tk-col form input{font-size:12.5px;min-height:34px}.tk-board .tk-meta{gap:5px}.tk-board .tk-meta1{margin-bottom:5px}
 
 @page land{size:A4 landscape;margin:10mm}
 @media print{
@@ -813,7 +813,7 @@ function vTarefas(){
   let body;
   if(u.modo==='quadro'){
     body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id);return `<div class="tk-col" data-tkdrop="${c.id}">
-      <div class="tk-ch"><textarea class="tk-cn" rows="${c.nome.length>21?2:1}" spellcheck="false" data-tkf="colname" data-v="${c.id}" aria-label="Nome da coluna">${esc(c.nome)}</textarea><button type="button" class="tk-plus" data-tk="addc" data-v="${c.id}" title="Adicionar cartão" aria-label="Adicionar cartão em ${esc(c.nome)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><span class="tk-n">${cs.length}</span></div>
+      <div class="tk-ch"><textarea class="tk-cn" rows="1" spellcheck="false" data-tkf="colname" data-v="${c.id}" aria-label="Nome da coluna">${esc(c.nome)}</textarea><button type="button" class="tk-plus" data-tk="addc" data-v="${c.id}" title="Adicionar cartão" aria-label="Adicionar cartão em ${esc(c.nome)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><span class="tk-n">${cs.length}</span></div>
       ${u.addCol===c.id?`<form data-tkform="card" data-col="${c.id}" class="tk-addf"><input name="t" placeholder="Título do cartão…" autocomplete="off" aria-label="Título do novo cartão"></form>`:''}
       <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div></div>`}).join('')}</div>`;
   }else if(u.modo==='arq'){
@@ -2479,7 +2479,7 @@ const NAVKEY='gv_nav';
 try{const n=JSON.parse(localStorage.getItem(NAVKEY)||'null');if(n&&typeof n.tab==='string'&&n.tab){const t0=ui.tab;ui.tab=n.tab;if(n.tk){tkU().modo=n.tk}if(n.fk){const t1=ui.tab;ui.tab='f-fatur';tkU().modo=n.fk;ui.tab=t1}try{render()}catch(e){ui.tab=t0;if(ui.tk)ui.tk.modo='quadro'}}}catch(e){}
 let pendCard=null;try{const n=JSON.parse(localStorage.getItem(NAVKEY)||'null');if(n&&n.card)pendCard=n.card}catch(e){}
 const saveNav=()=>{try{const K=ui.tab==='f-fatur'?'fk':'tk',sel=ui.modal&&ui.modal.type==='tk'&&ui[K]?ui[K].sel:null;if(pendCard&&!sel)return;localStorage.setItem(NAVKEY,JSON.stringify({tab:ui.tab,tk:ui.tk&&ui.tk.modo,fk:ui.fk&&ui.fk.modo,card:sel||null}))}catch(e){}};
-const _r0=render;render=function(){const r=_r0.apply(this,arguments);if(pendCard){const id=pendCard,el=document.querySelector('[data-tk="open"][data-v="'+id+'"]');if(el){pendCard=null;el.click();return r}else if(S.tarefas&&S.tarefas.length&&(ui.tab==='tarefas'||ui.tab==='f-fatur'))pendCard=null}saveNav();return r};
+const _r0=render;render=function(){const r=_r0.apply(this,arguments);document.querySelectorAll('textarea.tk-cn').forEach(e=>{e.style.height='auto';e.style.height=(e.scrollHeight+2)+'px'});if(pendCard){const id=pendCard,el=document.querySelector('[data-tk="open"][data-v="'+id+'"]');if(el){pendCard=null;el.click();return r}else if(S.tarefas&&S.tarefas.length&&(ui.tab==='tarefas'||ui.tab==='f-fatur'))pendCard=null}saveNav();return r};
 render();
 init();
 </script>
