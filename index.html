@@ -823,7 +823,7 @@ function vTarefas(){
   ${chips.length?`<div class="tk-chips">${chips.map(([k,h])=>`<span class="tk-chip">${h}<button data-tk="chipx" data-v="${k}" aria-label="Remover filtro">✕</button></span>`).join('')}<button class="btn sm" data-tk="fclear">Limpar tudo</button></div>`:''}</div>`;
   let body;
   if(u.modo==='quadro'){
-    body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id);return `<div class="tk-col" data-tkdrop="${c.id}">
+    body=`<div class="tk-board">${cols.map(c=>{const cs=vis.filter(t=>t.col===c.id).map((t,i)=>[t,i]).sort((x,y)=>{const a=x[0].prazo?x[0].prazo+(x[0].hora||'00:00'):'9',b=y[0].prazo?y[0].prazo+(y[0].hora||'00:00'):'9';return a<b?-1:a>b?1:x[1]-y[1]}).map(x=>x[0]);return `<div class="tk-col" data-tkdrop="${c.id}">
       <div class="tk-ch"><textarea class="tk-cn" rows="1" spellcheck="false" data-tkf="colname" data-v="${c.id}" aria-label="Nome da coluna">${esc(c.nome)}</textarea><button type="button" class="tk-plus" data-tk="addc" data-v="${c.id}" title="Adicionar cartão" aria-label="Adicionar cartão em ${esc(c.nome)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><span class="tk-n">${cs.length}</span></div>
       ${u.addCol===c.id?`<form data-tkform="card" data-col="${c.id}" class="tk-addf"><input name="t" placeholder="Título do cartão…" autocomplete="off" aria-label="Título do novo cartão"></form>`:''}
       <div class="tk-cl">${cs.map(tkCard).join('')||'<div class="tk-vz">Sem cartões</div>'}</div></div>`}).join('')}</div>`;
