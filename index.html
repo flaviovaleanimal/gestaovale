@@ -1979,7 +1979,7 @@ function render(){
   if(_ap)_ap.scrollTop=_sa;
   agAfter();admStrip();tkAutosize();
   if(_fq){const i=document.querySelector('[data-tkf=fqtop]');if(i){i.focus({preventScroll:true});try{i.setSelectionRange(_fq[0],_fq[1])}catch(_){}}}
-  const _ov2=document.querySelector('#modal-root .ov');if(_ov2&&_mk0&&_mk0===lastMK)_ov2.scrollTop=_so;
+  const _ov2=document.querySelector('#modal-root .ov');if(_ov2&&_mk0&&_mk0===lastMK){_ov2.style.animation='none';_ov2.scrollTop=_so}
 }
 function goNew(sel,i){const el=document.querySelectorAll(sel)[i];if(!el)return;el.scrollIntoView({block:'center'});const f=el.querySelector('input,select,textarea');if(f)try{f.focus({preventScroll:true})}catch(e){}}
 let tt;function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,2800)}
