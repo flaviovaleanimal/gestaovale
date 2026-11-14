@@ -1603,7 +1603,7 @@ function modalHtml(){
      ${chk('lotes','Lotes agendados (Serviços)','Apaga todos os lotes agendados.',false)}
      ${chk('estacoes','Estações de monta','Apaga todas as estações e os lançamentos de IATF delas.',false)}
      ${chk('ordens','Ordens de serviços','Apaga o histórico de ordens de serviços.',false)}
-     ${chk('fichas','Fichas de serviços','Apaga o histórico de fichas.',false)}
+     ${chk('fichas','Fichas de saída','Apaga o histórico de fichas.',false)}
      ${chk('fin','Financeiro: diárias e km rodado','Apaga todos os lançamentos de diárias técnicas e km rodado.',false)}
      ${chk('eventos','Agenda: eventos','Apaga todos os eventos da agenda.',false)}
      ${chk('products','Produtos cadastrados','Apaga o cadastro de produtos e as movimentações ligadas a eles.',false)}
@@ -1660,8 +1660,8 @@ function modalHtml(){
     const f=m.data||ui.fi,farm=f.farm?F(f.farm).name:'—';
     const rows=f.rows.filter(r=>r.date||r.proc||r.lote||r.etapa||r.total).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
     const mats=ficMats(f.mats).filter(x=>x.label);
-    body=`<h3>Ficha de Serviços</h3>
-    <div class="paper"><div class="paper-h plain"><div><b>Vale Animal</b><br><span>Ficha de Serviços</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    body=`<h3>Ficha de Saída</h3>
+    <div class="paper"><div class="paper-h plain"><div><b>Vale Animal</b><br><span>Ficha de Saída</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b">
      <table><tbody><tr><td><b>Data inicial:</b> ${f.from?dt(f.from):'—'}</td><td><b>Data final:</b> ${f.to?dt(f.to):'—'}</td></tr>
      <tr><td><b>Fazenda:</b> ${esc(farm)}</td><td><b>Técnico responsável:</b> ${esc(f.tech||'—')}</td></tr></tbody></table>
@@ -1749,7 +1749,7 @@ const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
 const ptitle=()=>({'p-painel':'Estoque › Produtos','p-cadastro':'Estoque › Produtos › Cadastro','p-estoque':'Estoque › Produtos › Estoque','p-movs':'Estoque › Produtos › Movimentações'}[ui.tab]);
-const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':(ui.tab==='e-painel'||ui.tab==='e-cad'||ui.tab==='e-mov'||ui.tab==='e-est')?'Estoque':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
+const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':(ui.tab==='e-painel'||ui.tab==='e-cad'||ui.tab==='e-mov'||ui.tab==='e-est')?'Estoque':ui.tab.startsWith('p-')?'Produtos':ui.tab==='i-fichas'?'Estoque':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
@@ -1890,8 +1890,8 @@ function pSaidaFields(){
 /* ---------- serviços da iatf ---------- */
 const LCAT=NCATS;
 const LPAR=['Primíparas','Secundíparas','Multíparas'];
-const ITIT={'i-painel':'Painel','i-lotes':'Agendamentos','i-fichas':'Fichas','i-ordens':'Ordens','i-estacao':'Estação de Monta'};
-const ititle=()=>ui.tab==='i-painel'?'Serviços':'Serviços › '+ITIT[ui.tab];
+const ITIT={'i-painel':'Painel','i-lotes':'Agendamentos','i-fichas':'Ficha de Saída','i-ordens':'Ordens','i-estacao':'Estação de Monta'};
+const ititle=()=>ui.tab==='i-painel'?'Serviços':(ui.tab==='i-fichas'?'Estoque':'Serviços')+' › '+ITIT[ui.tab];
 function vEmBreve(){
   return `<div class="card"><div class="card-h"><h3>${ITIT[ui.tab]}</h3></div>${empty('Esta tela está em construção. Envie a estrutura para eu montar.')}</div>`;
 }
@@ -2023,7 +2023,7 @@ function vFicha(){
     ${fldHtml('Saída',`<input type="number" min="0" step="any" inputmode="decimal" data-fm="${i}.out" value="${esc(m.out??'')}"${x.label?'':' disabled'}>`)}
     ${fldHtml('Saldo',`<input type="number" step="any" inputmode="decimal" data-fm="${i}.bal" value="${esc(m.bal??'')}"${x.label?'':' disabled'}>`)}
    </div><button type="button" class="btn sm" data-a="addFM" data-v="${i}">+ Adicionar material</button></div>`}).join('');
-  return `<div class="card"><div class="card-h"><h3>${f.id?'Editando ficha de serviços':'Ficha de Serviços'}</h3><div class="acts">${f.id?'<button class="btn" data-a="cancelFicha">Cancelar edição</button>':'<button class="btn" data-a="fClear">Limpar</button>'}<button class="btn" data-a="fPdf">Imprimir ficha</button><button class="btn pri" data-a="fSave">${f.id?'Salvar alterações':'Salvar ficha'}</button></div></div>
+  return `<div class="card"><div class="card-h"><h3>${f.id?'Editando ficha de saída':'Ficha de Saída'}</h3><div class="acts">${f.id?'<button class="btn" data-a="cancelFicha">Cancelar edição</button>':'<button class="btn" data-a="fClear">Limpar</button>'}<button class="btn" data-a="fPdf">Imprimir ficha</button><button class="btn pri" data-a="fSave">${f.id?'Salvar alterações':'Salvar ficha'}</button></div></div><p class="muted" style="margin:0 0 12px">Registro de conferência do que saiu do escritório para o campo. Não altera o saldo do estoque.</p>
   <div class="form" style="margin-bottom:16px">
    ${fldHtml('Data inicial',`<input type="date" data-fi="from" value="${esc(f.from)}">`)}
    ${fldHtml('Data final',`<input type="date" data-fi="to" value="${esc(f.to)}">`)}
@@ -2033,7 +2033,7 @@ function vFicha(){
   <h3 style="margin:0 0 8px">Serviços</h3>${svc}
   <h3 style="margin:16px 0 8px">Materiais utilizados</h3>${mat}
   <p class="muted" style="font-size:13px">Quantidade, Saída e Saldo são digitados na ficha; nada é lido nem lançado no estoque.</p></div>
-  <div class="card" style="margin-top:16px"><div class="card-h"><h3>Histórico Fichas de Serviços</h3></div>
+  <div class="card" style="margin-top:16px"><div class="card-h"><h3>Histórico de Fichas de Saída</h3></div>
   <div class="tw">${S.fichas.length?`<table><thead><tr><th>Data Inicial</th><th>Fazenda</th><th>Técnico Responsável</th><th>Ações</th></tr></thead><tbody>
   ${[...S.fichas].sort((a,b)=>b.from.localeCompare(a.from)).map(x=>`<tr><td>${dt(x.from)}</td><td>${esc(F(x.farm).name)}</td><td>${esc(x.tech)}</td>
    <td><div class="acts"><button class="btn sm" data-a="printFicha" data-v="${x.id}">Imprimir</button><button class="btn sm" data-a="editFicha" data-v="${x.id}">Editar</button><button class="btn sm dng" data-a="delFicha" data-v="${x.id}">Excluir</button></div></td></tr>`).join('')}
@@ -2066,12 +2066,12 @@ const NAV=[
  {id:'iatf',label:'Serviços',icon:'cal',home:'i-painel',kids:[
   {tab:'agenda',label:'Calendário',icon:'cal'},
   {tab:'i-lotes',label:'Agendamentos',icon:'cal'},
-  {tab:'i-fichas',label:'Fichas',icon:'list'},
   {tab:'i-ordens',label:'Ordens',icon:'list'},
   {tab:'i-estacao',label:'Estação de Monta',icon:'grid'}]},
  {id:'est',label:'Estoque',icon:'box',home:'e-painel',kids:[
   {tab:'e-cad',label:'Cadastro',icon:'list'},
   {tab:'e-mov',label:'Movimentações',icon:'swap'},
+  {tab:'i-fichas',label:'Ficha de Saída',icon:'list'},
   {tab:'e-est',label:'Por Fazenda',icon:'box'},
   {tab:'botijoes',label:'Botijões',icon:'tank'}]},
  {id:'fin',label:'Financeiro',icon:'coin',kids:[
@@ -2165,7 +2165,7 @@ document.addEventListener('click',e=>{
    case 'back':ui.farm=null;render();break;
    case 'toggle':ui.open[v]=!ui.open[v];render();break;
    case 'pdf':ui.modal={type:'pdf'};render();break;
-   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Estação de Monta - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha de Serviços - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='gpdf'?'Agendamentos':y==='agpdf'?'Calendário - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
+   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Estação de Monta - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha de Saída - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='gpdf'?'Agendamentos':y==='agpdf'?'Calendário - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
    case 'pdfHist':ui.modal={type:'pdfhist'};render();break;
    case 'pdfMov':ui.modal={type:'pdfmov'};render();break;
    case 'export':ui.modal={type:'export'};render();break;
