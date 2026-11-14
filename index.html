@@ -1555,11 +1555,10 @@ function modalHtml(){
   if(m.type==='itemtipo')body=`<h3>Novo item</h3><p class="muted" style="margin:0 0 14px">Qual tipo de item você quer cadastrar?</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="newProduct" style="flex:1;min-height:56px">Produto</button><button class="btn pri" data-a="newBreeder" style="flex:1;min-height:56px">Sêmen (reprodutor)</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='movtipo')body=`<h3>${m.pdf||m.est?'Imprimir PDF':m.k==='entrada'?'Nova entrada':'Nova saída'}</h3><p class="muted" style="margin:0 0 14px">${m.pdf||m.est?'Qual estoque você quer imprimir?':'Entrada ou saída de qual tipo de item?'}</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="emGo" data-v="p" style="flex:1;min-height:56px">Produtos</button><button class="btn pri" data-a="emGo" data-v="s" style="flex:1;min-height:56px">Sêmen</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='product'){const p=m.data||{};
-    body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form c4">
+    body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form c3">
     ${fldHtml('Nome do produto',`<input name="name" value="${esc(p.name)}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(PCAT.map(x=>[x,x]),p.category,'Selecione…')}</select>`)}
-    ${fldHtml('Unidade',`<select name="unit"${p.id?'':' required'}>${opts([...PUN,...(p.unit&&!PUN.includes(p.unit)?[p.unit]:[])].map(x=>[x,x]),p.unit,p.id?'Não informada':'Selecione…')}</select>`)}
-    ${fldHtml('Mínimo (Vale Animal)',`<input name="min" type="number" min="0" step="any" inputmode="decimal" placeholder="Opcional" value="${p.min>0?p.min:''}">`)}</div>${p.id?footX('Salvar',(p.inativo?`<button class="btn" type="button" data-a="ativProduct" data-v="${p.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatProduct" data-v="${p.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delProduct" data-v="${p.id}">Excluir</button>`):foot('Salvar')}</form>`}
+    ${fldHtml('Unidade',`<select name="unit"${p.id?'':' required'}>${opts([...PUN,...(p.unit&&!PUN.includes(p.unit)?[p.unit]:[])].map(x=>[x,x]),p.unit,p.id?'Não informada':'Selecione…')}</select>`)}</div>${p.id?footX('Salvar',(p.inativo?`<button class="btn" type="button" data-a="ativProduct" data-v="${p.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatProduct" data-v="${p.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delProduct" data-v="${p.id}">Excluir</button>`):foot('Salvar')}</form>`}
   if(m.type==='pentrada')body=`<h3>Entrada de produtos</h3>${errBox('pentrada')}<form data-form="pentrada" novalidate>${pEntradaFields()}${pfoot('pentrada','entrada')}</form>`;
   if(m.type==='psaida')body=`<h3>Saída de produtos</h3>${errBox('psaida')}<form data-form="psaida" novalidate>${pSaidaFields()}${pfoot('psaida','saída')}</form>`;
   if(m.type==='pmov'){const x=m.data;
@@ -2502,8 +2501,7 @@ document.addEventListener('submit',e=>{
     if(!name||!fd.category)return modalErr('Informe o nome e a categoria.');
     if(!id&&!fd.unit)return modalErr('Informe a unidade do produto.');
     if(S.products.some(p=>p.id!==id&&p.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe um produto com esse nome.');
-    const mn=Number(String(fd.min||'').replace(',','.'));if(fd.min&&(!isFinite(mn)||mn<0))return modalErr('O estoque mínimo deve ser um número maior ou igual a zero.');
-    if(id){Object.assign(PR(id),{name,category:fd.category});if(fd.unit)PR(id).unit=fd.unit;else delete PR(id).unit;if(mn>0)PR(id).min=mn;else delete PR(id).min}else S.products.push({id:nid('r'),name,category:fd.category,unit:fd.unit,...(mn>0?{min:mn}:{})});
+    if(id){Object.assign(PR(id),{name,category:fd.category});if(fd.unit)PR(id).unit=fd.unit;else delete PR(id).unit}else S.products.push({id:nid('r'),name,category:fd.category,unit:fd.unit});
     return done('Produto salvo.')}
   if(k==='pentrada'){
     const f=ui.f.pentrada,rows=f.rows||[];let er='';
