@@ -1187,8 +1187,8 @@ function vFazendas(){
   const nC=id=>S.contacts.filter(c=>c.farm===id).length;
   const segs=[...new Set(S.farms.map(f=>segTxt(f)).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),cids=[...new Set(S.farms.map(f=>f.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const _fl=farmsFilt(),_ky=f=>{const pr=f.parent?S.farms.find(x=>x.id===f.parent):null;return (pr?pr.name:f.name)+(pr?'~1':'~0')+f.name};
-  const rows=_fl.sort((a,b)=>_ky(a).localeCompare(_ky(b))).map(f=>`<tr${qHide('fz',farmTxt(f))}><td>${f.parent?'<span class="muted" style="padding-left:18px">↳ </span>':''}<b>${esc(f.name)}</b>${S.farms.some(x=>x.parent===f.id)?` <span class="muted" style="font-size:12px">· ${S.farms.filter(x=>x.parent===f.id).length} vinculada(s)</span>`:''}</td><td>${esc(segTxt(f)||'—')}</td><td>${esc(f.city||'—')}</td><td>${esc((CIDADES.includes(f.city)?'MT':f.state)||'—')}</td><td>${tipoPill(tipoOf(f))}</td>
-   <td><div class="acts">${f.parent?'':`<button class="btn sm" data-a="newSubFarm" data-v="${f.id}">+ Fazenda vinculada</button>`}<button class="btn sm" data-a="empContacts" data-v="${f.id}">Contatos (${nC(f.id)})</button><button class="btn sm" data-a="editFarm" data-v="${f.id}">Editar</button><button class="btn sm dng" data-a="delFarm" data-v="${f.id}">Excluir</button></div></td></tr>`).join('');
+  const rows=_fl.filter(f=>!f.parent||ui.q.fz).sort((a,b)=>_ky(a).localeCompare(_ky(b))).map(f=>`<tr${qHide('fz',farmTxt(f))}><td><b>${esc(f.parent?farmLbl(f):f.name)}</b></td><td>${esc(segTxt(f)||'—')}</td><td>${esc(f.city||'—')}</td><td>${esc((CIDADES.includes(f.city)?'MT':f.state)||'—')}</td><td>${tipoPill(tipoOf(f))}</td>
+   <td><div class="acts">${f.parent?'':`<button class="btn sm" data-a="subFarms" data-v="${f.id}">Fazendas (${S.farms.filter(x=>x.parent===f.id).length})</button>`}<button class="btn sm" data-a="empContacts" data-v="${f.id}">Contatos (${nC(f.id)})</button><button class="btn sm" data-a="editFarm" data-v="${f.id}">Editar</button><button class="btn sm dng" data-a="delFarm" data-v="${f.id}">Excluir</button></div></td></tr>`).join('');
   return `<div class="card"><div class="card-h"><h3>Empresas</h3><div class="acts"><button class="btn" data-a="printFarms">Imprimir</button><button class="btn pri" data-a="newFarm">Cadastrar empresa</button></div></div>
   ${S.farms.length?`<div class="filters" style="margin-bottom:12px">${searchBox('fz')}${fldHtml('Segmento',`<select data-ef="seg">${opts(segs.map(x=>[x,x]),ui.ef.seg,'Todos')}</select>`)}${fldHtml('Cidade',`<select data-ef="city">${opts(cids.map(x=>[x,x]),ui.ef.city,'Todas')}</select>`)}${fldHtml('Tipo de Empresa',`<select data-ef="tipo">${opts(TIPOS.map(x=>[x,x]),ui.ef.tipo,'Todos')}</select>`)}</div>`:''}
   <div class="tw">${S.farms.length?`<table><thead><tr><th>Nome Empresa</th><th>Segmento</th><th>Cidade</th><th>Estado</th><th>Tipo de Empresa</th><th>Ações</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">Nenhuma empresa com esses filtros.</td></tr>'}</tbody></table>`:empty('Nenhuma empresa cadastrada.')}</div></div>`;
@@ -1715,6 +1715,10 @@ function modalHtml(){
     ${fldHtml('Telefone',`<input name="phone" type="tel" value="${esc(c.phone||'')}" inputmode="tel" placeholder="(66) 99999-9999">`)}
     ${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}
     </div>${foot('Salvar')}</form>`}
+  if(m.type==='subfarms'){const e=F(m.farm),list=S.farms.filter(x=>x.parent===m.farm).sort((a,b)=>a.name.localeCompare(b.name));
+    body=`<h3>Fazendas · ${esc(e.name)}</h3>
+    ${list.length?`<div class="tw"><table><thead><tr><th>Fazenda</th><th>Cidade</th><th>Ações</th></tr></thead><tbody>${list.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.city||'—')}</td><td><div class="acts"><button class="btn sm" type="button" data-a="editFarm" data-v="${x.id}">Editar</button><button class="btn sm dng" type="button" data-a="delFarm" data-v="${x.id}">Excluir</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('Nenhuma fazenda vinculada a esta empresa.')}
+    <div class="mf"><button class="btn" type="button" data-a="close">Fechar</button><button class="btn pri" type="button" data-a="newSubFarm" data-v="${m.farm}">Nova fazenda vinculada</button></div>`}
   if(m.type==='empcontacts'){const e=F(m.farm),list=S.contacts.filter(c=>c.farm===m.farm).sort((a,b)=>a.name.localeCompare(b.name));
     body=`<h3>Contatos · ${esc(e.name)}</h3>
     ${list.length?`<div class="tw"><table><thead><tr><th>Nome</th><th>Cargo</th><th>Telefone</th><th>E-mail</th></tr></thead><tbody>${list.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.role||'—')}</td><td>${foneHtml(c.phone)}</td><td>${esc(c.email||'—')}</td></tr>`).join('')}</tbody></table></div>`:empty('Nenhum contato vinculado a esta empresa.')}
@@ -2214,7 +2218,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 21:30</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 21:45</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2374,6 +2378,7 @@ document.addEventListener('click',e=>{
        S.pmovs=rest;done('Movimentação excluída. Estoque atualizado.')});break;
    case 'wipe':ui.modal={type:'wipe'};render();break;
    case 'newFarm':ui.modal={type:'farm'};render();break;
+   case 'subFarms':ui.modal={type:'subfarms',farm:v};render();break;
    case 'newSubFarm':ui.modal={type:'farm',data:{parent:v,tipo:tipoOf(F(v)),city:F(v).city,state:F(v).state}};render();break;
    case 'finPrint':ui.modal={type:'finpdf',kind:v};render();break;
    case 'agPrint':ui.modal={type:'agpdf'};render();break;
