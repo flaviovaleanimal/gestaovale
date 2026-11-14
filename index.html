@@ -400,6 +400,15 @@ function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fic
   conectando:'Conectando ao banco de dados…',lento:'Não foi possível alcançar o banco de dados agora. Os dados podem estar desatualizados.',
   erro:'O banco de dados recusou o acesso. Saia e entre de novo.',local:'Sem conexão com a nuvem: os dados ficam salvos só neste navegador. Confira o arquivo config.js.'}[dbState]}
 // Lista de diaristas (opção "Vai junto" da Equipe do evento). As diárias são lançadas à mão.
+// Importar do calendário: propõe 1 diária por diarista por dia (eventos com o nome dele na Equipe, exceto Entourar)
+function diaProp(from,to){
+  const m={};
+  [...S.eventos].filter(e=>e.date&&e.date>=from&&e.date<=to&&e.title!=='Entourar').sort((a,b)=>(a.date+a.id).localeCompare(b.date+b.id)).forEach(e=>{
+    const nomes=evTeamNames(e.team);
+    (S.diaristas||[]).forEach(d=>{const n=nrm(String(d.name||'').trim().split(/\s+/)[0]);if(!n||!nomes.includes(n))return;
+      const key=d.id+'|'+e.date;if(!m[key])m[key]={key,date:e.date,prest:d.name,farms:[],unit:Number(d.valor)||0};if(e.farm&&!m[key].farms.includes(e.farm))m[key].farms.push(e.farm)})});
+  return Object.values(m).map(x=>({...x,exists:S.diarias.some(r=>nrm(r.prest)===nrm(x.prest)&&r.date===x.date)})).sort((a,b)=>a.date.localeCompare(b.date)||a.prest.localeCompare(b.prest))}
+const monthRange=()=>{const d=new Date(),y=d.getFullYear(),mo=d.getMonth(),pad=n=>String(n).padStart(2,'0'),last=new Date(y,mo+1,0).getDate();return [y+'-'+pad(mo+1)+'-01',y+'-'+pad(mo+1)+'-'+pad(last)]};
 const diaRead=()=>{const f=document.querySelector('form[data-form=diaristas]');if(!f)return[];const n=[...f.querySelectorAll('input[name=dn]')],v=[...f.querySelectorAll('input[name=dv]')],old=(ui.modal&&ui.modal.rows)||[];return n.map((x,i)=>({...(old[i]||{}),name:x.value,valor:v[i].value}))};
 function save(){
   if(!DB){
@@ -632,7 +641,7 @@ function vFin(k){
   const c=FIN[k],f=ui.ff[k],recs=S[c.col];
   const prests=[...new Set(recs.map(r=>r.prest).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),fz=[...new Set(recs.map(r=>r.farm).filter(Boolean))].map(id=>[id,F(id).name]).sort((a,b)=>a[1].localeCompare(b[1]));
   const nA=recs.filter(r=>r.sit!=='Paga').length,nP=recs.length-nA,tabs=`<div class="acts" style="margin-bottom:12px"><button class="btn ${ui.fa[k]==='a'?'pri':''}" data-a="finTab" data-v="${k}:a">Em aberto (${nA})</button><button class="btn ${ui.fa[k]==='p'?'pri':''}" data-a="finTab" data-v="${k}:p">Arquivadas (${nP})</button></div>`;
-  return `<div class="card"><div class="card-h"><h3>${c.title}</h3><div class="acts">${k==='diarias'?'<button class="btn" data-a="diaristas">Diaristas e valores</button>':''}<button class="btn" data-a="finPrint" data-v="${k}">Imprimir</button><button class="btn pri" data-a="finNew" data-v="${k}">${c.btn}</button></div></div>
+  return `<div class="card"><div class="card-h"><h3>${c.title}</h3><div class="acts">${k==='diarias'?'<button class="btn" data-a="diaImp">Importar do calendário</button><button class="btn" data-a="diaristas">Diaristas e valores</button>':''}<button class="btn" data-a="finPrint" data-v="${k}">Imprimir</button><button class="btn pri" data-a="finNew" data-v="${k}">${c.btn}</button></div></div>
   ${tabs}<div class="filters" style="margin-bottom:12px">
    <div class="fld" style="max-width:300px;flex:1 1 220px"><label>Pesquisar</label><input type="search" data-fq="${k}" value="${esc(f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>
    ${fldHtml('Data Inicial',`<input type="date" data-ff="${k}.from" value="${esc(f.from)}">`)}
@@ -1479,6 +1488,13 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="8">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>')}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês':view==='week'?'semana':view==='day'?'lista do dia':'lista'}.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='diaimp'){const L=diaProp(m.from,m.to),sel=m.sel||[],novas=L.filter(x=>!x.exists),all=novas.length&&novas.every(x=>sel.includes(x.key));
+    const tot=r2(L.filter(x=>sel.includes(x.key)).reduce((s,x)=>s+x.unit,0));
+    body=`<h3>Importar diárias do calendário</h3>${err}<p class="muted" style="margin:0 0 10px;font-size:13px">Mostra os dias em que um diarista aparece na <b>Equipe</b> dos eventos do período (Entourar não conta). É 1 diária por pessoa por dia. Marque as que quer lançar e confirme.</p>
+    <div class="form c2" style="margin-bottom:12px">${fldHtml('De',`<input type="date" data-dimp="from" value="${esc(m.from)}">`)}${fldHtml('Até',`<input type="date" data-dimp="to" value="${esc(m.to)}">`)}</div>
+    ${L.length?`<div style="display:flex;gap:10px;align-items:center;margin:0 0 8px"><label style="display:flex;gap:8px;align-items:center;font-weight:600;color:var(--ink);cursor:pointer"><input type="checkbox" data-a="diaPickAll"${all?' checked':''}${novas.length?'':' disabled'} style="width:auto"> Selecionar todas as novas</label><span class="muted" style="font-size:13px">${sel.length} selecionada(s) · ${brl(tot)}</span></div>
+    <div class="tw" style="max-height:340px;overflow:auto"><table><thead><tr><th></th><th>Data</th><th>Prestador</th><th>Fazenda</th><th class="num">Valor</th><th></th></tr></thead><tbody>${L.map(x=>`<tr${x.exists?' style="opacity:.55"':''}><td><input type="checkbox" data-a="diaPick" data-v="${x.key}"${sel.includes(x.key)?' checked':''}${x.exists?' disabled':''} style="width:auto"></td><td>${dt(x.date)}</td><td>${esc(x.prest)}</td><td>${esc(x.farms.map(f=>F(f).name).join(' / ')||'—')}</td><td class="num">${brl(x.unit)}</td><td>${x.exists?'<span class="pill in">já lançada</span>':''}</td></tr>`).join('')}</tbody></table></div>`:empty('Nenhum diarista na Equipe dos eventos deste período.')}
+    <form data-form="diaimp" novalidate><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit"${sel.length?'':' disabled'}>Lançar ${sel.length||''} diária(s)</button></div></form>`}
   if(m.type==='diaristas'){const rows=m.rows||[];
     body=`<h3>Diaristas e valores</h3>${err}<p class="muted" style="margin:0 0 10px;font-size:13px">Quem constar nesta lista aparece na opção “Vai junto” da Equipe do evento. As diárias são lançadas à mão, em Lançar diária.</p>
     <form data-form="diaristas" novalidate><div style="display:flex;flex-direction:column;gap:8px">
@@ -1787,7 +1803,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','ev'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','ev','diaimp'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -2179,7 +2195,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 16:20</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 16:30</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2357,6 +2373,9 @@ document.addEventListener('click',e=>{
    case 'agSelAll':{const n=(ui.ag.sel||[]).filter(id=>S.eventos_lixo.some(e=>e.id===id)).length;ui.ag.sel=n===S.eventos_lixo.length?[]:S.eventos_lixo.map(e=>e.id);render();break}
    case 'agRestoreSel':{const ids=ui.ag.sel||[],L=S.eventos_lixo.filter(e=>ids.includes(e.id));if(!L.length)break;L.forEach(x=>{const r={...x};delete r.deletedAt;S.eventos.push(r)});S.eventos_lixo=S.eventos_lixo.filter(e=>!ids.includes(e.id));ui.ag.sel=[];save();render();toast(L.length+' evento(s) restaurado(s).');break}
    case 'agPurgeSel':{const ids=ui.ag.sel||[],n=S.eventos_lixo.filter(e=>ids.includes(e.id)).length;if(!n)break;ask(`Excluir definitivamente ${n} evento(s) selecionado(s)? Não dá para desfazer.`,()=>{S.eventos_lixo=S.eventos_lixo.filter(e=>!ids.includes(e.id));ui.ag.sel=[];done(n+' evento(s) excluído(s) definitivamente.')},{title:'Excluir definitivamente',ok:'Excluir definitivamente'});break}
+   case 'diaImp':{const [a,b]=monthRange();ui.modal={type:'diaimp',from:a,to:b,sel:[]};ui.modal.sel=diaProp(a,b).filter(x=>!x.exists).map(x=>x.key);render();break}
+   case 'diaPick':{const s=new Set(ui.modal.sel||[]);s.has(v)?s.delete(v):s.add(v);ui.modal.sel=[...s];render();break}
+   case 'diaPickAll':{const nv=diaProp(ui.modal.from,ui.modal.to).filter(x=>!x.exists).map(x=>x.key),all=nv.length&&nv.every(k=>(ui.modal.sel||[]).includes(k));ui.modal.sel=all?[]:nv;render();break}
    case 'diaristas':ui.modal={type:'diaristas',rows:S.diaristas.map(d=>({...d}))};render();break
    case 'diaAdd':{const r=diaRead();r.push({name:'',valor:''});ui.modal.rows=r;render();break}
    case 'diaDel':{const r=diaRead();r.splice(+v,1);ui.modal.rows=r;render();break}
@@ -2441,7 +2460,7 @@ const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el[
   const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Arquivado'&&nrm(x.name)===nrm(v));if(!l)return;
   el['lote'].value=String(l.name).toUpperCase();el['total'].value=l.total;el['cat'].value=NCATS.includes(l.category)?l.category:''};
 document.addEventListener('input',e=>{const t=e.target;if(t.name==='lote'&&t.form&&t.form.dataset.form==='ev'){t.dataset.auto='';evLoteFill(t.form)}});
-document.addEventListener('change',e=>{const t=e.target;if((t.name==='tecs'||t.name==='hlp')&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tc2=[...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),hp=[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value);f.elements['team'].value=evTeamCalc(tc2,hp,f.elements['team'].value)}if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const c=t.form.elements['cat'];if(c){if(t.value==='Andrológico')c.value='Touros';else if(c.value==='Touros'){c.value='';evLoteFill(t.form)}}}if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.dimp&&ui.modal&&ui.modal.type==='diaimp'){ui.modal[t.dataset.dimp]=t.value;const L=diaProp(ui.modal.from,ui.modal.to);ui.modal.sel=L.filter(x=>!x.exists).map(x=>x.key);render();return}if((t.name==='tecs'||t.name==='hlp')&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tc2=[...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),hp=[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value);f.elements['team'].value=evTeamCalc(tc2,hp,f.elements['team'].value)}if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const c=t.form.elements['cat'];if(c){if(t.value==='Andrológico')c.value='Touros';else if(c.value==='Touros'){c.value='';evLoteFill(t.form)}}}if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
   {
     const pend=S.lotes.find(l=>l.farm===t.value&&l.status!=='Arquivado'&&String(l.name).toUpperCase()===(lo.options[1]||{}).value);
     if(pend){lo.value=String(pend.name).toUpperCase();lo.dataset.auto='1';evLoteFill(t.form)}
@@ -2692,6 +2711,11 @@ document.addEventListener('submit',e=>{
     if(n>1){const o=S.eventos.find(q=>q.id===ev.id);if(o)o.suf='A'}
     pl.forEach(([t,x,sf])=>S.eventos.push({id:nid('e'),...base,title:t,date:x,end:x,suf:sf||''}));
     return done(pl.length+' eventos criados: '+pl.map(x=>x[0]).join(', ')+'.')}
+  if(k==='diaimp'){
+    const L=diaProp(ui.modal.from,ui.modal.to).filter(x=>!x.exists&&(ui.modal.sel||[]).includes(x.key));
+    if(!L.length)return done();
+    L.forEach(x=>S.diarias.push({id:nid('d'),date:x.date,sit:'Aberta',prest:x.prest,farm:x.farms[0]||'',qty:1,unit:x.unit,total:r2(x.unit)}));
+    return done(L.length+' diária(s) lançada(s).')}
   if(k==='diaristas'){
     const rows=diaRead().map(r=>({...r,name:tc(String(r.name||'').trim()),valor:Number(String(r.valor).replace(',','.'))})).filter(r=>r.name);
     for(const r of rows)if(!(r.valor>=0))return modalErr('Informe o valor da diária de '+r.name+'.');
