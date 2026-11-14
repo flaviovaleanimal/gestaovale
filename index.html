@@ -1344,9 +1344,10 @@ function modalHtml(){
   const tkSel=(v)=>`<select name="tank" required>${opts(S.tanks.map(t=>[t.id,t.name]),v,'Selecione…')}</select>`;
   let body='';
   if(m.type==='breeder'){const b=m.data||{};
-    body=`<h3>${b.id?'Editar reprodutor':'Novo reprodutor'}</h3>${err}<form data-form="breeder" data-id="${b.id||''}" novalidate><div class="form">
+    body=`<h3>${b.id?'Editar reprodutor':'Novo reprodutor'}</h3>${err}<form data-form="breeder" data-id="${b.id||''}" novalidate><div class="form c3">
     ${fldHtml('Nome do reprodutor',`<input name="name" value="${esc(b.name)}" required>`)}
-    ${fldHtml('Raça',`<select name="breed" required>${opts(BREEDS.map(x=>[x,x]),b.breed,'Selecione…')}</select>`)}</div>${b.id?footX('Salvar',(b.inativo?`<button class="btn" type="button" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delBreeder" data-v="${b.id}">Excluir</button>`):foot('Salvar')}</form>`}
+    ${fldHtml('Raça',`<select name="breed" required>${opts(BREEDS.map(x=>[x,x]),b.breed,'Selecione…')}</select>`)}
+    ${fldHtml('Unidade',`<div class="ro">Dose</div>`)}</div>${b.id?footX('Salvar',(b.inativo?`<button class="btn" type="button" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delBreeder" data-v="${b.id}">Excluir</button>`):foot('Salvar')}</form>`}
   if(m.type==='estacao'){const e=m.data||{};
     body=`<h3>${e.id?'Editar estação':'Nova estação'}</h3>${err}<form data-form="estacao" data-id="${e.id||''}" novalidate><div class="form">
     ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
