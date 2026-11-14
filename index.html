@@ -1446,17 +1446,20 @@ function modalHtml(){
     ${fldHtml('Início EM',`<input name="start" type="date" value="${e.start||''}" required>`)}
     ${fldHtml('Final EM',`<input name="end" type="date" value="${e.end||''}" required>`)}</div>${foot('Salvar')}</form>`}
   if(m.type==='ev'){const e=m.data||{},per=e.id||e.periodo||e.allday!==undefined?perOf(e):'Dia Inteiro',tits=[...EVTIT,...(e.title&&!EVTIT.includes(e.title)?[e.title]:[])];
-    body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form">
+    body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form c3">
     ${fldHtml('Data Serviço',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
     ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
+    </div><div class="form c4" style="margin-top:12px">
     ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,x]),e.title,'Selecione…')}</select>`)}
     ${e.lock?fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
     ${e.lock?'':fldHtml('Lote',`<select name="lote">${evLoteSel(e.farm,e.lote).replace('value="'+esc(String(e.lote||'').toUpperCase())+'"','value="'+esc(String(e.lote||'').toUpperCase())+'" selected')}</select>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly placeholder="Vem do lote">`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly placeholder="Vem do lote">`)}
+    </div><div class="form c2" style="margin-top:12px">
+    ${fldHtml('Agenda Técnico',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`)}
     ${fldHtml('Equipe',`<input name="team" value="${esc(evTeamIni(e))}" autocomplete="off" placeholder="Marque a Agenda Técnico abaixo">`+((S.diaristas||[]).length?`<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:8px 0 0"><span class="muted" style="font-size:12px">Vai junto:</span>${S.diaristas.map(d=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="hlp" value="${esc(d.name)}"${evTeamNames(e.team).includes(nrm(d.name))?' checked':''} style="width:auto"> ${esc(d.name)}</label>`).join('')}</div>`:''))}
-    ${fldHtml('Agenda Técnico',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`,'wide')}
-    ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`,'wide')}
-    ${fldHtml('Observação',`<textarea name="desc" rows="3">${esc(e.desc||'')}</textarea>`,'wide')}
+    </div><div class="form c2" style="margin-top:12px">
+    ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`)}
+    ${fldHtml('Observação',`<textarea name="desc" rows="3">${esc(e.desc||'')}</textarea>`)}
     </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}${e.id&&(e.title==='IM'||e.title==='AV + IM')?`<button class="btn" type="button" data-a="agProto" data-v="${e.id}">Criar protocolo IATF</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='agfil'){const f=ui.ag.f;
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
@@ -1804,7 +1807,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','ev'].includes(m.type)?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -2196,7 +2199,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 16:00</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 16:10</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
