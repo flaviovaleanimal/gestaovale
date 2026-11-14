@@ -1725,7 +1725,7 @@ function modalHtml(){
 }
 
 /* ---------- produtos ---------- */
-const PORD=['PRIMER MONODOSE','PRIMER 1º USO','PRIMER 2º USO','PRIMER 3º USO','RIC-BE','CIPIOTEC','ESTRON','ECEGON 25ML','ECEGON 100ML','PROGECIO','TEC RELIN','BAINHAS IA'];
+const PORD=['PRIMER MONODOSE','PRIMER 1º USO','PRIMER 2º USO','PRIMER 3º USO','RIC-BE','CIPIOTEC','ESTRON','ECEGON 25ML','ECEGON 100ML','PROGECIO','BAINHAS IA','TEC RELIN'];
 const pRank=n=>{const k=nrm(n).replace(/\s+/g,' ').trim(),i=PORD.findIndex(x=>nrm(x).replace(/\s+/g,' ').trim()===k);return i<0?999:i};
 const pSort=(a,b)=>pRank(a.p.name)-pRank(b.p.name)||b.v-a.v||a.p.name.localeCompare(b.p.name);
 const PLOC=['ESCRITÓRIO','FAZENDA'];
