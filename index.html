@@ -390,20 +390,42 @@ function seed(){
       {id:'n4',tank:'t3',kind:'medicao',date:'2026-11-01',level:31,liters:0,total:0,note:''}]};
 }
 /* ---------- armazenamento: banco compartilhado (db) ou, sem ele, este navegador ---------- */
-const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],tarefas:[],tcols:[]});
+const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],diaristas:[],tarefas:[],tcols:[]});
 let S=emptyS();
 let DB=null,dbState='conectando',slowT=null,busy=false,q=[],needRender=false;
-const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},tarefas:{},tcols:{}},lastSnap={},held={},got={};
+const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},diaristas:{},tarefas:{},tcols:{}},lastSnap={},held={},got={};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const loadLocal=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}};
 function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários.',
   conectando:'Conectando ao banco de dados…',lento:'Não foi possível alcançar o banco de dados agora. Os dados podem estar desatualizados.',
   erro:'O banco de dados recusou o acesso. Saia e entre de novo.',local:'Sem conexão com a nuvem: os dados ficam salvos só neste navegador. Confira o arquivo config.js.'}[dbState]}
+// Diárias automáticas: quem estiver na Equipe de um evento (e na lista de diaristas) ganha 1 diária por dia.
+// Só mexe de hoje em diante; datas passadas, diárias lançadas à mão e diárias pagas ficam como estão.
+function syncDiarias(){
+  if(!S.diaristas||!S.diaristas.length&&!S.diarias.some(r=>r.auto))return false;
+  const hoje=today(),want={};
+  [...S.eventos].filter(e=>e.date&&e.date>=hoje).sort((a,b)=>(a.date+a.id).localeCompare(b.date+b.id)).forEach(e=>{
+    const nomes=String(e.team||'').split(/\s*(?:,|;|\/|\+)\s*|\s+e\s+/i).map(x=>nrm(x.trim().split(/\s+/)[0])).filter(Boolean);
+    S.diaristas.forEach(d=>{const n=nrm(String(d.name||'').trim().split(/\s+/)[0]);if(!n||!nomes.includes(n))return;
+      const key=d.id+'|'+e.date;if(!want[key])want[key]={key,date:e.date,prest:d.name,farm:e.farm,unit:Number(d.valor)||0}})});
+  let ch=false;const keep=[];
+  S.diarias.forEach(r=>{
+    if(!r.auto||!r.key||r.date<hoje||r.sit==='Paga'){keep.push(r);return}
+    const w=want[r.key];if(!w){ch=true;return}
+    delete want[r.key];
+    if(r.prest!==w.prest||r.farm!==w.farm||Number(r.unit)!==w.unit||Number(r.qty)!==1||r.total!==r2(w.unit)){ch=true;Object.assign(r,{prest:w.prest,farm:w.farm,unit:w.unit,qty:1,total:r2(w.unit)})}
+    keep.push(r)});
+  Object.values(want).forEach(w=>{
+    if(S.diarias.some(r=>(r.auto&&r.key===w.key)||(!r.auto&&r.prest===w.prest&&r.date===w.date)))return;
+    keep.push({id:nid('d'),date:w.date,sit:'Aberta',prest:w.prest,farm:w.farm,qty:1,unit:w.unit,total:r2(w.unit),auto:true,key:w.key});ch=true});
+  if(ch)S.diarias=keep;return ch}
+const diaRead=()=>{const f=document.querySelector('form[data-form=diaristas]');if(!f)return[];const n=[...f.querySelectorAll('input[name=dn]')],v=[...f.querySelectorAll('input[name=dv]')],old=(ui.modal&&ui.modal.rows)||[];return n.map((x,i)=>({...(old[i]||{}),name:x.value,valor:v[i].value}))};
 function save(){
   if(!DB){
     if(dbState==='conectando'){toast('Aguarde: conectando ao banco de dados…');return}
     try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
     return}
+  try{if(dbState==='ok')syncDiarias()}catch(e){}
   for(const c in synced){
     const cur={};S[c].forEach(x=>{cur[x.id]=JSON.stringify(x)});
     for(const id in cur)if(synced[c][id]!==cur[id])q.push({op:'set',c,id,data:JSON.parse(cur[id])});
@@ -623,14 +645,14 @@ function finTable(k){
   const sum=`<p style="margin:0 0 10px"><b>${list.length}</b> ${list.length===1?'lançamento':'lançamentos'} · ${arq?'Total pago':'Total a pagar'} <b class="${arq?'in-t':'out-t'}">${brl(tot)}</b></p>`;
   if(!list.length)return sum+empty(S[c.col].some(r=>(r.sit==='Paga')===arq)?'Nenhum lançamento com esses filtros.':(arq?'Nenhuma diária arquivada ainda. Ao marcar como paga, ela vem para cá.':'Nenhum lançamento em aberto. Clique em '+c.btn+'.').replace('Nenhuma diária',k==='kms'?'Nenhum km':'Nenhuma diária'));
   return sum+`<div class="tw"><table><thead><tr><th>${c.dl}</th><th>Situação</th>${arq?'<th>Data Pagamento</th>':''}<th>Prestador</th><th>Fazenda</th><th class="num">${c.ql}</th><th class="num">Valor Unitário</th><th class="num">Valor Total</th><th>Ações</th></tr></thead><tbody>
-  ${list.map(r=>`<tr><td>${dt(r.date)}</td><td><span class="pill ${r.sit==='Paga'?'in':'warn'}">${esc(r.sit||'Aberta')}</span></td>${arq?`<td>${r.paidAt?dt(r.paidAt):'—'}</td>`:''}<td>${esc(r.prest||'—')}</td><td>${esc(F(r.farm).name)}</td><td class="num">${fnum(r.qty)}</td><td class="num">${brl(r.unit)}</td><td class="num"><b>${brl(finTot(r))}</b></td>
+  ${list.map(r=>`<tr><td>${dt(r.date)}</td><td><span class="pill ${r.sit==='Paga'?'in':'warn'}">${esc(r.sit||'Aberta')}</span></td>${arq?`<td>${r.paidAt?dt(r.paidAt):'—'}</td>`:''}<td>${esc(r.prest||'—')}${r.auto?' <span class="pill" title="Lançada automaticamente pela Equipe do evento" style="font-size:10px">auto</span>':''}</td><td>${esc(F(r.farm).name)}</td><td class="num">${fnum(r.qty)}</td><td class="num">${brl(r.unit)}</td><td class="num"><b>${brl(finTot(r))}</b></td>
    <td><div class="acts"><button class="btn sm" data-a="finPay" data-v="${k}:${r.id}">${r.sit==='Paga'?'Reabrir':'Marcar paga'}</button><button class="btn sm" data-a="finEdit" data-v="${k}:${r.id}">Editar</button><button class="btn sm dng" data-a="finDel" data-v="${k}:${r.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody><tfoot><tr><td colspan="${arq?7:6}">Total</td><td class="num">${brl(tot)}</td><td></td></tr></tfoot></table></div>`}
 function vFin(k){
   const c=FIN[k],f=ui.ff[k],recs=S[c.col];
   const prests=[...new Set(recs.map(r=>r.prest).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),fz=[...new Set(recs.map(r=>r.farm).filter(Boolean))].map(id=>[id,F(id).name]).sort((a,b)=>a[1].localeCompare(b[1]));
   const nA=recs.filter(r=>r.sit!=='Paga').length,nP=recs.length-nA,tabs=`<div class="acts" style="margin-bottom:12px"><button class="btn ${ui.fa[k]==='a'?'pri':''}" data-a="finTab" data-v="${k}:a">Em aberto (${nA})</button><button class="btn ${ui.fa[k]==='p'?'pri':''}" data-a="finTab" data-v="${k}:p">Arquivadas (${nP})</button></div>`;
-  return `<div class="card"><div class="card-h"><h3>${c.title}</h3><div class="acts"><button class="btn" data-a="finPrint" data-v="${k}">Imprimir</button><button class="btn pri" data-a="finNew" data-v="${k}">${c.btn}</button></div></div>
+  return `<div class="card"><div class="card-h"><h3>${c.title}</h3><div class="acts">${k==='diarias'?'<button class="btn" data-a="diaristas">Diaristas e valores</button>':''}<button class="btn" data-a="finPrint" data-v="${k}">Imprimir</button><button class="btn pri" data-a="finNew" data-v="${k}">${c.btn}</button></div></div>
   ${tabs}<div class="filters" style="margin-bottom:12px">
    <div class="fld" style="max-width:300px;flex:1 1 220px"><label>Pesquisar</label><input type="search" data-fq="${k}" value="${esc(f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>
    ${fldHtml('Data Inicial',`<input type="date" data-ff="${k}.from" value="${esc(f.from)}">`)}
@@ -746,9 +768,9 @@ function vAgenda(){
   const body=view==='trash'?agTrash():view==='month'?agMonth():view==='week'?agWeek(Array.from({length:7},(_,i)=>addDays(weekStart(date),i))):view==='day'?agWeek([date]):`<div class="filters" style="margin-bottom:12px"><div class="fld" style="max-width:300px;flex:1 1 220px"><label>Pesquisar</label><input type="search" data-agq="1" value="${esc(ui.ag.f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>${fldHtml('Data Inicial',`<input type="date" data-agd="lf" value="${esc(ui.ag.lf)}">`)}${fldHtml('Data Final',`<input type="date" data-agd="lt" value="${esc(ui.ag.lt)}">`)}</div><div id="ag-list">${agList()}</div>`;
   return `<div class="card"><div class="ag-bar"><button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
    <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}${vb('trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':''))}</span><button class="btn" data-a="agPrint">Imprimir</button><button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button></div>
-   <div class="ag-bar" style="margin-top:-2px"><b style="font-size:13px">Agenda Técnico</b><span class="ag-seg"><button class="btn sm ${ui.ag.tec?'':'pri'}" data-a="agTec" data-v="">Todos</button>${AGTEC.map(t=>`<button class="btn sm ${ui.ag.tec===t?'pri':''}" data-a="agTec" data-v="${t}">${t}</button>`).join('')}</span>
-   <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select><button class="btn sm" data-a="tab" data-v="i-lotes" style="margin-left:auto">← Agendamentos</button></div>
-   ${agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
+   <div class="ag-bar" style="margin-top:-2px">${view==='trash'?'':`<b style="font-size:13px">Agenda Técnico</b><span class="ag-seg"><button class="btn sm ${ui.ag.tec?'':'pri'}" data-a="agTec" data-v="">Todos</button>${AGTEC.map(t=>`<button class="btn sm ${ui.ag.tec===t?'pri':''}" data-a="agTec" data-v="${t}">${t}</button>`).join('')}</span>
+   <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select>`}<button class="btn sm" data-a="tab" data-v="i-lotes" style="margin-left:auto">← Agendamentos</button></div>
+   ${view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8)}
 /* ===== TAREFAS (quadro estilo Trello) ===== */
 const TK_TEAM=['Flávio Alves','Bina Alves','Isabella Galdioli'],TK_OLD={'Flávio':'Flávio Alves','Bina':'Bina Alves','Isabella':'Isabella Galdioli'};
@@ -1466,6 +1488,12 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="8">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>')}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês':view==='week'?'semana':view==='day'?'lista do dia':'lista'}.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='diaristas'){const rows=m.rows||[];
+    body=`<h3>Diaristas e valores</h3>${err}<p class="muted" style="margin:0 0 10px;font-size:13px">Quem estiver na <b>Equipe</b> de um evento e constar nesta lista ganha 1 diária por dia, automaticamente, de hoje em diante. Quem não está na lista (contratados) não gera diária.</p>
+    <form data-form="diaristas" novalidate><div style="display:flex;flex-direction:column;gap:8px">
+    ${rows.map((r,i)=>`<div style="display:flex;gap:8px;align-items:center"><input name="dn" value="${esc(r.name||'')}" placeholder="Primeiro nome (ex.: Danilo)" style="flex:1;min-width:0"><input name="dv" value="${esc(r.valor??'')}" inputmode="decimal" placeholder="Valor da diária" style="width:130px"><button type="button" class="btn sm dng" data-a="diaDel" data-v="${i}">Remover</button></div>`).join('')||'<div class="muted">Nenhum diarista cadastrado.</div>'}
+    </div><div style="margin-top:10px"><button type="button" class="btn sm" data-a="diaAdd">+ Adicionar diarista</button></div>
+    <div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='agdelm'){const x=S.eventos.find(q=>q.id===m.id)||{},rel=evRel(x);
     body=`<h3>Mover para a Lixeira</h3><p style="margin:0 0 10px">Evento <b>${esc(evLabel(x))}</b> em ${dt(x.date)} será movido para a Lixeira.</p>
     <p style="margin:0 0 8px"><b>Deseja excluir também algum destes eventos próximos${x.lote?' do lote '+esc(x.lote):''}?</b></p>
@@ -2160,7 +2188,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 15:21</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 15:33</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2338,6 +2366,9 @@ document.addEventListener('click',e=>{
    case 'agSelAll':{const n=(ui.ag.sel||[]).filter(id=>S.eventos_lixo.some(e=>e.id===id)).length;ui.ag.sel=n===S.eventos_lixo.length?[]:S.eventos_lixo.map(e=>e.id);render();break}
    case 'agRestoreSel':{const ids=ui.ag.sel||[],L=S.eventos_lixo.filter(e=>ids.includes(e.id));if(!L.length)break;L.forEach(x=>{const r={...x};delete r.deletedAt;S.eventos.push(r)});S.eventos_lixo=S.eventos_lixo.filter(e=>!ids.includes(e.id));ui.ag.sel=[];save();render();toast(L.length+' evento(s) restaurado(s).');break}
    case 'agPurgeSel':{const ids=ui.ag.sel||[],n=S.eventos_lixo.filter(e=>ids.includes(e.id)).length;if(!n)break;ask(`Excluir definitivamente ${n} evento(s) selecionado(s)? Não dá para desfazer.`,()=>{S.eventos_lixo=S.eventos_lixo.filter(e=>!ids.includes(e.id));ui.ag.sel=[];done(n+' evento(s) excluído(s) definitivamente.')},{title:'Excluir definitivamente',ok:'Excluir definitivamente'});break}
+   case 'diaristas':ui.modal={type:'diaristas',rows:S.diaristas.map(d=>({...d}))};render();break
+   case 'diaAdd':{const r=diaRead();r.push({name:'',valor:''});ui.modal.rows=r;render();break}
+   case 'diaDel':{const r=diaRead();r.splice(+v,1);ui.modal.rows=r;render();break}
    case 'agDelAll':document.querySelectorAll('form[data-form=agdelm] input[name=rel]').forEach(c=>c.checked=true);break
    case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
    case 'agDel':{const x=S.eventos.find(q=>q.id===v);if(!x)break;
@@ -2670,6 +2701,11 @@ document.addEventListener('submit',e=>{
     if(n>1){const o=S.eventos.find(q=>q.id===ev.id);if(o)o.suf='A'}
     pl.forEach(([t,x,sf])=>S.eventos.push({id:nid('e'),...base,title:t,date:x,end:x,suf:sf||''}));
     return done(pl.length+' eventos criados: '+pl.map(x=>x[0]).join(', ')+'.')}
+  if(k==='diaristas'){
+    const rows=diaRead().map(r=>({...r,name:tc(String(r.name||'').trim()),valor:Number(String(r.valor).replace(',','.'))})).filter(r=>r.name);
+    for(const r of rows)if(!(r.valor>=0))return modalErr('Informe o valor da diária de '+r.name+'.');
+    S.diaristas=rows.map(r=>({id:r.id||nid('di'),name:r.name,valor:r.valor}));
+    return done('Diaristas salvos. As diárias futuras foram recalculadas.')}
   if(k==='fin'){
     const kind=form.dataset.kind,c=FIN[kind],id=form.dataset.id,rows=finRead(form);
     ui.modal.rows=rows;
