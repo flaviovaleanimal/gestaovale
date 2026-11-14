@@ -459,7 +459,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={brInat:false,ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={brInat:false,ecT:'',ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
@@ -556,6 +556,21 @@ function breederAllLocs(bid){
   const g={};S.movs.filter(m=>m.b===bid).forEach(m=>{const k=m.farm+'|'+m.tank;g[k]=(g[k]||0)+sg(m)});
   return Object.entries(g).filter(([,q])=>q>0).map(([k,q])=>{const [f,t]=k.split('|');return{f,t,q}})
     .sort((a,b)=>F(a.f).name.localeCompare(F(b.f).name)||T(a.t).name.localeCompare(T(b.t).name));
+}
+
+function vECad(){
+  const inat=!!ui.brInat,t=ui.ecT||'',nI=S.breeders.filter(b=>b.inativo).length;
+  const sem=t==='p'?[]:S.breeders.filter(b=>!!b.inativo===inat).map(b=>({k:'s',id:b.id,name:b.name,cat:b.breed,bal:breederBal(b.id),inat:!!b.inativo}));
+  const pro=t==='s'||inat?[]:S.products.map(p=>({k:'p',id:p.id,name:p.name,cat:p.category,bal:pTotal(p.id)}));
+  const list=[...sem,...pro].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+  const seg=(v,l)=>`<button class="btn${t===v?' pri':''}" data-a="ecT" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
+  const tot=S.breeders.length+S.products.length;
+  return `<div class="card"><div class="card-h"><h3>${inat?'Itens inativos':'Cadastro de estoque'}</h3><button class="btn pri" data-a="newItem">Novo item</button></div>
+  ${tot?`<div class="filters" style="margin-bottom:12px;align-items:flex-end"><div class="acts">${seg('','Todos')}${seg('s','Sêmen')}${seg('p','Produtos')}</div>${searchBox('ec')}${t!=='p'&&(nI||inat)?`<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button>`:''}</div>`:''}
+  <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>Tipo</th><th>Categoria / raça</th><th class="num">Saldo</th><th>Ações</th></tr></thead><tbody>
+   ${list.map(o=>{const s=o.k==='s';return `<tr${qHide('ec',o.name+' '+o.cat+' '+(s?'sêmen':'produto'))}><td><b>${esc(o.name)}</b></td><td><span class="pill ${s?'ok':'in'}">${s?'Sêmen':'Produto'}</span></td><td>${esc(o.cat)}</td><td class="num">${fmt(o.bal)}${s?' doses':''}</td>
+   <td><div class="acts"><button class="btn sm" data-a="${s?'editBreeder':'editProduct'}" data-v="${o.id}">Editar</button>${s?(o.inat?`<button class="btn sm pri" data-a="ativBreeder" data-v="${o.id}">Ativar</button>`:`<button class="btn sm" data-a="inatBreeder" data-v="${o.id}">Inativar</button>`):''}<button class="btn sm dng" data-a="${s?'delBreeder':'delProduct'}" data-v="${o.id}">Excluir</button></div></td></tr>`}).join('')}
+  </tbody></table>`:empty(tot?'Nenhum item com esses filtros.':'Nenhum item cadastrado. Clique em Novo item para começar.')}</div></div>`;
 }
 function vCadastro(){
   const inat=!!ui.brInat,nI=S.breeders.filter(b=>b.inativo).length,list=S.breeders.filter(b=>!!b.inativo===inat).sort((a,b)=>a.name.localeCompare(b.name));
@@ -1482,6 +1497,7 @@ function modalHtml(){
     ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
     ${fldHtml('Status',`<select name="status">${opts(['Aberto','Arquivado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>${foot('Salvar')}</form>`}
   const pfoot=(k,w)=>{const n=(ui.f[k].rows||[]).length;return `<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${n>1?'Registrar '+n+' '+w+'s':'Registrar '+w}</button></div>`};
+  if(m.type==='itemtipo')body=`<h3>Novo item</h3><p class="muted" style="margin:0 0 14px">Qual tipo de item você quer cadastrar?</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="newProduct" style="flex:1;min-height:56px">Produto</button><button class="btn pri" data-a="newBreeder" style="flex:1;min-height:56px">Sêmen (reprodutor)</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='product'){const p=m.data||{};
     body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do produto',`<input name="name" value="${esc(p.name)}" required>`)}
@@ -1663,7 +1679,7 @@ const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
 const ptitle=()=>({'p-painel':'Estoque › Produtos','p-cadastro':'Estoque › Produtos › Cadastro','p-estoque':'Estoque › Produtos › Estoque','p-movs':'Estoque › Produtos › Movimentações'}[ui.tab]);
-const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':ui.tab==='e-painel'?'Estoque':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
+const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':(ui.tab==='e-painel'||ui.tab==='e-cad')?'Estoque':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
@@ -1977,12 +1993,11 @@ const NAV=[
   {tab:'i-ordens',label:'Ordens Serviços',icon:'list'},
   {tab:'i-estacao',label:'Controle da Estação',icon:'grid'}]},
  {id:'est',label:'Estoque',icon:'box',home:'e-painel',kids:[
+  {tab:'e-cad',label:'Cadastro',icon:'list'},
   {id:'prod',label:'Produtos',icon:'pack',home:'p-painel',kids:[
-   {tab:'p-cadastro',label:'Cadastro',icon:'list'},
    {tab:'p-estoque',label:'Estoque',icon:'box'},
    {tab:'p-movs',label:'Movimentações',icon:'swap'}]},
   {id:'semen',label:'Sêmen',icon:'drop',home:'painel',kids:[
-   {tab:'cadastro',label:'Cadastro',icon:'user'},
    {tab:'estoque',label:'Estoque',icon:'box'},
    {tab:'botijoes',label:'Botijões',icon:'tank'},
    {tab:'movs',msub:'hist',label:'Movimentações',icon:'swap'}]}]},
@@ -2026,8 +2041,8 @@ function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelector
 function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab==='e-cad'?'Estoque › Cadastro':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
@@ -2095,6 +2110,8 @@ document.addEventListener('click',e=>{
      const go=()=>{B(v).inativo=true;done(B(v).name+' inativado. Ele sai do estoque e das listas de seleção.')};
      if(bal>0)ask(`${B(v).name} ainda tem ${fmt(bal)} doses em estoque. Inativar mesmo assim? Ele deixa de aparecer no estoque e nas listas até ser ativado novamente.`,go,{title:'Atenção'});else go();break}
    case 'ativBreeder':delete B(v).inativo;done(B(v).name+' ativado. Ele voltou ao estoque de sêmen.');break
+   case 'ecT':ui.ecT=v;ui.q.ec='';render();break;
+   case 'newItem':ui.modal={type:'itemtipo'};render();break;
    case 'newBreeder':ui.modal={type:'breeder'};render();break;
    case 'editBreeder':ui.modal={type:'breeder',data:{...B(v)}};render();break;
    case 'delBreeder':{
