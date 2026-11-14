@@ -1852,7 +1852,6 @@ function vPMovs(){
 }
 function pEntradaFields(){
   const f=ui.f.pentrada;if(!f.rows||!f.rows.length)f.rows=[{}];
-  const vale=!!(f.farm&&S.farms.some(x=>x.id===f.farm&&isVale(x)));
   return `<div class="form">
    ${fldHtml('Data da entrada',fi('pentrada','date','date'))}
    ${fldHtml('Nome da fazenda',fs('pentrada','farm',FZV().map(x=>[x.id,x.name]),'Selecione…'))}
@@ -1862,7 +1861,7 @@ function pEntradaFields(){
    ${fldHtml('Quantidade',`<input data-pf="entrada.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
    ${fldHtml('Localidade',`<select data-pf="entrada.${i}.loc">${opts([...PLOC,...(r.loc&&!PLOC.includes(r.loc)?[r.loc]:[])].map(x=>[x,x]),r.loc,'Selecione…')}</select>`)}
    ${fldHtml('Observação',`<textarea data-pf="entrada.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
-   </div>${vale&&r.product?`<div class="form c4" style="margin-top:12px">${fldHtml('Estoque mínimo (Vale Animal)',`<input data-pf="entrada.${i}.min" type="number" min="0" step="any" inputmode="decimal" placeholder="Opcional" value="${esc(r.min??(PR(r.product).min>0?PR(r.product).min:''))}"><span class="hint">Alerta no Painel quando ficar abaixo.</span>`)}</div>`:''}<div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}`;
+   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}`;
 }
 function pSaidaFields(){
   const f=ui.f.psaida;if(!f.rows||!f.rows.length)f.rows=[{}];
@@ -2508,11 +2507,9 @@ document.addEventListener('submit',e=>{
     const f=ui.f.pentrada,rows=f.rows||[];let er='';
     if(!f.date||!f.farm)er='Preencha a data e a fazenda.';
     for(let i=0;i<rows.length&&!er;i++){const r=rows[i],q=Number(r.qty),n='Produto '+(i+1)+': ';
-      if(!r.product)er=n+'escolha o produto.';else if(!(q>0))er=n+'a quantidade deve ser maior que zero.';
-      else if(r.min!==undefined&&String(r.min).trim()!==''&&!(Number(String(r.min).replace(',','.'))>=0))er=n+'o estoque mínimo deve ser um número maior ou igual a zero.'}
+      if(!r.product)er=n+'escolha o produto.';else if(!(q>0))er=n+'a quantidade deve ser maior que zero.'}
     ui.err.pentrada=er;if(er){render();return}
     const ts=Date.now();
-    if(S.farms.some(x=>x.id===f.farm&&isVale(x)))rows.forEach(r=>{if(r.min===undefined)return;const pr=PR(r.product),mn=Number(String(r.min).replace(',','.'));if(pr){if(String(r.min).trim()!==''&&mn>0)pr.min=mn;else delete pr.min}});
     rows.forEach((r,i)=>S.pmovs.push({id:nid('p'),ts:ts+i,date:f.date,type:'entrada',product:r.product,farm:f.farm,qty:Number(r.qty),loc:(r.loc||'').trim(),note:r.note||''}));
     ui.f.pentrada={date:f.date,farm:f.farm,rows:[{}]};ui.modal=null;save();render();
     toast(rows.length>1?`${rows.length} entradas registradas. Estoque atualizado.`:'Entrada registrada. Estoque atualizado.');return}
