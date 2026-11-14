@@ -559,17 +559,17 @@ function breederAllLocs(bid){
 }
 
 function vECad(){
-  const inat=!!ui.brInat,t=ui.ecT||'',nI=S.breeders.filter(b=>b.inativo).length;
+  const inat=!!ui.brInat,t=ui.ecT||'',nI=S.breeders.filter(b=>b.inativo).length+S.products.filter(p=>p.inativo).length;
   const sem=t==='p'?[]:S.breeders.filter(b=>!!b.inativo===inat).map(b=>({k:'s',id:b.id,name:b.name,cat:b.breed,bal:breederBal(b.id),inat:!!b.inativo}));
-  const pro=t==='s'||inat?[]:S.products.map(p=>({k:'p',id:p.id,name:p.name,cat:p.category,bal:pTotal(p.id)}));
+  const pro=t==='s'?[]:S.products.filter(p=>!!p.inativo===inat).map(p=>({k:'p',id:p.id,name:p.name,cat:p.category,bal:pTotal(p.id),inat:!!p.inativo}));
   const list=[...sem,...pro].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
   const seg=(v,l)=>`<button class="btn${t===v?' pri':''}" data-a="ecT" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
   const tot=S.breeders.length+S.products.length;
   return `<div class="card"><div class="card-h"><h3>${inat?'Itens inativos':'Cadastro de estoque'}</h3><button class="btn pri" data-a="newItem">Novo item</button></div>
-  ${tot?`<div class="filters" style="margin-bottom:12px;align-items:flex-end"><div class="acts">${seg('','Todos')}${seg('s','Sêmen')}${seg('p','Produtos')}</div>${searchBox('ec')}${t!=='p'&&(nI||inat)?`<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button>`:''}</div>`:''}
+  ${tot?`<div class="filters" style="margin-bottom:12px;align-items:flex-end"><div class="acts">${seg('','Todos')}${seg('s','Sêmen')}${seg('p','Produtos')}</div>${searchBox('ec')}${(nI||inat)?`<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button>`:''}</div>`:''}
   <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>Tipo</th><th>Categoria / raça</th><th class="num">Saldo</th><th>Ações</th></tr></thead><tbody>
    ${list.map(o=>{const s=o.k==='s';return `<tr${qHide('ec',o.name+' '+o.cat+' '+(s?'sêmen':'produto'))}><td><b>${esc(o.name)}</b></td><td><span class="pill ${s?'ok':'in'}">${s?'Sêmen':'Produto'}</span></td><td>${esc(o.cat)}</td><td class="num">${fmt(o.bal)}${s?' doses':''}</td>
-   <td><div class="acts"><button class="btn sm" data-a="${s?'editBreeder':'editProduct'}" data-v="${o.id}">Editar</button>${s?(o.inat?`<button class="btn sm pri" data-a="ativBreeder" data-v="${o.id}">Ativar</button>`:`<button class="btn sm" data-a="inatBreeder" data-v="${o.id}">Inativar</button>`):''}<button class="btn sm dng" data-a="${s?'delBreeder':'delProduct'}" data-v="${o.id}">Excluir</button></div></td></tr>`}).join('')}
+   <td><div class="acts"><button class="btn sm" data-a="${s?'editBreeder':'editProduct'}" data-v="${o.id}">Editar</button>${o.inat?`<button class="btn sm pri" data-a="${s?'ativBreeder':'ativProduct'}" data-v="${o.id}">Ativar</button>`:`<button class="btn sm" data-a="${s?'inatBreeder':'inatProduct'}" data-v="${o.id}">Inativar</button>`}<button class="btn sm dng" data-a="${s?'delBreeder':'delProduct'}" data-v="${o.id}">Excluir</button></div></td></tr>`}).join('')}
   </tbody></table>`:empty(tot?'Nenhum item com esses filtros.':'Nenhum item cadastrado. Clique em Novo item para começar.')}</div></div>`;
 }
 function vCadastro(){
@@ -1507,7 +1507,7 @@ function modalHtml(){
   if(m.type==='pmov'){const x=m.data;
     body=`<h3>Editar ${x.type==='entrada'?'entrada':'saída'}</h3>${err}<form data-form="pmov" data-id="${x.id}" novalidate><div class="form">
     ${fldHtml('Data',`<input name="date" type="date" value="${x.date}" required>`)}
-    ${fldHtml('Produto',`<select name="product">${opts(az(S.products.map(b=>[b.id,b.name])),x.product)}</select>`)}
+    ${fldHtml('Produto',`<select name="product">${opts(az(S.products.filter(b=>!b.inativo||b.id===x.product).map(b=>[b.id,b.name])),x.product)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
     ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${foot('Salvar')}</form>`}
@@ -1683,7 +1683,7 @@ const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.ta
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
-  return Object.values(m).map(o=>({...o,ent:r3(o.ent),sai:r3(o.sai),bal:r3(o.ent-o.sai),p:PR(o.product)}))
+  return Object.values(m).filter(o=>!PR(o.product).inativo).map(o=>({...o,ent:r3(o.ent),sai:r3(o.sai),bal:r3(o.ent-o.sai),p:PR(o.product)}))
     .filter(o=>o.bal>0&&(!cat||o.p.category===cat)).sort((a,b)=>a.p.name.localeCompare(b.p.name));
 }
 function pcheck(movs){
@@ -1703,7 +1703,7 @@ function pmovTable(list,actions){
 function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
 function pChart(){
   const va=S.farms.find(f=>f.name.trim().toLowerCase()==='vale animal');
-  const rows=S.products.map(p=>({p,v:va?pBal(va.id,p.id):0})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name));
+  const rows=S.products.filter(p=>!p.inativo).map(p=>({p,v:va?pBal(va.id,p.id):0})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name));
   if(!rows.length)return `<div class="card"><div class="card-h"><h3>Estoque atual por produto</h3></div>${empty(va?'Nenhum produto com estoque na Vale Animal no momento.':'Cadastre a fazenda Vale Animal em CRM › Empresas para ver o gráfico.')}</div>`;
   const max=niceMax(rows[0].v);
   return `<div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Somente Vale Animal</span></div>
@@ -1719,7 +1719,7 @@ function vEPainel(){
   const lowMeds=S.meas.filter(x=>x.kind==='medicao'&&x.level<LOW).sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0));
   const resolv=x=>S.meas.filter(y=>y.tank===x.tank&&y.kind==='abastecimento'&&y.date>=x.date).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const medRows=lowMeds.map(x=>{const r=resolv(x);return `<tr><td>${dt(x.date)}</td><td><b>${esc(T(x.tank).name)}</b></td><td class="num"><b>${x.level} cm</b></td><td><span class="pill warn">Nitrogênio baixo</span></td><td>${r?'Reabastecido em '+dt(r.date).slice(0,5):'<span class="pill out">Precisa reabastecer</span>'}</td></tr>`}).join('');
-  const rows=S.products.map(p=>({p,v:pTotal(p.id)})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name));
+  const rows=S.products.filter(p=>!p.inativo).map(p=>({p,v:pTotal(p.id)})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v||a.p.name.localeCompare(b.p.name));
   const max=rows.length?niceMax(rows[0].v):1;
   const chart=rows.length?`<div class="bars" role="img" aria-label="Gráfico de barras com o estoque atual de cada produto">
    ${rows.map(o=>`<div class="bar-row" title="${esc(o.p.name)}: ${fmt(o.v)}"><span class="bar-name">${esc(o.p.name)}</span><div class="bar-track"><div class="bar" style="width:${(o.v/max*100).toFixed(2)}%"></div></div><span class="bar-val">${fmt(o.v)}</span></div>`).join('')}
@@ -1790,7 +1790,7 @@ function pEntradaFields(){
    ${fldHtml('Nome da fazenda',fs('pentrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…'))}
   </div>${f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="entrada" data-v="${i}">Remover</button>`:''}</div>
    <div class="form">
-   ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(az(S.products.map(p=>[p.id,p.name])),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
+   ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(az(S.products.filter(p=>!p.inativo||p.id===r.product).map(p=>[p.id,p.name])),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
    ${fldHtml('Quantidade',`<input data-pf="entrada.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
    ${fldHtml('Observação',`<textarea data-pf="entrada.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
    </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}`;
@@ -1916,7 +1916,7 @@ function vOrdens(){
 const PROCS=['Indução','Implante','Retirada','Inseminação','Diagnóstico'];
 const ETAPAS=['1º IATF','2º IATF','3º IATF'];
 function ficOptions(){
-  const pr=S.products.map(p=>({v:'p:'+p.id,label:p.name}));
+  const pr=S.products.filter(p=>!p.inativo).map(p=>({v:'p:'+p.id,label:p.name}));
   const se=S.breeders.filter(b=>!b.inativo).map(b=>({v:'s:'+b.id,label:'Sêmen — '+b.name}));
   const c=(a,b)=>a.label.localeCompare(b.label);
   return {pr:pr.sort(c),se:se.sort(c)};
@@ -2109,6 +2109,10 @@ document.addEventListener('click',e=>{
    case 'inatBreeder':{const bal=breederBal(v);
      const go=()=>{B(v).inativo=true;done(B(v).name+' inativado. Ele sai do estoque e das listas de seleção.')};
      if(bal>0)ask(`${B(v).name} ainda tem ${fmt(bal)} doses em estoque. Inativar mesmo assim? Ele deixa de aparecer no estoque e nas listas até ser ativado novamente.`,go,{title:'Atenção'});else go();break}
+   case 'inatProduct':{const bal=pTotal(v);
+     const go=()=>{PR(v).inativo=true;done(PR(v).name+' inativado. Ele sai do estoque e das listas de seleção.')};
+     if(bal>0)ask(`${PR(v).name} ainda tem ${fmt(bal)} em estoque. Inativar mesmo assim? Ele deixa de aparecer no estoque e nas listas até ser ativado novamente.`,go,{title:'Atenção'});else go();break}
+   case 'ativProduct':delete PR(v).inativo;done(PR(v).name+' ativado. Ele voltou ao estoque de produtos.');break
    case 'ativBreeder':delete B(v).inativo;done(B(v).name+' ativado. Ele voltou ao estoque de sêmen.');break
    case 'ecT':ui.ecT=v;ui.q.ec='';render();break;
    case 'newItem':ui.modal={type:'itemtipo'};render();break;
