@@ -655,6 +655,8 @@ function vFin(k){
 function vComis(){return `<div class="card"><div class="card-h"><h3>Comissões Vendedores</h3></div>${empty('Esta tela ainda será criada. Em breve.')}</div>`}
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const WDS=['dom','seg','ter','qua','qui','sex','sáb'],WDL=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+const TECCOL={'Flávio':'#3b6fd4','Hiago':'#1d8f5a','Erikson':'#c9561a','Joaquim':'#8e44ad'},ENTCOL='#546e7a';
+const evCol=e=>(e.title==='Entourar'||!(e.tecs||[]).length)?(e.title==='Entourar'?ENTCOL:(evCol(e))):(TECCOL[e.tecs[0]]||evCol(e));
 const EVCOL=['#3b6fd4','#1d8f5a','#c9561a','#c0392b','#8e44ad','#0b8a8f','#a8741a','#546e7a'];
 const pad2=n=>String(n).padStart(2,'0');
 const Dt=x=>new Date(x+'T12:00:00');
@@ -717,7 +719,7 @@ const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='trash')return 'Lixeira';
   if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
   return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
-const evChip=e=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
+const evChip=e=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
 function agMonth(){
   const d=Dt(ui.ag.date),first=isoD(new Date(d.getFullYear(),d.getMonth(),1)),st=weekStart(first),td=today();
   const n=Math.ceil((wdi(first)+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
@@ -742,7 +744,7 @@ function agWeek(days){
     const now=new Date(),nowLine=x===td?`<div class="ag-now" style="top:${(now.getHours()*60+now.getMinutes())*48/60}px"></div>`:'';
     return `<div class="ag-col">${hrs.map(h=>`<div class="ag-slot" data-a="agNew" data-v="${x}|${h}" data-drop="${x}|${h}"></div>`).join('')}${nowLine}
     ${ev.map(e=>{const l=L[e.id],top=l.s*48/60,ht=Math.max(20,(l.e-l.s)*48/60),w=100/l.n;
-      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}"><b>${esc(evLabel(e))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
+      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}"><b>${esc(evLabel(e))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
   return `<div class="ag-wrap"><div style="--n:${n}">
    <div class="ag-gridrow"><div></div>${head}</div>
    <div class="ag-gridrow"><div class="ag-hr" style="height:auto;font-size:10px;padding-top:8px">dia todo</div>${ad}</div>
@@ -751,7 +753,7 @@ function agRange(){const a=ui.ag.lf||ui.ag.date;let e=ui.ag.lt||addDays(a,59);if
 function agList(){
   let h='',any=false;const [a0,n0]=agRange();
   for(let i=0;i<n0;i++){const x=addDays(a0,i),ev=evOn(x);if(!ev.length)continue;any=true;const dd=Dt(x);
-    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<div class="ag-liw"><button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button><button type="button" class="btn sm dng ag-lix" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">Excluir</button></div>`).join('')}</div></div>`}
+    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<div class="ag-liw"><button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button><button type="button" class="btn sm dng ag-lix" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">Excluir</button></div>`).join('')}</div></div>`}
   return any?h:empty('Nenhum evento neste período.')}
 function agTrash(){
   const L=[...S.eventos_lixo].sort((a,b)=>(b.deletedAt||0)-(a.deletedAt||0));
@@ -759,7 +761,7 @@ function agTrash(){
   if(!L.length)return note+empty('A Lixeira está vazia.');
   const sel=(ui.ag.sel||[]).filter(id=>L.some(e=>e.id===id)),all=sel.length===L.length;
   const bar=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px"><label style="display:flex;gap:8px;align-items:center;font-weight:600;color:var(--ink);cursor:pointer"><input type="checkbox" data-a="agSelAll"${all?' checked':''} style="width:auto"> Selecionar todos</label><span class="muted" style="font-size:13px">${sel.length?sel.length+' selecionado(s)':'Nenhum selecionado'}</span><span style="flex:1"></span><button type="button" class="btn sm" data-a="agRestoreSel"${sel.length?'':' disabled'}>Restaurar selecionados</button><button type="button" class="btn sm dng" data-a="agPurgeSel"${sel.length?'':' disabled'}>Excluir selecionados definitivamente</button></div>`;
-  return note+bar+L.map(e=>{const dd=Dt(e.date);return `<div class="ag-list-d" style="align-items:center"><input type="checkbox" data-a="agSel" data-v="${e.id}"${sel.includes(e.id)?' checked':''} style="width:auto;flex:none"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0"><div class="ag-li" style="cursor:default;flex-wrap:wrap"><i style="background:${e.color||EVCOL[0]}"></i><em>${esc(evTime(e))}</em><span style="flex:1;min-width:180px"><b>${esc(evLabel(e))}</b>${e.total?` · <span class="muted">Total: ${esc(e.total)}</span>`:''}<br><small class="muted">Excluído em ${e.deletedAt?new Date(e.deletedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—'}</small></span><button type="button" class="btn sm" data-a="agRestore" data-v="${e.id}">Restaurar</button></div></div></div>`}).join('')}
+  return note+bar+L.map(e=>{const dd=Dt(e.date);return `<div class="ag-list-d" style="align-items:center"><input type="checkbox" data-a="agSel" data-v="${e.id}"${sel.includes(e.id)?' checked':''} style="width:auto;flex:none"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0"><div class="ag-li" style="cursor:default;flex-wrap:wrap"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span style="flex:1;min-width:180px"><b>${esc(evLabel(e))}</b>${e.total?` · <span class="muted">Total: ${esc(e.total)}</span>`:''}<br><small class="muted">Excluído em ${e.deletedAt?new Date(e.deletedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—'}</small></span><button type="button" class="btn sm" data-a="agRestore" data-v="${e.id}">Restaurar</button></div></div></div>`}).join('')}
 function vAgenda(){
   if(ui.ag.view==='day')ui.ag.view='week';
   const {view,date}=ui.ag,vb=(v,l)=>`<button class="btn ${view===v?'pri':''}" data-a="agView" data-v="${v}">${l}</button>`;
@@ -1171,7 +1173,7 @@ function vInicio(){
    ${tkHoje.length?tkHoje.map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty('Nenhuma tarefa para hoje.')}</div>
   <div class="ini-two">
    <div class="card"><div class="card-h"><h3>Eventos de hoje</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Calendário</button></div>
-    ${hoje.length?hoje.map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><span><b>${esc(evLabel(e))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
+    ${hoje.length?hoje.map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><span><b>${esc(evLabel(e))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
    <div class="card"><div class="card-h"><h3>Lotes para agendar serviço <small class="muted">(em aberto: ${abertos.length})</small></h3><button class="btn sm" data-a="go" data-v="i-lotes">Agendamentos</button></div>
     ${abertos.length?abertos.map(l=>`<div class="ini-row"><div><b>${esc(farmShort(l.farm)||F(l.farm).name)}</b> / ${esc(l.name)}<small>${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${l.start?' · parição '+dt(l.start)+' a '+dt(l.end):''}</small></div><span style="display:flex;gap:8px;align-items:center">${loteTemServico(l)?'<span class="muted" style="font-size:12px">✓ Com serviço</span>':'<span style="font-size:12px;font-weight:600">Falta agendar</span>'}<button class="btn sm ${loteTemServico(l)?'':'pri'}" data-a="iniAgendar" data-v="${l.id}">Agendar</button></span></div>`).join(''):empty('Nenhum lote em aberto.')}</div>
   </div>
@@ -1448,7 +1450,7 @@ function modalHtml(){
     ${fldHtml('Agenda Profissional',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${e.title==='Entourar'?' disabled':(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`)}
     ${fldHtml('Equipe',`<input name="team" value="${esc(e.title==='Entourar'?'':evTeamIni(e))}" autocomplete="off" placeholder="${e.title==='Entourar'?'Entourar não tem Equipe':'Marque a Agenda Profissional abaixo'}"${e.title==='Entourar'?' readonly':''}>`+((S.diaristas||[]).length?`<div class="ev-hlp" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:8px 0 0${e.title==='Entourar'?';display:none':''}"><span class="muted" style="font-size:12px">Vai junto:</span>${S.diaristas.map(d=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="hlp" value="${esc(d.name)}"${evTeamNames(e.team).includes(nrm(d.name))?' checked':''} style="width:auto"> ${esc(d.name)}</label>`).join('')}</div>`:''))}
     </div><div class="form c2" style="margin-top:12px">
-    ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`)}
+    ${fldHtml('Cor',`<div style="padding:6px 0;font-size:13px;color:var(--muted)">Automática pela Agenda Profissional: ${Object.entries(TECCOL).map(([n,c])=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:12px"><i style="width:12px;height:12px;border-radius:3px;background:${c}"></i>${n}</span>`).join('')}</div>`)}
     ${fldHtml('Observação',`<textarea name="desc" rows="3">${esc(e.desc||'')}</textarea>`)}
     </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}${e.id&&(e.title==='IM'||e.title==='AV + IM')?`<button class="btn" type="button" data-a="agProto" data-v="${e.id}">Criar protocolo IATF</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='agfil'){const f=ui.ag.f;
@@ -1471,7 +1473,7 @@ function modalHtml(){
     const fs=(()=>{try{const c=document.createElement('canvas').getContext('2d');c.font='8px '+getComputedStyle(document.body).fontFamily;
       const w=Math.max(0,...rows.map(([x,e])=>c.measureText((view==='week'&&!e.allday?perOf(e)+' ':'')+evLabel(e)).width)),av=138;
       return w>av?Math.max(4.5,Math.floor(80*av/w)/10):8}catch(err){return 8}})();
-    const pc=(e,wk)=>`<div style="background:${e.color||EVCOL[0]};color:#fff;border-radius:3px;padding:1px 2px;margin-top:2px;font-size:${fs}px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:clip;-webkit-print-color-adjust:exact;print-color-adjust:exact">${wk&&!e.allday?`<small style="font-size:${Math.max(4,fs-1)}px;opacity:.9">${esc(perOf(e))}</small> `:''}${esc(evLabel(e))}</div>`;
+    const pc=(e,wk)=>`<div style="background:${evCol(e)};color:#fff;border-radius:3px;padding:1px 2px;margin-top:2px;font-size:${fs}px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:clip;-webkit-print-color-adjust:exact;print-color-adjust:exact">${wk&&!e.allday?`<small style="font-size:${Math.max(4,fs-1)}px;opacity:.9">${esc(perOf(e))}</small> `:''}${esc(evLabel(e))}</div>`;
     const bd='1px solid #888',hd=x=>`style="padding:2px;text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;border-right:${bd};border-bottom:${bd};background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact"`;
     let cal='';
     if(view==='month'){
@@ -2197,7 +2199,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 18:05</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 18:20</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2686,7 +2688,8 @@ document.addEventListener('submit',e=>{
     {const old=id?S.eventos.find(x=>x.id===id):null;if(isDom(fd.date)&&(!old||old.date!==fd.date))return err('Não é permitido agendar evento no domingo. Escolha outra data.')}
     if(fd.total!==''&&fd.total!==undefined&&!(Number.isInteger(Number(fd.total))&&Number(fd.total)>=0))return err('O total deve ser um número inteiro.');
     const [start,etime]=all?['','']:PERH[per];
-    const rec={title,date:fd.date,end:fd.date,allday:all,periodo:per,start,etime,cat:fd.cat||'',color:fd.color||EVCOL[0],farm:fd.farm,total:fd.total===''||fd.total===undefined?'':Number(fd.total),lote:(fd.lote||'').trim().toUpperCase(),team:title==='Entourar'?'':tcTeam(fd.team),tecs,desc:(fd.desc||'').trim()};
+    const rec={title,date:fd.date,end:fd.date,allday:all,periodo:per,start,etime,cat:fd.cat||'',color:EVCOL[0],farm:fd.farm,total:fd.total===''||fd.total===undefined?'':Number(fd.total),lote:(fd.lote||'').trim().toUpperCase(),team:title==='Entourar'?'':tcTeam(fd.team),tecs,desc:(fd.desc||'').trim()};
+    rec.color=evCol(rec);
     let ajuste='';
     if(rec.title==='Andrológico'){if(rec.cat!=='Touros'){rec.cat='Touros';ajuste=' Categoria ajustada para Touros.'}}
     else if(rec.title==='IM'&&AVCATS.includes(rec.cat)){rec.title='AV + IM';ajuste=' Serviço ajustado para AV + IM ('+rec.cat+').'}
@@ -2713,7 +2716,7 @@ document.addEventListener('submit',e=>{
     const pl=evPlano(ev.date,prot,n,ev.farm);
     if(pl.dom.length){m0.sel={prot:fd.prot,niatf:n};m0.err='A '+pl.dom.join(' e a ')+' cairia no domingo. Escolha outro protocolo.';return render()}
     if(n>1){const o=S.eventos.find(q=>q.id===ev.id);if(o)o.suf='A'}
-    pl.forEach(([t,x,sf])=>S.eventos.push({id:nid('e'),...base,team:t==='Entourar'?'':base.team,tecs:t==='Entourar'?[]:base.tecs,title:t,date:x,end:x,suf:sf||''}));
+    pl.forEach(([t,x,sf])=>S.eventos.push({id:nid('e'),...base,team:t==='Entourar'?'':base.team,tecs:t==='Entourar'?[]:base.tecs,title:t,date:x,end:x,suf:sf||'',color:t==='Entourar'?ENTCOL:base.color}));
     return done(pl.length+' eventos criados: '+pl.map(x=>x[0]).join(', ')+'.')}
   if(k==='diaimp'){
     const L=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec).filter(x=>!x.exists&&(ui.modal.sel||[]).includes(x.key));
