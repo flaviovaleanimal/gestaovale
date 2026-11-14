@@ -723,7 +723,7 @@ function vAgenda(){
   return `<div class="card"><div class="ag-bar"><button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
    <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('day','Dia')}${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}${vb('trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':''))}</span><button class="btn" data-a="agPrint">Imprimir</button><button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button></div>
    <div class="ag-bar" style="margin-top:-2px"><b style="font-size:13px">Agenda Técnico</b><span class="ag-seg"><button class="btn sm ${ui.ag.tec?'':'pri'}" data-a="agTec" data-v="">Todos</button>${AGTEC.map(t=>`<button class="btn sm ${ui.ag.tec===t?'pri':''}" data-a="agTec" data-v="${t}">${t}</button>`).join('')}</span>
-   <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
+   <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select><button class="btn sm" data-a="tab" data-v="i-lotes" style="margin-left:auto">← Agendamentos</button></div>
    ${agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8)}
 /* ===== TAREFAS (quadro estilo Trello) ===== */
@@ -1954,7 +1954,7 @@ const lotesFilt=()=>{const f=ui.lf;return S.lotes.filter(l=>(!f.status||l.status
 function vLotes(){
   const f=ui.lf;
   const list=lotesFilt();
-  return `<div class="card"><div class="card-h"><h3>Agendamentos</h3><div class="acts"><button class="btn" data-a="printLotes">Imprimir</button><button class="btn pri" data-a="newLote">Agendar lote</button></div></div>
+  return `<div class="card"><div class="card-h"><h3>Agendamentos</h3><div class="acts"><button class="btn" data-a="tab" data-v="agenda">📅 Calendário</button><button class="btn" data-a="printLotes">Imprimir</button><button class="btn pri" data-a="newLote">Agendar lote</button></div></div>
   <div class="filters" style="margin-bottom:12px">
    ${fldHtml('Status',`<select data-lf="status">${opts([['Aberto','Aberto'],['Arquivado','Arquivado']],f.status,'Todos')}</select>`)}
    ${fldHtml('Fazenda',`<select data-lf="farm">${opts(FZ().map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
