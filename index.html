@@ -568,8 +568,8 @@ function vECad(){
   const tot=S.breeders.length+S.products.length;
   return `<div class="card"><div class="card-h"><h3>${inat?'Itens inativos':'Cadastro de estoque'}</h3>${tot?`<span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span>`:''}<span class="tk-sp"></span><button class="btn pri" data-a="newItem">Novo item</button></div>
   ${tot?`<div class="filters" style="margin-bottom:12px;align-items:flex-end">${searchBox('ec')}${(nI||inat)?`<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button>`:''}</div>`:''}
-  <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>Categoria / raça</th><th>Tipo</th><th class="num">Saldo</th><th>Ações</th></tr></thead><tbody>
-   ${list.map(o=>{const s=o.k==='s';return `<tr${qHide('ec',o.name+' '+o.cat+' '+(s?'sêmen':'produto'))}><td><b>${esc(o.name)}</b></td><td>${esc(o.cat)}</td><td><span class="pill ${s?'ok':'in'}">${s?'Sêmen':'Produto'}</span></td><td class="num">${fmt(o.bal)}${s?' '+esc((o.un||'Dose').toLowerCase()+(o.un==='Palheta'?'s':'s')):o.un?' '+esc(o.un.toLowerCase()):''}</td>
+  <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>Categoria / raça</th><th>Tipo</th><th>Unidade</th><th class="num">Saldo</th><th>Ações</th></tr></thead><tbody>
+   ${list.map(o=>{const s=o.k==='s';return `<tr${qHide('ec',o.name+' '+o.cat+' '+(s?'sêmen':'produto'))}><td><b>${esc(o.name)}</b></td><td>${esc(o.cat)}</td><td><span class="pill ${s?'ok':'in'}">${s?'Sêmen':'Produto'}</span></td><td>${o.un?esc(o.un):s?'Dose':'<span class="muted">—</span>'}</td><td class="num">${fmt(o.bal)}</td>
    <td><div class="acts"><button class="btn sm" data-a="${s?'editBreeder':'editProduct'}" data-v="${o.id}">Editar</button></div></td></tr>`}).join('')}
   </tbody></table>`:empty(tot?'Nenhum item com esses filtros.':'Nenhum item cadastrado. Clique em Novo item para começar.')}</div></div>`;
 }
