@@ -459,7 +459,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={brInat:false,ecT:'',ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={brInat:false,ecT:'',emT:'',emItem:'',ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
@@ -531,7 +531,7 @@ function vPainel(){
     <div class="card stat ${low.length?'alert':''}"><div class="n">${fmt(low.length)}</div><div class="l">Botijões com nitrogênio abaixo de ${LOW} cm</div></div>
   </div>
   <div class="two">
-    <div class="card"><div class="card-h"><h3>Últimas movimentações</h3><button class="btn sm" data-a="tab" data-v="movs">Ver histórico</button></div>
+    <div class="card"><div class="card-h"><h3>Últimas movimentações</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="s">Ver histórico</button></div>
       <div class="tw small">${movTable(last,false)}</div></div>
     <div class="card"><div class="card-h"><h3>Nitrogênio baixo</h3></div>
       ${low.length?low.map(t=>{const l=tankLast(t.id);return `<div class="farm-row"><div><b>${esc(t.name)}</b><div class="muted">${t.cap} L · medido em ${dt(l.date)}</div></div><span class="pill warn">${l.level} cm</span></div>`}).join(''):empty('Todos os botijões estão acima de '+LOW+' cm.')}
@@ -1278,6 +1278,36 @@ function movList(){
   return S.movs.filter(m=>(!h.from||m.date>=h.from)&&(!h.to||m.date<=h.to)&&(!h.type||m.type===h.type)&&(!h.farm||m.farm===h.farm)&&(!h.breeder||m.b===h.breeder))
     .sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0));
 }
+
+function emOpen(k,y){ui.err={};
+  if(k==='entrada'){if(y==='s'){ui.f.entrada={date:today(),rows:[{}]};ui.added=0;ui.modal={type:'entrada'}}else{ui.f.pentrada={date:today(),rows:[{}]};ui.modal={type:'pentrada'}}}
+  else{if(y==='s'){ui.f.saida={date:today(),rows:[{}]};ui.added=0;ui.modal={type:'saida'}}else{ui.f.psaida={date:today(),rows:[{}]};ui.modal={type:'psaida'}}}}
+function emPdfGo(y){const it=ui.emItem||'';ui.hm.breeder=it[0]==='s'?it.slice(2):'';ui.pm.product=it[0]==='p'?it.slice(2):'';ui.modal={type:y==='s'?'pdfmov':'ppdfmov'}}
+
+function emList(){
+  const h=ui.hm,p=ui.pm,t=ui.emT||'',it=ui.emItem||'';
+  const inR=m=>(!h.from||m.date>=h.from)&&(!h.to||m.date<=h.to)&&(!h.type||m.type===h.type)&&(!h.farm||m.farm===h.farm);
+  const sem=t==='p'||it.startsWith('p:')?[]:S.movs.filter(m=>inR(m)&&(!it||m.b===it.slice(2))).map(m=>({k:'s',m}));
+  const pro=t==='s'||it.startsWith('s:')?[]:S.pmovs.filter(m=>inR(m)&&(!it||m.product===it.slice(2))).map(m=>({k:'p',m}));
+  return [...sem,...pro].sort((a,b)=>b.m.date.localeCompare(a.m.date)||(b.m.ts||0)-(a.m.ts||0));
+}
+function vEMov(){
+  const h=ui.hm,t=ui.emT||'',it=ui.emItem||'',list=emList();
+  const seg=(v,l)=>`<button class="btn sm${t===v?' pri':''}" data-a="emT" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
+  const items=[...(t==='p'?[]:S.breeders.map(b=>['s:'+b.id,b.name+' (sêmen)'])),...(t==='s'?[]:S.products.map(x=>['p:'+x.id,x.name]))].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR',{sensitivity:'base'}));
+  const pill=m=>`<span class="pill ${m.type==='entrada'?'in':'out'}">${m.type==='entrada'?'Entrada':'Saída'}</span>`;
+  const rows=list.map(o=>{const m=o.m,s=o.k==='s',e=m.type==='entrada';
+    return `<tr><td>${dt(m.date)}</td><td>${s?'Sêmen':'Produto'}</td><td><b>${esc(s?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td>${s?esc(T(m.tank).name):'<span class="muted">—</span>'}</td><td>${pill(m)}</td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${s?' doses':''}</td>
+    <td><div class="acts"><button class="btn sm" data-a="${s?'editMov':'editPMov'}" data-v="${m.id}">Editar</button></div></td></tr>`}).join('');
+  return `<div class="card"><div class="card-h"><h3>Movimentações</h3><span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span><span class="tk-sp"></span><div class="acts"><button class="btn" data-a="emPdf">Imprimir PDF</button><button class="btn pri" data-a="emNew" data-v="entrada">Nova entrada</button><button class="btn pri" data-a="emNew" data-v="saida">Nova saída</button></div></div>
+  <div class="filters" style="margin-bottom:12px">
+   ${fldHtml('Data inicial',`<input type="date" data-em="from" value="${h.from}">`)}
+   ${fldHtml('Data final',`<input type="date" data-em="to" value="${h.to}">`)}
+   ${fldHtml('Movimento',`<select data-em="type">${opts([['entrada','Entrada'],['saida','Saída']],h.type,'Todos')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-em="farm">${opts(FZ().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
+   ${fldHtml('Item',`<select data-em="item">${opts(items,it,'Todos')}</select>`)}
+  </div><div class="tw">${list.length?`<table><thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th>Fazenda</th><th>Botijão</th><th>Movimento</th><th class="num">Quantidade</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>`:empty('Nenhuma movimentação encontrada.')}</div></div>`;
+}
 function vMovs(){
   const sub=ui.msub,h=ui.hm;
   const ttl={entrada:'Entradas de sêmen',saida:'Saídas de sêmen',hist:'Histórico de movimentações'}[sub];
@@ -1500,6 +1530,7 @@ function modalHtml(){
     ${fldHtml('Status',`<select name="status">${opts(['Aberto','Arquivado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>${foot('Salvar')}</form>`}
   const pfoot=(k,w)=>{const n=(ui.f[k].rows||[]).length;return `<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${n>1?'Registrar '+n+' '+w+'s':'Registrar '+w}</button></div>`};
   if(m.type==='itemtipo')body=`<h3>Novo item</h3><p class="muted" style="margin:0 0 14px">Qual tipo de item você quer cadastrar?</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="newProduct" style="flex:1;min-height:56px">Produto</button><button class="btn pri" data-a="newBreeder" style="flex:1;min-height:56px">Sêmen (reprodutor)</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
+  if(m.type==='movtipo')body=`<h3>${m.pdf?'Imprimir PDF':m.k==='entrada'?'Nova entrada':'Nova saída'}</h3><p class="muted" style="margin:0 0 14px">${m.pdf?'Qual lista você quer imprimir?':'Entrada ou saída de qual tipo de item?'}</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="emGo" data-v="p" style="flex:1;min-height:56px">Produtos</button><button class="btn pri" data-a="emGo" data-v="s" style="flex:1;min-height:56px">Sêmen</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='product'){const p=m.data||{};
     body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do produto',`<input name="name" value="${esc(p.name)}" required>`)}
@@ -1513,7 +1544,7 @@ function modalHtml(){
     ${fldHtml('Produto',`<select name="product">${opts(az(S.products.filter(b=>!b.inativo||b.id===x.product).map(b=>[b.id,b.name])),x.product)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
-    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${foot('Salvar')}</form>`}
+    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${footX('Salvar',`<button class="btn dng" type="button" data-a="delPMov" data-v="${x.id}">Excluir</button>`)}</form>`}
   if(m.type==='export'){
     const txt=JSON.stringify({app:'gestao-de-servicos',versao:1,exportado:new Date().toISOString(),dados:S});
     m.txt=txt;
@@ -1590,7 +1621,7 @@ function modalHtml(){
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Botijão',`<select name="tank">${opts(S.tanks.map(b=>[b.id,b.name]),x.tank)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="1" step="1" value="${x.qty}" required>`)}
-    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${foot('Salvar')}</form>`}
+    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${footX('Salvar',`<button class="btn dng" type="button" data-a="delMov" data-v="${x.id}">Excluir</button>`)}</form>`}
   if(m.type==='entrada')body=`<h3>Entrada de sêmen</h3>${errBox('entrada')}<form data-form="entrada" novalidate>${entradaFields()}${foot3()}</form>`;
   if(m.type==='saida')body=`<h3>Saída de sêmen</h3>${errBox('saida')}<form data-form="saida" novalidate>${saidaFields()}${foot4()}</form>`;
   if(m.type==='fpdf'){
@@ -1682,7 +1713,7 @@ const psg=m=>m.type==='entrada'?m.qty:-m.qty;
 const pBal=(farm,prod)=>r3(S.pmovs.filter(m=>m.farm===farm&&m.product===prod).reduce((a,m)=>a+psg(m),0));
 const pTotal=prod=>r3(S.pmovs.filter(m=>m.product===prod).reduce((a,m)=>a+psg(m),0));
 const ptitle=()=>({'p-painel':'Estoque › Produtos','p-cadastro':'Estoque › Produtos › Cadastro','p-estoque':'Estoque › Produtos › Estoque','p-movs':'Estoque › Produtos › Movimentações'}[ui.tab]);
-const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':(ui.tab==='e-painel'||ui.tab==='e-cad')?'Estoque':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
+const modName=()=>ui.tab==='tarefas'?'Tarefas':ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Agenda':ui.tab.startsWith('f-')?'Financeiro':(ui.tab==='fazendas'||ui.tab==='contatos'||ui.tab==='negociacoes')?'CRM':(ui.tab==='e-painel'||ui.tab==='e-cad'||ui.tab==='e-mov')?'Estoque':ui.tab.startsWith('p-')?'Produtos':ui.tab.startsWith('i-')?'Serviços':'Sêmen';
 function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
@@ -1739,13 +1770,13 @@ function vEPainel(){
     <h3 style="margin:16px 0 8px;font-size:14px">Histórico de nitrogênio baixo</h3>
     <div class="tw small">${medRows?`<table><thead><tr><th>Data</th><th>Botijão</th><th class="num">Nível</th><th>Situação</th><th>Resolução</th></tr></thead><tbody>${medRows}</tbody></table>`:empty('Nenhuma medição abaixo de '+LOW+' cm.')}</div></div>
   <div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Saldo de todas as fazendas</span></div>${chart}</div>
-  <div class="card"><div class="card-h"><h3>Últimas movimentações · Sêmen</h3><button class="btn sm" data-a="tab" data-v="movs">Ver histórico</button></div><div class="tw small">${lastS}</div></div>
-  <div class="card"><div class="card-h"><h3>Últimas movimentações · Produtos</h3><button class="btn sm" data-a="tab" data-v="p-movs">Ver histórico</button></div><div class="tw small">${lastP}</div></div>`;
+  <div class="card"><div class="card-h"><h3>Últimas movimentações · Sêmen</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="s">Ver histórico</button></div><div class="tw small">${lastS}</div></div>
+  <div class="card"><div class="card-h"><h3>Últimas movimentações · Produtos</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="p">Ver histórico</button></div><div class="tw small">${lastP}</div></div>`;
 }
 function vPPainel(){
   const last=[...S.pmovs].sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0)).slice(0,6);
   return `${pChart()}
-  <div class="card"><div class="card-h"><h3>Últimas movimentações</h3><button class="btn sm" data-a="tab" data-v="p-movs">Ver histórico</button></div>
+  <div class="card"><div class="card-h"><h3>Últimas movimentações</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="p">Ver histórico</button></div>
     <div class="tw small">${pmovTable(last,false)}</div></div>`;
 }
 function vPCadastro_(){
@@ -1997,13 +2028,12 @@ const NAV=[
   {tab:'i-estacao',label:'Controle da Estação',icon:'grid'}]},
  {id:'est',label:'Estoque',icon:'box',home:'e-painel',kids:[
   {tab:'e-cad',label:'Cadastro',icon:'list'},
+  {tab:'e-mov',label:'Movimentações',icon:'swap'},
   {id:'prod',label:'Produtos',icon:'pack',home:'p-painel',kids:[
-   {tab:'p-estoque',label:'Estoque',icon:'box'},
-   {tab:'p-movs',label:'Movimentações',icon:'swap'}]},
+   {tab:'p-estoque',label:'Estoque',icon:'box'}]},
   {id:'semen',label:'Sêmen',icon:'drop',home:'painel',kids:[
    {tab:'estoque',label:'Estoque',icon:'box'},
-   {tab:'botijoes',label:'Botijões',icon:'tank'},
-   {tab:'movs',msub:'hist',label:'Movimentações',icon:'swap'}]}]},
+   {tab:'botijoes',label:'Botijões',icon:'tank'}]}]},
  {id:'fin',label:'Financeiro',icon:'coin',kids:[
   {tab:'f-fatur',label:'Faturamento',icon:'coin'},
   {tab:'f-diarias',label:'Diárias Técnicas',icon:'list'},
@@ -2044,8 +2074,8 @@ function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelector
 function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab==='e-cad'?'Estoque › Cadastro':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'e-mov':vEMov,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab==='e-cad'?'Estoque › Cadastro':ui.tab==='e-mov'?'Estoque › Movimentações':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
@@ -2079,7 +2109,7 @@ document.addEventListener('click',e=>{
   if(a!=='umenu')ui.umenu=false;
   switch(a){
    case 'umenu':ui.umenu=!ui.umenu;render();break;
-   case 'tab':ui.tab=v;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
+   case 'tab':ui.tab=v;if(v==='e-mov'&&b.dataset.s)ui.emT=b.dataset.s;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
    case 'go':ui.tab=v;if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
    case 'grp':{const g=b.dataset.home;
      const goHome=g&&!(curTab()===g&&(g!=='movs'||ui.msub==='hist'));
@@ -2118,6 +2148,10 @@ document.addEventListener('click',e=>{
    case 'ativProduct':delete PR(v).inativo;done(PR(v).name+' ativado. Ele voltou ao estoque de produtos.');break
    case 'ativBreeder':delete B(v).inativo;done(B(v).name+' ativado. Ele voltou ao estoque de sêmen.');break
    case 'ecT':ui.ecT=v;ui.q.ec='';render();break;
+   case 'emT':ui.emT=v;if(ui.emItem&&((v==='p'&&ui.emItem[0]==='s')||(v==='s'&&ui.emItem[0]==='p')))ui.emItem='';render();break;
+   case 'emNew':if(ui.emT){emOpen(v,ui.emT)}else ui.modal={type:'movtipo',k:v,pdf:false};render();break;
+   case 'emPdf':if(ui.emT)emPdfGo(ui.emT);else ui.modal={type:'movtipo',pdf:true};render();break;
+   case 'emGo':{const k=ui.modal.k,pdf=ui.modal.pdf;ui.modal=null;if(pdf)emPdfGo(v);else emOpen(k,v);render();break}
    case 'newItem':ui.modal={type:'itemtipo'};render();break;
    case 'newBreeder':ui.modal={type:'breeder'};render();break;
    case 'editBreeder':ui.modal={type:'breeder',data:{...B(v)}};render();break;
@@ -2318,6 +2352,7 @@ document.addEventListener('change',e=>{
   if(d.h){ui.hist[d.h]=t.value;render()}
   if(d.m){ui.hm[d.m]=t.value;render()}
   if(d.pm){ui.pm[d.pm]=t.value;render()}
+  if(d.em){const k=d.em;if(k==='item')ui.emItem=t.value;else{ui.hm[k]=t.value;ui.pm[k]=t.value}render()}
   if(d.impfile&&t.files&&t.files[0]){const r=new FileReader();r.onload=()=>{const ta=document.querySelector('textarea[name=json]');if(ta)ta.value=String(r.result)};r.readAsText(t.files[0])}
   if(d.lf){ui.lf[d.lf]=t.value;render()}
   if(d.cf){ui.cf[d.cf]=t.value;render()}
