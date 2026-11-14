@@ -289,6 +289,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-list-d{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ag-list-h{flex:0 0 120px;font-weight:700}.ag-list-h small{display:block;color:var(--muted);font-weight:500;text-transform:capitalize}
 .ag-li{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:5px 6px;border-radius:6px;cursor:pointer;font-family:inherit;color:var(--ink);font-size:13px}.ag-li:hover{background:var(--navy-soft)}
+.ag-liw{position:relative}.ag-liw .ag-li{padding-right:92px}.ag-lix{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .ag-li i{width:10px;height:10px;border-radius:50%;flex:0 0 auto}.ag-li em{font-style:normal;color:var(--muted);min-width:96px}
 .ag-cols{display:flex;gap:8px;flex-wrap:wrap}.ag-cols label{cursor:pointer}.ag-cols input{position:absolute;opacity:0;width:0;height:0}
 .ag-cols span{display:block;width:28px;height:28px;border-radius:50%;border:3px solid transparent;box-sizing:border-box}
@@ -388,10 +389,10 @@ function seed(){
       {id:'n4',tank:'t3',kind:'medicao',date:'2026-11-01',level:31,liters:0,total:0,note:''}]};
 }
 /* ---------- armazenamento: banco compartilhado (db) ou, sem ele, este navegador ---------- */
-const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],tarefas:[],tcols:[]});
+const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],tarefas:[],tcols:[]});
 let S=emptyS();
 let DB=null,dbState='conectando',slowT=null,busy=false,q=[],needRender=false;
-const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},tarefas:{},tcols:{}},lastSnap={},held={},got={};
+const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},tarefas:{},tcols:{}},lastSnap={},held={},got={};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const loadLocal=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}};
 function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários.',
@@ -645,7 +646,8 @@ const EVCOL=['#3b6fd4','#1d8f5a','#c9561a','#c0392b','#8e44ad','#0b8a8f','#a8741
 const pad2=n=>String(n).padStart(2,'0');
 const Dt=x=>new Date(x+'T12:00:00');
 const isoD=d=>d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
-const weekStart=x=>addDays(x,-Dt(x).getDay());
+const WDM=[...WDS.slice(1),WDS[0]],wdi=x=>(Dt(x).getDay()+6)%7;
+const weekStart=x=>addDays(x,-wdi(x));
 const tmin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[2]):0};
 const evFarm=e=>(S.farms.find(f=>f.id===e.farm)||{}).name||'';
 const AGTEC=['Flávio','Hiago','Joaquim'],AGTECF=['Flávio Alves','Hiago Miguel','Joaquim Gomes'];
@@ -671,13 +673,14 @@ const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='day')return `${WDL[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
   if(view==='week'){const a=Dt(weekStart(date)),b=Dt(addDays(weekStart(date),6));
     return a.getMonth()===b.getMonth()?`${a.getDate()} – ${b.getDate()} de ${MESES[a.getMonth()]} de ${b.getFullYear()}`:`${a.getDate()} de ${MESES[a.getMonth()].slice(0,3)} – ${b.getDate()} de ${MESES[b.getMonth()].slice(0,3)} de ${b.getFullYear()}`}
+  if(view==='trash')return 'Lixeira';
   if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
   return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
 const evChip=e=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e))}</button>`;
 function agMonth(){
   const d=Dt(ui.ag.date),first=isoD(new Date(d.getFullYear(),d.getMonth(),1)),st=weekStart(first),td=today();
-  const n=Math.ceil((Dt(first).getDay()+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
-  let h=WDS.map(w=>`<div class="ag-wd">${w}</div>`).join('');
+  const n=Math.ceil((wdi(first)+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
+  let h=WDM.map(w=>`<div class="ag-wd">${w}</div>`).join('');
   for(let i=0;i<n;i++){const x=addDays(st,i),dd=Dt(x),ev=evOn(x),out=dd.getMonth()!==d.getMonth();
     h+=`<div class="ag-day${out?' out':''}" data-a="agNew" data-v="${x}" data-drop="${x}"><button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}" aria-label="Ver dia ${dt(x)}">${dd.getDate()===1?dd.getDate()+' '+MESES[dd.getMonth()].slice(0,3):dd.getDate()}</button>
     ${ev.slice(0,3).map(evChip).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agGoDay" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
@@ -707,13 +710,18 @@ function agRange(){const a=ui.ag.lf||ui.ag.date;let e=ui.ag.lt||addDays(a,59);if
 function agList(){
   let h='',any=false;const [a0,n0]=agRange();
   for(let i=0;i<n0;i++){const x=addDays(a0,i),ev=evOn(x);if(!ev.length)continue;any=true;const dd=Dt(x);
-    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button>`).join('')}</div></div>`}
+    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<div class="ag-liw"><button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button><button type="button" class="btn sm dng ag-lix" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">Excluir</button></div>`).join('')}</div></div>`}
   return any?h:empty('Nenhum evento neste período.')}
+function agTrash(){
+  const L=[...S.eventos_lixo].sort((a,b)=>(b.deletedAt||0)-(a.deletedAt||0));
+  const note='<p class="muted" style="margin:6px 0 10px;font-size:13px">Eventos excluídos ficam aqui até você excluir definitivamente. Ao restaurar, o evento volta ao Calendário e ao Google Agenda.</p>';
+  if(!L.length)return note+empty('A Lixeira está vazia.');
+  return note+L.map(e=>{const dd=Dt(e.date);return `<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0"><div class="ag-li" style="cursor:default;flex-wrap:wrap"><i style="background:${e.color||EVCOL[0]}"></i><em>${esc(evTime(e))}</em><span style="flex:1;min-width:180px"><b>${esc(evLabel(e))}</b>${e.total?` · <span class="muted">Total: ${esc(e.total)}</span>`:''}<br><small class="muted">Excluído em ${e.deletedAt?new Date(e.deletedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—'}</small></span><button type="button" class="btn sm" data-a="agRestore" data-v="${e.id}">Restaurar</button><button type="button" class="btn sm dng" data-a="agPurge" data-v="${e.id}">Excluir definitivamente</button></div></div></div>`}).join('')}
 function vAgenda(){
   const {view,date}=ui.ag,vb=(v,l)=>`<button class="btn ${view===v?'pri':''}" data-a="agView" data-v="${v}">${l}</button>`;
-  const body=view==='month'?agMonth():view==='week'?agWeek(Array.from({length:7},(_,i)=>addDays(weekStart(date),i))):view==='day'?agWeek([date]):`<div class="filters" style="margin-bottom:12px"><div class="fld" style="max-width:300px;flex:1 1 220px"><label>Pesquisar</label><input type="search" data-agq="1" value="${esc(ui.ag.f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>${fldHtml('Data Inicial',`<input type="date" data-agd="lf" value="${esc(ui.ag.lf)}">`)}${fldHtml('Data Final',`<input type="date" data-agd="lt" value="${esc(ui.ag.lt)}">`)}</div><div id="ag-list">${agList()}</div>`;
+  const body=view==='trash'?agTrash():view==='month'?agMonth():view==='week'?agWeek(Array.from({length:7},(_,i)=>addDays(weekStart(date),i))):view==='day'?agWeek([date]):`<div class="filters" style="margin-bottom:12px"><div class="fld" style="max-width:300px;flex:1 1 220px"><label>Pesquisar</label><input type="search" data-agq="1" value="${esc(ui.ag.f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>${fldHtml('Data Inicial',`<input type="date" data-agd="lf" value="${esc(ui.ag.lf)}">`)}${fldHtml('Data Final',`<input type="date" data-agd="lt" value="${esc(ui.ag.lt)}">`)}</div><div id="ag-list">${agList()}</div>`;
   return `<div class="card"><div class="ag-bar"><button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
-   <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('day','Dia')}${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}</span><button class="btn" data-a="agPrint">Imprimir</button><button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button></div>
+   <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('day','Dia')}${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}${vb('trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':''))}</span><button class="btn" data-a="agPrint">Imprimir</button><button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button></div>
    <div class="ag-bar" style="margin-top:-2px"><b style="font-size:13px">Agenda Técnico</b><span class="ag-seg"><button class="btn sm ${ui.ag.tec?'':'pri'}" data-a="agTec" data-v="">Todos</button>${AGTEC.map(t=>`<button class="btn sm ${ui.ag.tec===t?'pri':''}" data-a="agTec" data-v="${t}">${t}</button>`).join('')}</span>
    <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select></div>
    ${agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
@@ -1420,8 +1428,8 @@ function modalHtml(){
     const bd='1px solid #888',hd=x=>`style="padding:2px;text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;border-right:${bd};border-bottom:${bd};background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact"`;
     let cal='';
     if(view==='month'){
-      const first=a,st=weekStart(first),nn=Math.ceil((Dt(first).getDay()+n)/7)*7;
-      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${WDS.map(w=>`<div ${hd()}>${w}</div>`).join('')}
+      const first=a,st=weekStart(first),nn=Math.ceil((wdi(first)+n)/7)*7;
+      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${WDM.map(w=>`<div ${hd()}>${w}</div>`).join('')}
       ${Array.from({length:nn},(_,i)=>{const x=addDays(st,i),dd=Dt(x),out=dd.getMonth()!==d.getMonth();
         return `<div style="min-height:70px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd};break-inside:avoid;${out?'color:#999':''}"><b style="font-size:9px">${dd.getDate()}</b>${out?'':evOn(x).map(e=>pc(e,false)).join('')}</div>`}).join('')}</div>`}
     else if(view==='week'){
@@ -2296,7 +2304,9 @@ document.addEventListener('click',e=>{
    case 'agNew':{const [d,h]=String(v).split('|');const H=h===undefined?null:+h;
      ui.modal={type:'ev',data:{date:d,periodo:H===null?'Dia Inteiro':(H<12?'Manhã':'Tarde')}};render();break}
    case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
-   case 'agDel':{const x=S.eventos.find(q=>q.id===v);ask(`Excluir o evento "${x.title}"?`,()=>{S.eventos=S.eventos.filter(q=>q.id!==v);done('Evento excluído.')});break}
+   case 'agDel':{const x=S.eventos.find(q=>q.id===v);if(!x)break;ask(`Mover o evento "${x.title}" para a Lixeira? Você pode restaurar depois.`,()=>{S.eventos_lixo.push({...x,deletedAt:Date.now()});S.eventos=S.eventos.filter(q=>q.id!==v);done('Evento movido para a Lixeira.')},{title:'Mover para a Lixeira',ok:'Mover para a Lixeira'});break}
+   case 'agRestore':{const x=S.eventos_lixo.find(q=>q.id===v);if(!x)break;const r={...x};delete r.deletedAt;S.eventos.push(r);S.eventos_lixo=S.eventos_lixo.filter(q=>q.id!==v);ui.ag.date=r.date;save();render();toast('Evento restaurado.');break}
+   case 'agPurge':{const x=S.eventos_lixo.find(q=>q.id===v);if(!x)break;ask(`Excluir definitivamente o evento "${x.title}"? Não dá para desfazer.`,()=>{S.eventos_lixo=S.eventos_lixo.filter(q=>q.id!==v);done('Evento excluído definitivamente.')},{title:'Excluir definitivamente',ok:'Excluir definitivamente'});break}
    case 'finNew':ui.modal={type:'fin',kind:v,rows:[{date:today(),sit:'Aberta',qty:v==='diarias'?1:''}]};render();break;
    case 'finEdit':{const [k,id]=v.split(':');ui.modal={type:'fin',kind:k,editId:id,rows:[{...S[FIN[k].col].find(x=>x.id===id)}]};render();break}
    case 'finAddRow':{finCollect();const rs=ui.modal.rows,i=+v,p=rs[i]||{};rs.splice(i+1,0,{date:p.date||today(),sit:p.sit||'Aberta',prest:p.prest,farm:p.farm,unit:ui.modal.kind==='diarias'?p.unit:undefined,qty:ui.modal.kind==='diarias'?1:''});render();goNew('#modal-root .line',i+1);break}
