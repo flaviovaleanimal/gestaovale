@@ -1544,8 +1544,8 @@ function modalHtml(){
     ${fldHtml('Produto',`<select name="product">${opts(az(S.products.filter(b=>!b.inativo||b.id===x.product).map(b=>[b.id,b.name])),x.product)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
-    ${fldHtml('Localidade',`<input name="loc" list="plocs" value="${esc(x.loc||'')}" placeholder="Ex.: Geladeira" autocomplete="off">`)}
-    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div><datalist id="plocs">${[...new Set(S.pmovs.map(m=>m.loc).filter(Boolean))].sort().map(v=>`<option value="${esc(v)}">`).join('')}</datalist>${footX('Salvar',`<button class="btn dng" type="button" data-a="delPMov" data-v="${x.id}">Excluir</button>`)}</form>`}
+    ${fldHtml('Localidade',`<select name="loc">${opts([...PLOC,...(x.loc&&!PLOC.includes(x.loc)?[x.loc]:[])].map(v=>[v,v]),x.loc,'Não informada')}</select>`)}
+    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${footX('Salvar',`<button class="btn dng" type="button" data-a="delPMov" data-v="${x.id}">Excluir</button>`)}</form>`}
   if(m.type==='export'){
     const txt=JSON.stringify({app:'gestao-de-servicos',versao:1,exportado:new Date().toISOString(),dados:S});
     m.txt=txt;
@@ -1703,6 +1703,7 @@ function modalHtml(){
 }
 
 /* ---------- produtos ---------- */
+const PLOC=['Escritório','Fazenda'];
 const PUN=['Unidade','Quilo (kg)','Litro (L)','Frasco','Caixa','Pacote','Dose'];
 const PCAT=['Medicamento','Hormônio IATF','Vacina','Material Descartável','Equipamentos'];
 const SHORTU={'Unidade':'un','Quilo (kg)':'kg','Litro (L)':'L','Frasco':'fr','Caixa':'cx','Pacote':'pct','Dose':'doses'};
@@ -1827,9 +1828,9 @@ function pEntradaFields(){
    <div class="form">
    ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(az(S.products.filter(p=>!p.inativo||p.id===r.product).map(p=>[p.id,p.name])),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
    ${fldHtml('Quantidade',`<input data-pf="entrada.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
-   ${fldHtml('Localidade',`<input data-pf="entrada.${i}.loc" list="plocs" value="${esc(r.loc??'')}" placeholder="Ex.: Geladeira" autocomplete="off">`)}
+   ${fldHtml('Localidade',`<select data-pf="entrada.${i}.loc">${opts([...PLOC,...(r.loc&&!PLOC.includes(r.loc)?[r.loc]:[])].map(x=>[x,x]),r.loc,'Selecione…')}</select>`)}
    ${fldHtml('Observação',`<textarea data-pf="entrada.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
-   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}<datalist id="plocs">${[...new Set(S.pmovs.map(m=>m.loc).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
+   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}`;
 }
 function pSaidaFields(){
   const f=ui.f.psaida;if(!f.rows||!f.rows.length)f.rows=[{}];
@@ -1842,9 +1843,9 @@ function pSaidaFields(){
    ${fldHtml('Produto',`<select data-pf="saida.${i}.product" data-r="1"${f.farm?'':' disabled'}>${opts(az(its.map(o=>[o.product,o.p.name])),r.product,f.farm?(its.length?'Selecione…':'Sem produto com saldo'):'Escolha a fazenda')}</select>
       ${it?`<span class="hint">Estoque disponível na ${esc(F(f.farm).name)}: ${qtyU(it.bal,it.p.unit)}.</span>`:''}`)}
    ${fldHtml('Quantidade utilizada',`<input data-pf="saida.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
-   ${fldHtml('Localidade',`<input data-pf="saida.${i}.loc" list="plocs" value="${esc(r.loc??'')}" placeholder="Ex.: Geladeira" autocomplete="off">`)}
+   ${fldHtml('Localidade',`<select data-pf="saida.${i}.loc">${opts([...PLOC,...(r.loc&&!PLOC.includes(r.loc)?[r.loc]:[])].map(x=>[x,x]),r.loc,'Selecione…')}</select>`)}
    ${fldHtml('Observação',`<textarea data-pf="saida.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
-   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="saida" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`}).join('')}<datalist id="plocs">${[...new Set(S.pmovs.map(m=>m.loc).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
+   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="saida" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`}).join('')}`;
 }
 
 /* ---------- serviços da iatf ---------- */
