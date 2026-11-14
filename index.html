@@ -1118,12 +1118,12 @@ function vInicio(){
   <div class="card" style="margin-bottom:14px"><div class="card-h"><h3>${tkSo?'Minhas tarefas de hoje':'Tarefas de hoje'} <small class="muted">(${tkHoje.length}${tkSo?' · '+esc(tkEu):''})</small></h3><button class="btn sm" data-a="go" data-v="tarefas">Abrir Tarefas</button></div>
    ${tkHoje.length?tkHoje.map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty('Nenhuma tarefa para hoje.')}</div>
   <div class="ini-two">
-   <div class="card"><div class="card-h"><h3>Eventos de hoje</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Agenda</button></div>
+   <div class="card"><div class="card-h"><h3>Eventos de hoje</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Calendário</button></div>
     ${hoje.length?hoje.map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${e.color||EVCOL[0]}"></i><span><b>${esc(evLabel(e))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
-   <div class="card"><div class="card-h"><h3>Lotes para agendar serviço <small class="muted">(em aberto: ${abertos.length})</small></h3><button class="btn sm" data-a="go" data-v="i-lotes">Agendar Lotes</button></div>
+   <div class="card"><div class="card-h"><h3>Lotes para agendar serviço <small class="muted">(em aberto: ${abertos.length})</small></h3><button class="btn sm" data-a="go" data-v="i-lotes">Agendamentos</button></div>
     ${abertos.length?abertos.map(l=>`<div class="ini-row"><div><b>${esc(farmShort(l.farm)||F(l.farm).name)}</b> / ${esc(l.name)}<small>${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${l.start?' · parição '+dt(l.start)+' a '+dt(l.end):''}</small></div><span style="display:flex;gap:8px;align-items:center">${loteTemServico(l)?'<span class="muted" style="font-size:12px">✓ Com serviço</span>':'<span style="font-size:12px;font-weight:600">Falta agendar</span>'}<button class="btn sm ${loteTemServico(l)?'':'pri'}" data-a="iniAgendar" data-v="${l.id}">Agendar</button></span></div>`).join(''):empty('Nenhum lote em aberto.')}</div>
   </div>
-  <div class="card" style="margin-top:14px"><div class="card-h"><h3>Lotes falta para diagnóstico <small class="muted">(${faltaDg.length} · 28 dias após a inseminação)</small></h3><button class="btn sm" data-a="go" data-v="i-estacao">Controle da Estação</button></div>
+  <div class="card" style="margin-top:14px"><div class="card-h"><h3>Lotes falta para diagnóstico <small class="muted">(${faltaDg.length} · 28 dias após a inseminação)</small></h3><button class="btn sm" data-a="go" data-v="i-estacao">Estação de Monta</button></div>
    ${faltaDg.length?faltaDg.map(x=>`<div class="ini-row"><div><b>${esc(farmShort(x.farm)||(x.farm?F(x.farm).name:'—'))}</b> / ${esc(x.lt?x.lt.name:'?')}<small>IATF ${esc(x.l.etapa)} · inseminação ${dt(x.l.ia)} · DG previsto ${dt(x.prev)}${x.l.cat?' · '+esc(x.l.cat):''}</small></div><span style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;font-weight:600">${x.atraso>0?x.atraso+(x.atraso===1?' dia':' dias')+' de atraso':'DG hoje'}</span><button class="btn sm pri" data-a="editLanc" data-v="${x.l.id}">Lançar DG</button></span></div>`).join(''):empty('Nenhum lote aguardando diagnóstico.')}</div>`}
 function vFazendas(){
   const nC=id=>S.contacts.filter(c=>c.farm===id).length;
@@ -1397,7 +1397,7 @@ function modalHtml(){
     ${fldHtml('Observação',`<textarea name="desc" rows="3">${esc(e.desc||'')}</textarea>`,'wide')}
     </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='agfil'){const f=ui.ag.f;
-    body=`<h3>Filtrar Agenda</h3><form data-form="agfil" novalidate><div class="form">
+    body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
     ${fldHtml('Técnico',`<select name="tec">${opts(AGTEC.map(x=>[x,x]),ui.ag.tec,'Todos')}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
     ${fldHtml('Serviço',`<select name="title">${opts(EVTIT.map(x=>[x,x]),f.title,'Todos')}</select>`)}
@@ -1427,8 +1427,8 @@ function modalHtml(){
     else if(view==='week'){
       cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div ${hd()}>${WDS[Dt(x).getDay()]} ${dt(x).slice(0,5)}</div>`}).join('')}
       ${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
-    body=`<h3>Agenda</h3>
-    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Agenda · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    body=`<h3>Calendário</h3>
+    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Calendário · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b" style="font-size:12px">${cal||(rows.length?`<table><thead><tr><th>Data</th><th>Período</th><th>Fazenda</th><th>Serviço</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Equipe</th></tr></thead><tbody>
     ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(perOf(e))}</td><td>${esc(evFarm(e)||'—')}</td><td>${esc(e.title)}</td><td>${esc(e.lote||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(e.team||(e.tecs||[]).join(', ')||'—')}</td></tr>`).join('')}
     </tbody><tfoot><tr><td colspan="8">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>')}</div></div>
@@ -1470,8 +1470,8 @@ function modalHtml(){
   if(m.type==='gpdf'){
     const f=ui.lf,list=lotesFilt(),flt=[f.status&&'Status: '+f.status,f.farm&&'Fazenda: '+F(f.farm).name].filter(Boolean).join(' · ')||'Sem filtros';
     const tot=list.reduce((a,l)=>a+(Number(l.total)||0),0);
-    body=`<h3>Agendar Lotes</h3>
-    <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Agendar Lotes</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    body=`<h3>Agendamentos</h3>
+    <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Agendamentos</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b"><p style="margin:0 0 10px"><b>Filtros:</b> ${esc(flt)} &nbsp; <b>Lotes:</b> ${list.length}</p>
     ${list.length?`<table><thead><tr><th>Fazenda</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Carimbo</th><th>Início Parição</th><th>Final Parição</th><th>Status</th></tr></thead><tbody>${list.map(l=>`<tr><td>${esc(F(l.farm).name)}</td><td>${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${esc(l.category||'—')}</td><td>${esc(l.carimbo||'—')}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td><td>${esc(l.status)}</td></tr>`).join('')}</tbody><tfoot><tr><td colspan="2">Total de animais</td><td class="num">${fmt(tot)}</td><td colspan="5"></td></tr></tfoot></table>`:'<p>Nenhum lote encontrado.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia da lista para impressão, respeitando os filtros escolhidos.</p>
@@ -1522,8 +1522,8 @@ function modalHtml(){
       </tbody><tfoot><tr><td colspan="7">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td></tr></tfoot></table>`:'<p>Nenhum lançamento nesta IATF.</p>';
     }
     const ttl=tab==='G'?'GERAL IATF':'IATF '+tab;
-    body=`<h3>Controle da Estação · ${ttl}</h3>
-    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Controle da Estação · ${ttl}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    body=`<h3>Estação de Monta · ${ttl}</h3>
+    <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Estação de Monta · ${ttl}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b" style="font-size:12px"><p style="margin:0 0 12px"><b>Fazenda:</b> ${esc(F(e.farm).name)}${e.city?' · '+esc(e.city):''} &nbsp; <b>EM:</b> ${dt(e.start)} a ${dt(e.end)}</p>${tbl}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia do relatório para impressão (folha na horizontal).</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
@@ -1534,7 +1534,7 @@ function modalHtml(){
     body=`<h3>${l.id?'Editar lançamento':'Novo lançamento'} · IATF ${l.etapa}</h3>${err}<p style="margin:0 0 4px"><b>${esc(F(e.farm).name)}</b> · EM ${dt(e.start)} a ${dt(e.end)}</p>
     <form data-form="lanc" data-id="${l.id||''}" data-est="${esc(l.est)}" data-etapa="${l.etapa}" novalidate>
     ${sec('Animais')}<div class="form c3">
-    ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes em aberto desta fazenda (cadastre em Agendar Lotes)')}</select>`)}
+    ${fldHtml('Lote',`<select name="lote" required>${opts(lots.map(x=>[x.id,x.name]),l.lote,lots.length?'Selecione…':'Sem lotes em aberto desta fazenda (cadastre em Agendamentos)')}</select>`)}
     ${fldHtml('Categoria',`<select name="cat" required>${opts(catOpts(l.cat),l.cat,'Selecione…')}</select>`)}
     ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
     </div>${sec('Protocolo e datas')}<div class="form c5">
@@ -1601,7 +1601,7 @@ function modalHtml(){
      ${chk('tanks','Botijões e nitrogênio','Apaga os botijões, as medições, os abastecimentos e as movimentações ligadas a eles.',false)}
      ${chk('pmovs','Produtos: movimentações e estoque','Apaga todas as entradas e saídas de produtos. O saldo de todas as fazendas volta a zero.',false)}
      ${chk('lotes','Lotes agendados (Serviços)','Apaga todos os lotes agendados.',false)}
-     ${chk('estacoes','Estações de monta (Controle da Estação)','Apaga todas as estações e os lançamentos de IATF delas.',false)}
+     ${chk('estacoes','Estações de monta','Apaga todas as estações e os lançamentos de IATF delas.',false)}
      ${chk('ordens','Ordens de serviços','Apaga o histórico de ordens de serviços.',false)}
      ${chk('fichas','Fichas de serviços','Apaga o histórico de fichas.',false)}
      ${chk('fin','Financeiro: diárias e km rodado','Apaga todos os lançamentos de diárias técnicas e km rodado.',false)}
@@ -1890,7 +1890,7 @@ function pSaidaFields(){
 /* ---------- serviços da iatf ---------- */
 const LCAT=NCATS;
 const LPAR=['Primíparas','Secundíparas','Multíparas'];
-const ITIT={'i-painel':'Painel','i-lotes':'Agendar Lotes','i-fichas':'Fichas Serviços','i-ordens':'Ordens Serviços','i-estacao':'Controle da Estação'};
+const ITIT={'i-painel':'Painel','i-lotes':'Agendamentos','i-fichas':'Fichas','i-ordens':'Ordens','i-estacao':'Estação de Monta'};
 const ititle=()=>ui.tab==='i-painel'?'Serviços':'Serviços › '+ITIT[ui.tab];
 function vEmBreve(){
   return `<div class="card"><div class="card-h"><h3>${ITIT[ui.tab]}</h3></div>${empty('Esta tela está em construção. Envie a estrutura para eu montar.')}</div>`;
@@ -1905,7 +1905,7 @@ function vEstacao(){
   if(ui.est.id&&S.estacoes.some(x=>x.id===ui.est.id))return vEstLanc();
   const list=[...S.estacoes].sort((a,b)=>b.start.localeCompare(a.start));
   const n=v=>v===undefined||v===null||v===''?'—':fmt(v);
-  return `<div class="card"><div class="card-h"><h3>Controle da Estação</h3><button class="btn pri" data-a="newEst">Nova estação</button></div>
+  return `<div class="card"><div class="card-h"><h3>Estação de Monta</h3><button class="btn pri" data-a="newEst">Nova estação</button></div>
   <div class="tw">${list.length?`<table><thead><tr><th>Fazenda</th><th>Início EM</th><th>Final EM</th><th class="num">Matrizes</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Prenhez Geral</th><th>Ações</th></tr></thead><tbody>
   ${list.map(e=>{const t=estTot(e.id),l=t.diag!==undefined&&t.pren!==undefined;return `<tr><td><b>${esc(F(e.farm).name)}</b></td><td>${dt(e.start)}</td><td>${dt(e.end)}</td>
    <td class="num">${n(t.mz)}</td><td class="num">${n(t.diag)}</td><td class="num">${n(t.pren)}</td><td class="num">${l?fmt(t.diag-t.pren):'—'}</td><td class="num"><b>${t.pren!==undefined&&t.mz?pct(t.pren,t.mz):'—'}</b></td>
@@ -1946,7 +1946,7 @@ const lotesFilt=()=>{const f=ui.lf;return S.lotes.filter(l=>(!f.status||l.status
 function vLotes(){
   const f=ui.lf;
   const list=lotesFilt();
-  return `<div class="card"><div class="card-h"><h3>Agendar Lotes</h3><div class="acts"><button class="btn" data-a="printLotes">Imprimir</button><button class="btn pri" data-a="newLote">Agendar lote</button></div></div>
+  return `<div class="card"><div class="card-h"><h3>Agendamentos</h3><div class="acts"><button class="btn" data-a="printLotes">Imprimir</button><button class="btn pri" data-a="newLote">Agendar lote</button></div></div>
   <div class="filters" style="margin-bottom:12px">
    ${fldHtml('Status',`<select data-lf="status">${opts([['Aberto','Aberto'],['Arquivado','Arquivado']],f.status,'Todos')}</select>`)}
    ${fldHtml('Fazenda',`<select data-lf="farm">${opts(FZ().map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
@@ -2064,11 +2064,11 @@ const NAV=[
   {tab:'fazendas',label:'Empresas',icon:'farm'},
   {tab:'negociacoes',label:'Negociações',icon:'coin'}]},
  {id:'iatf',label:'Serviços',icon:'cal',home:'i-painel',kids:[
-  {tab:'agenda',label:'Agenda',icon:'cal'},
-  {tab:'i-lotes',label:'Agendar Lotes',icon:'cal'},
-  {tab:'i-fichas',label:'Fichas Serviços',icon:'list'},
-  {tab:'i-ordens',label:'Ordens Serviços',icon:'list'},
-  {tab:'i-estacao',label:'Controle da Estação',icon:'grid'}]},
+  {tab:'agenda',label:'Calendário',icon:'cal'},
+  {tab:'i-lotes',label:'Agendamentos',icon:'cal'},
+  {tab:'i-fichas',label:'Fichas',icon:'list'},
+  {tab:'i-ordens',label:'Ordens',icon:'list'},
+  {tab:'i-estacao',label:'Estação de Monta',icon:'grid'}]},
  {id:'est',label:'Estoque',icon:'box',home:'e-painel',kids:[
   {tab:'e-cad',label:'Cadastro',icon:'list'},
   {tab:'e-mov',label:'Movimentações',icon:'swap'},
@@ -2115,7 +2115,7 @@ function render(){
   normData();
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
   const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'e-mov':vEMov,'e-est':vEEst,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,'f-fatur':vTarefas,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
-  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab==='e-cad'?'Estoque › Cadastro':ui.tab==='e-mov'?'Estoque › Movimentações':ui.tab==='e-est'?'Estoque › Por Fazenda':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Agenda':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
+  const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab==='e-cad'?'Estoque › Cadastro':ui.tab==='e-mov'?'Estoque › Movimentações':ui.tab==='e-est'?'Estoque › Por Fazenda':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Calendário':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
   sh.className='app'+(ui.drawer?' drawer':'');
@@ -2165,7 +2165,7 @@ document.addEventListener('click',e=>{
    case 'back':ui.farm=null;render();break;
    case 'toggle':ui.open[v]=!ui.open[v];render();break;
    case 'pdf':ui.modal={type:'pdf'};render();break;
-   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Controle da Estação - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha de Serviços - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='gpdf'?'Agendar Lotes':y==='agpdf'?'Agenda - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
+   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Estação de Monta - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha de Serviços - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='gpdf'?'Agendamentos':y==='agpdf'?'Calendário - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
    case 'pdfHist':ui.modal={type:'pdfhist'};render();break;
    case 'pdfMov':ui.modal={type:'pdfmov'};render();break;
    case 'export':ui.modal={type:'export'};render();break;
