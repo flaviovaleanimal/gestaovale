@@ -81,6 +81,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .stat .n{font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
 .stat .l{color:var(--muted);margin-top:6px}
 .stat.alert .n{color:var(--warn)}
+.low-card{border-color:var(--out);background:var(--out-bg)}.low-card h3{color:var(--out)}.bar.low{background:var(--out)}
 .two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px}
 .tw{overflow-x:auto}
 .small table{font-size:12.5px}
@@ -1554,10 +1555,11 @@ function modalHtml(){
   if(m.type==='itemtipo')body=`<h3>Novo item</h3><p class="muted" style="margin:0 0 14px">Qual tipo de item você quer cadastrar?</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="newProduct" style="flex:1;min-height:56px">Produto</button><button class="btn pri" data-a="newBreeder" style="flex:1;min-height:56px">Sêmen (reprodutor)</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='movtipo')body=`<h3>${m.pdf||m.est?'Imprimir PDF':m.k==='entrada'?'Nova entrada':'Nova saída'}</h3><p class="muted" style="margin:0 0 14px">${m.pdf||m.est?'Qual estoque você quer imprimir?':'Entrada ou saída de qual tipo de item?'}</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="emGo" data-v="p" style="flex:1;min-height:56px">Produtos</button><button class="btn pri" data-a="emGo" data-v="s" style="flex:1;min-height:56px">Sêmen</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='product'){const p=m.data||{};
-    body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form c3">
+    body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form c4">
     ${fldHtml('Nome do produto',`<input name="name" value="${esc(p.name)}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(PCAT.map(x=>[x,x]),p.category,'Selecione…')}</select>`)}
-    ${fldHtml('Unidade',`<select name="unit"${p.id?'':' required'}>${opts([...PUN,...(p.unit&&!PUN.includes(p.unit)?[p.unit]:[])].map(x=>[x,x]),p.unit,p.id?'Não informada':'Selecione…')}</select>`)}</div>${p.id?footX('Salvar',(p.inativo?`<button class="btn" type="button" data-a="ativProduct" data-v="${p.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatProduct" data-v="${p.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delProduct" data-v="${p.id}">Excluir</button>`):foot('Salvar')}</form>`}
+    ${fldHtml('Unidade',`<select name="unit"${p.id?'':' required'}>${opts([...PUN,...(p.unit&&!PUN.includes(p.unit)?[p.unit]:[])].map(x=>[x,x]),p.unit,p.id?'Não informada':'Selecione…')}</select>`)}
+    ${fldHtml('Mínimo (Vale Animal)',`<input name="min" type="number" min="0" step="any" inputmode="decimal" placeholder="Opcional" value="${p.min>0?p.min:''}">`)}</div>${p.id?footX('Salvar',(p.inativo?`<button class="btn" type="button" data-a="ativProduct" data-v="${p.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatProduct" data-v="${p.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delProduct" data-v="${p.id}">Excluir</button>`):foot('Salvar')}</form>`}
   if(m.type==='pentrada')body=`<h3>Entrada de produtos</h3>${errBox('pentrada')}<form data-form="pentrada" novalidate>${pEntradaFields()}${pfoot('pentrada','entrada')}</form>`;
   if(m.type==='psaida')body=`<h3>Saída de produtos</h3>${errBox('psaida')}<form data-form="psaida" novalidate>${pSaidaFields()}${pfoot('psaida','saída')}</form>`;
   if(m.type==='pmov'){const x=m.data;
@@ -1780,11 +1782,15 @@ function vEPainel(){
   const lowMeds=S.meas.filter(x=>x.kind==='medicao'&&x.level<LOW).sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0));
   const resolv=x=>S.meas.filter(y=>y.tank===x.tank&&y.kind==='abastecimento'&&y.date>=x.date).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const medRows=lowMeds.map(x=>{const r=resolv(x);return `<tr><td>${dt(x.date)}</td><td><b>${esc(T(x.tank).name)}</b></td><td class="num"><b>${x.level} cm</b></td><td><span class="pill warn">Nitrogênio baixo</span></td><td>${r?'Reabastecido em '+dt(r.date).slice(0,5):'<span class="pill out">Precisa reabastecer</span>'}</td></tr>`}).join('');
-  const rows=S.products.filter(p=>!p.inativo).map(p=>({p,v:pTotal(p.id)})).filter(o=>o.v>0).sort(pSort);
+  const vaF=S.farms.find(isVale);
+  const lowP=S.products.filter(p=>!p.inativo&&p.min>0&&vaF).map(p=>({p,v:pBal(vaF.id,p.id)})).filter(o=>o.v<o.p.min).sort((a,b)=>a.v/a.p.min-b.v/b.p.min||a.p.name.localeCompare(b.p.name));
+  const lowIds=new Set(lowP.map(o=>o.p.id));
+  const lowCard=lowP.length?`<div class="card low-card"><div class="card-h"><h3>⚠ Produtos com pouco estoque (${lowP.length})</h3><span class="muted">Vale Animal · abaixo do mínimo cadastrado</span></div><div class="tw small"><table><thead><tr><th>Produto</th><th class="num">Saldo</th><th class="num">Mínimo</th><th>Situação</th></tr></thead><tbody>${lowP.map(o=>`<tr><td><b>${esc(o.p.name)}</b></td><td class="num">${fmt(o.v)}${o.p.unit?' '+esc(o.p.unit.toLowerCase()):''}</td><td class="num">${fmt(o.p.min)}</td><td><span class="pill out">${o.v<=0?'Sem estoque':o.v<o.p.min/2?'Crítico':'Baixo'}</span></td></tr>`).join('')}</tbody></table></div></div>`:'';
+  const rows=S.products.filter(p=>!p.inativo).map(p=>({p,v:vaF?pBal(vaF.id,p.id):0})).filter(o=>o.v>0).sort(pSort);
   const max=rows.length?niceMax(Math.max(...rows.map(o=>o.v))):1;
   const chart=rows.length?`<div class="bars" role="img" aria-label="Gráfico de barras com o estoque atual de cada produto">
-   ${rows.map(o=>`<div class="bar-row" title="${esc(o.p.name)}: ${fmt(o.v)}"><span class="bar-name">${esc(o.p.name)}</span><div class="bar-track"><div class="bar" style="width:${(o.v/max*100).toFixed(2)}%"></div></div><span class="bar-val">${fmt(o.v)}</span></div>`).join('')}
-   <div class="bar-row axis"><span></span><div class="ticks">${[0,1,2,3,4].map(i=>`<span style="left:${i*25}%">${fmt(r3(max*i/4))}</span>`).join('')}</div><span></span></div></div>`:empty('Nenhum produto com estoque no momento.');
+   ${rows.map(o=>`<div class="bar-row" title="${esc(o.p.name)}: ${fmt(o.v)}${lowIds.has(o.p.id)?' (abaixo do mínimo na Vale Animal)':''}"><span class="bar-name">${esc(o.p.name)}</span><div class="bar-track"><div class="bar${lowIds.has(o.p.id)?' low':''}" style="width:${(o.v/max*100).toFixed(2)}%"></div></div><span class="bar-val">${fmt(o.v)}</span></div>`).join('')}
+   <div class="bar-row axis"><span></span><div class="ticks">${[0,1,2,3,4].map(i=>`<span style="left:${i*25}%">${fmt(r3(max*i/4))}</span>`).join('')}</div><span></span></div></div>`:empty(vaF?'Nenhum produto com estoque na Vale Animal no momento.':'Cadastre a fazenda Vale Animal em CRM › Empresas para ver o gráfico.');
   const mk=(list,tipo)=>{const items=list.sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0)).slice(0,6);
    return items.length?`<table><thead><tr><th>Data</th><th>${tipo==='Sêmen'?'Touro':'Produto'}</th><th>Fazenda</th><th>Movimentação</th><th class="num">Total</th></tr></thead><tbody>
    ${items.map(m=>{const e=m.type==='entrada';return `<tr><td>${dt(m.date)}</td><td><b>${esc(tipo==='Sêmen'?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td><span class="pill ${e?'in':'out'}">${e?'Entrada':'Saída'}</span></td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${tipo==='Sêmen'?' doses':''}</td></tr>`}).join('')}</tbody></table>`:empty('Nenhuma movimentação encontrada.')};
@@ -1796,7 +1802,8 @@ function vEPainel(){
   <div class="card stat ${lowT.length?'alert':''}"><div class="n">${fmt(lowT.length)} de ${fmt(S.tanks.length)}</div><div class="l">Botijões com nitrogênio baixo (abaixo de ${LOW} cm)${lowT.length?' · '+lowT.map(o=>esc(o.t.name)+' ('+o.l.level+' cm)').join(', '):''}</div>
     <h3 style="margin:16px 0 8px;font-size:14px">Histórico de nitrogênio baixo</h3>
     <div class="tw small">${medRows?`<table><thead><tr><th>Data</th><th>Botijão</th><th class="num">Nível</th><th>Situação</th><th>Resolução</th></tr></thead><tbody>${medRows}</tbody></table>`:empty('Nenhuma medição abaixo de '+LOW+' cm.')}</div></div>
-  <div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Saldo de todas as fazendas</span></div>${chart}</div>
+  ${lowCard}
+  <div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Somente Vale Animal</span></div>${chart}</div>
   <div class="card"><div class="card-h"><h3>Últimas movimentações · Sêmen</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="s">Ver histórico</button></div><div class="tw small">${lastS}</div></div>
   <div class="card"><div class="card-h"><h3>Últimas movimentações · Produtos</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="p">Ver histórico</button></div><div class="tw small">${lastP}</div></div>`;
 }
@@ -2495,7 +2502,8 @@ document.addEventListener('submit',e=>{
     if(!name||!fd.category)return modalErr('Informe o nome e a categoria.');
     if(!id&&!fd.unit)return modalErr('Informe a unidade do produto.');
     if(S.products.some(p=>p.id!==id&&p.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe um produto com esse nome.');
-    if(id){Object.assign(PR(id),{name,category:fd.category});if(fd.unit)PR(id).unit=fd.unit;else delete PR(id).unit}else S.products.push({id:nid('r'),name,category:fd.category,unit:fd.unit});
+    const mn=Number(String(fd.min||'').replace(',','.'));if(fd.min&&(!isFinite(mn)||mn<0))return modalErr('O estoque mínimo deve ser um número maior ou igual a zero.');
+    if(id){Object.assign(PR(id),{name,category:fd.category});if(fd.unit)PR(id).unit=fd.unit;else delete PR(id).unit;if(mn>0)PR(id).min=mn;else delete PR(id).min}else S.products.push({id:nid('r'),name,category:fd.category,unit:fd.unit,...(mn>0?{min:mn}:{})});
     return done('Produto salvo.')}
   if(k==='pentrada'){
     const f=ui.f.pentrada,rows=f.rows||[];let er='';
