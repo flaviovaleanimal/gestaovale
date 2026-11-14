@@ -1625,13 +1625,15 @@ function modalHtml(){
     </div><p class="muted" style="font-size:13px;margin:10px 0 0">Vazias = Diagnósticos − Prenhas · Concepção = Prenhas ÷ Inseminadas. Deixe em branco o que ainda não aconteceu.</p>${foot('Salvar')}</form>`}
   if(m.type==='lote'&&!(m.data||{}).id){
     body=`<h3>Agendar lote</h3>${err}<form data-form="lote" data-id="" data-multi="1" novalidate>
-    <div class="form">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ().map(f=>[f.id,f.name]),(m.data||{}).farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}</div>
+    <div class="form c2">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ().map(f=>[f.id,f.name]),(m.data||{}).farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
+    ${fldHtml('Procedimento',`<select name="proc">${opts(LPROC.map(x=>[x,x]),'','Selecione…')}</select>`)}</div>
     <div id="lrows">${loteRowHtml({},false)}</div>
     <button type="button" class="btn sm" data-a="loteAddRow" style="margin-top:12px">+ Adicionar outro lote</button>
     ${foot('Salvar')}</form>`}
   else if(m.type==='lote'){const l=m.data||{};
     body=`<h3>${l.id?'Editar lote':'Agendar lote'}</h3>${err}<form data-form="lote" data-id="${l.id||''}" novalidate><div class="form">
     ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(l.farm).map(f=>[f.id,f.name]),l.farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
+    ${fldHtml('Procedimento',`<select name="proc">${opts(LPROC.map(x=>[x,x]),l.proc,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
@@ -1639,6 +1641,7 @@ function modalHtml(){
     ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
     ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div>
     ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
+    ${fldHtml('Observação',`<input name="obs" value="${esc(l.obs||'')}" autocomplete="off">`)}
     ${fldHtml('Status',`<select name="status">${opts(['Aberto','Arquivado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>${foot('Salvar')}</form>`}
   const pfoot=(k,w)=>{const n=(ui.f[k].rows||[]).length;return `<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${n>1?'Registrar '+n+' '+w+'s':'Registrar '+w}</button></div>`};
   if(m.type==='itemtipo')body=`<h3>Novo item</h3><p class="muted" style="margin:0 0 14px">Qual tipo de item você quer cadastrar?</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="newProduct" style="flex:1;min-height:56px">Produto</button><button class="btn pri" data-a="newBreeder" style="flex:1;min-height:56px">Sêmen (reprodutor)</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
@@ -2205,7 +2208,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 20:15</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 20:30</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2468,14 +2471,16 @@ document.addEventListener('input',e=>{
 });
 const carOpts=cur=>{const c=String(cur||'').trim(),L=Array.from({length:12},(_,i)=>String(i+1));return `<option value="">Selecione…</option>${[...L,...(c&&!L.includes(c)?[c]:[])].map(x=>`<option value="${esc(x)}"${x===c?' selected':''}>${esc(x)}</option>`).join('')}`};
 
+const LPROC=['1 IATF','2 IATF','3 IATF'];
 const loteRowHtml=(l,x)=>`<div class="lrow" style="border-top:1px solid var(--line);padding-top:12px;margin-top:12px"><div class="form c4">
-    ${fldHtml('Categoria',`<select name="category">${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name||'')}" placeholder="Ex.: Lote 1" autocomplete="off">`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}">`)}
+    ${fldHtml('Categoria',`<select name="category">${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
     ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
     <div class="lote-dates" style="display:${!l.category||LPAR.includes(l.category)?'contents':'none'}">
     ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
-    ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div></div>${x?`<div style="text-align:right;margin-top:6px"><button type="button" class="btn sm dng" data-a="loteDelRow">Remover este lote</button></div>`:''}</div>`;const evLoteSel=(fid,cur)=>{const u=String(cur||'').toUpperCase(),o=evLoteOpts(fid);return `<option value="">${fid?(o?'Selecione o lote…':'Nenhum lote em aberto'):'Selecione a fazenda primeiro'}</option>${o}${u&&!o.includes('value="'+esc(u)+'"')?`<option value="${esc(u)}">${esc(u)}</option>`:''}`};
+    ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div>
+    <div style="grid-column:span 2">${fldHtml('Observação',`<input name="obs" value="${esc(l.obs||'')}" autocomplete="off">`)}</div></div>${x?`<div style="text-align:right;margin-top:6px"><button type="button" class="btn sm dng" data-a="loteDelRow">Remover este lote</button></div>`:''}</div>`;const evLoteSel=(fid,cur)=>{const u=String(cur||'').toUpperCase(),o=evLoteOpts(fid);return `<option value="">${fid?(o?'Selecione o lote…':'Nenhum lote em aberto'):'Selecione a fazenda primeiro'}</option>${o}${u&&!o.includes('value="'+esc(u)+'"')?`<option value="${esc(u)}">${esc(u)}</option>`:''}`};
 const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el['lote'].value||'').trim();if(!fid||!v)return;
   const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Arquivado'&&nrm(x.name)===nrm(v));if(!l)return;
   el['lote'].value=String(l.name).toUpperCase();el['total'].value=l.total;el['cat'].value=NCATS.includes(l.category)?l.category:''};
@@ -2609,7 +2614,7 @@ document.addEventListener('submit',e=>{
     return}
   if(k==='lote'&&form.dataset.multi){
     if(!fd.farm)return modalErr('Selecione a fazenda.');
-    const rows=[...form.querySelectorAll('.lrow')].map(rw=>{const g=n=>{const e=rw.querySelector('[name='+n+']');return e?String(e.value||'').trim():''};return {name:g('name'),total:g('total'),category:g('category'),carimbo:g('carimbo'),start:g('start'),end:g('end')}});
+    const rows=[...form.querySelectorAll('.lrow')].map(rw=>{const g=n=>{const e=rw.querySelector('[name='+n+']');return e?String(e.value||'').trim():''};return {name:g('name'),total:g('total'),category:g('category'),carimbo:g('carimbo'),start:g('start'),end:g('end'),obs:g('obs')}});
     const used=rows.filter(x=>x.name||x.total||x.category);
     if(!used.length)return modalErr('Preencha ao menos um lote.');
     const recs=[];
@@ -2617,7 +2622,7 @@ document.addEventListener('submit',e=>{
       if(!x.name||!x.category||(par&&(!x.start||!x.end)))return modalErr(w+(par?'preencha lote, categoria e as datas da parição.':'preencha lote e categoria.'));
       if(!(tot>0)||!Number.isInteger(tot))return modalErr(w+'o total deve ser um número inteiro maior que zero.');
       if(par&&x.end<x.start)return modalErr(w+'o final da parição não pode ser antes do início.');
-      recs.push({farm:fd.farm,name:x.name,total:tot,category:x.category,carimbo:x.carimbo,start:par?x.start:'',end:par?x.end:'',status:'Aberto'})}
+      recs.push({farm:fd.farm,proc:fd.proc||'',obs:x.obs,name:x.name,total:tot,category:x.category,carimbo:x.carimbo,start:par?x.start:'',end:par?x.end:'',status:'Aberto'})}
     recs.forEach(rc=>S.lotes.push({id:nid('l'),...rc}));
     return done(recs.length>1?recs.length+' lotes salvos.':'Lote salvo.')}
   if(k==='lote'){
@@ -2626,7 +2631,7 @@ document.addEventListener('submit',e=>{
     if(!fd.farm||!name||!fd.category||(par&&(!fd.start||!fd.end)))return modalErr(par?'Preencha fazenda, lote, categoria e as datas da parição.':'Preencha fazenda, lote e categoria.');
     if(!(total>0)||!Number.isInteger(total))return modalErr('O total deve ser um número inteiro maior que zero.');
     if(par&&fd.end<fd.start)return modalErr('O final da parição não pode ser antes do início.');
-    const rec={farm:fd.farm,name,total,category:fd.category,carimbo:(fd.carimbo||'').trim(),start:par?fd.start:'',end:par?fd.end:'',status:fd.status||'Aberto'};
+    const rec={farm:fd.farm,proc:fd.proc||'',obs:(fd.obs||'').trim(),name,total,category:fd.category,carimbo:(fd.carimbo||'').trim(),start:par?fd.start:'',end:par?fd.end:'',status:fd.status||'Aberto'};
     if(id)Object.assign(S.lotes.find(x=>x.id===id),rec);else S.lotes.push({id:nid('l'),...rec});
     return done('Lote salvo.')}
   if(k==='product'){
