@@ -500,9 +500,11 @@ const segTxt=f=>f.segment&&!(f.segment in OLDSEG)?f.segment:'';
 const isAtivo=f=>tipoOf(f)==='Cliente ativo';
 const TIPOCLS={'Cliente ativo':'in','Cliente inativo':'out','Fornecedor':'warn','Lead':'ok'};
 const tipoPill=t=>`<span class="pill ${TIPOCLS[t]||'ok'}">${esc(t)}</span>`;
-const FZ=sel=>S.farms.filter(f=>isAtivo(f)||(sel&&f.id===sel));
+const FZALL=sel=>S.farms.filter(f=>isAtivo(f)||(sel&&f.id===sel));
+const FZ=sel=>FZALL(sel).filter(f=>!f.parent||(sel&&f.id===sel));
+const farmLbl=f=>{f=f||{};const pr=f.parent?S.farms.find(x=>x.id===f.parent):null;return pr?pr.name+' › '+f.name:(f.name||'?')};
 const isVale=f=>String(f.name||'').trim().toLowerCase()==='vale animal';
-const FZC=sel=>FZ(sel).filter(f=>!isVale(f));
+const FZC=sel=>FZALL(sel).filter(f=>!isVale(f)&&!f.nolote).sort((a,b)=>farmLbl(a).localeCompare(farmLbl(b)));
 const FZV=sel=>{const a=FZ(sel);return [...a.filter(isVale),...a.filter(f=>!isVale(f))]};
 const T=id=>S.tanks.find(x=>x.id===id)||{name:'?'};
 const sg=m=>m.type==='entrada'?m.qty:-m.qty;
@@ -1184,8 +1186,9 @@ function vInicio(){
 function vFazendas(){
   const nC=id=>S.contacts.filter(c=>c.farm===id).length;
   const segs=[...new Set(S.farms.map(f=>segTxt(f)).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),cids=[...new Set(S.farms.map(f=>f.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  const rows=farmsFilt().map(f=>`<tr${qHide('fz',farmTxt(f))}><td><b>${esc(f.name)}</b></td><td>${esc(segTxt(f)||'—')}</td><td>${esc(f.city||'—')}</td><td>${esc((CIDADES.includes(f.city)?'MT':f.state)||'—')}</td><td>${tipoPill(tipoOf(f))}</td>
-   <td><div class="acts"><button class="btn sm" data-a="empContacts" data-v="${f.id}">Contatos (${nC(f.id)})</button><button class="btn sm" data-a="editFarm" data-v="${f.id}">Editar</button><button class="btn sm dng" data-a="delFarm" data-v="${f.id}">Excluir</button></div></td></tr>`).join('');
+  const _fl=farmsFilt(),_ky=f=>{const pr=f.parent?S.farms.find(x=>x.id===f.parent):null;return (pr?pr.name:f.name)+(pr?'~1':'~0')+f.name};
+  const rows=_fl.sort((a,b)=>_ky(a).localeCompare(_ky(b))).map(f=>`<tr${qHide('fz',farmTxt(f))}><td>${f.parent?'<span class="muted" style="padding-left:18px">↳ </span>':''}<b>${esc(f.name)}</b>${S.farms.some(x=>x.parent===f.id)?` <span class="muted" style="font-size:12px">· ${S.farms.filter(x=>x.parent===f.id).length} vinculada(s)</span>`:''}</td><td>${esc(segTxt(f)||'—')}</td><td>${esc(f.city||'—')}</td><td>${esc((CIDADES.includes(f.city)?'MT':f.state)||'—')}</td><td>${tipoPill(tipoOf(f))}</td>
+   <td><div class="acts">${f.parent?'':`<button class="btn sm" data-a="newSubFarm" data-v="${f.id}">+ Fazenda vinculada</button>`}<button class="btn sm" data-a="empContacts" data-v="${f.id}">Contatos (${nC(f.id)})</button><button class="btn sm" data-a="editFarm" data-v="${f.id}">Editar</button><button class="btn sm dng" data-a="delFarm" data-v="${f.id}">Excluir</button></div></td></tr>`).join('');
   return `<div class="card"><div class="card-h"><h3>Empresas</h3><div class="acts"><button class="btn" data-a="printFarms">Imprimir</button><button class="btn pri" data-a="newFarm">Cadastrar empresa</button></div></div>
   ${S.farms.length?`<div class="filters" style="margin-bottom:12px">${searchBox('fz')}${fldHtml('Segmento',`<select data-ef="seg">${opts(segs.map(x=>[x,x]),ui.ef.seg,'Todos')}</select>`)}${fldHtml('Cidade',`<select data-ef="city">${opts(cids.map(x=>[x,x]),ui.ef.city,'Todas')}</select>`)}${fldHtml('Tipo de Empresa',`<select data-ef="tipo">${opts(TIPOS.map(x=>[x,x]),ui.ef.tipo,'Todos')}</select>`)}</div>`:''}
   <div class="tw">${S.farms.length?`<table><thead><tr><th>Nome Empresa</th><th>Segmento</th><th>Cidade</th><th>Estado</th><th>Tipo de Empresa</th><th>Ações</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">Nenhuma empresa com esses filtros.</td></tr>'}</tbody></table>`:empty('Nenhuma empresa cadastrada.')}</div></div>`;
@@ -1443,7 +1446,7 @@ function modalHtml(){
     body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form c3">
     ${fldHtml('Data Serviço',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
-    ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(e.farm).map(f=>[f.id,f.name]),e.farm,FZC().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
+    ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(e.farm).map(f=>[f.id,farmLbl(f)]),e.farm,FZC().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     </div><div class="form c4" style="margin-top:12px">
     ${fldHtml('Procedimento',`<select name="title" required>${opts(tits.map(x=>[x,svn(x)]),e.title,'Selecione…')}</select>`)}
     ${e.lock?fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
@@ -1457,7 +1460,7 @@ function modalHtml(){
   if(m.type==='agfil'){const f=ui.ag.f;
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
     ${fldHtml('Profissional',`<select name="tec">${opts(AGTEC.map(x=>[x,x]),ui.ag.tec,'Todos')}</select>`)}
-    ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms.filter(x=>!isVale(x))].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms.filter(x=>!isVale(x)&&!x.nolote)].sort((a,b)=>farmLbl(a).localeCompare(farmLbl(b))).map(x=>[x.id,farmLbl(x)]),f.farm,'Todas')}</select>`)}
     ${fldHtml('Procedimento',`<select name="title">${opts(EVTIT.map(x=>[x,svn(x)]),f.title,'Todos')}</select>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),f.periodo,'Todos')}</select>`)}
     ${fldHtml('Lote',`<input name="lote" value="${esc(f.lote)}" autocomplete="off" style="text-transform:uppercase">`)}
@@ -1626,14 +1629,14 @@ function modalHtml(){
     </div><p class="muted" style="font-size:13px;margin:10px 0 0">Vazias = Diagnósticos − Prenhas · Concepção = Prenhas ÷ Inseminadas. Deixe em branco o que ainda não aconteceu.</p>${foot('Salvar')}</form>`}
   if(m.type==='lote'&&!(m.data||{}).id){
     body=`<h3>Agendar lote</h3>${err}<form data-form="lote" data-id="" data-multi="1" novalidate>
-    <div class="form c2">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC().map(f=>[f.id,f.name]),(m.data||{}).farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
+    <div class="form c2">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC().map(f=>[f.id,farmLbl(f)]),(m.data||{}).farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
     ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),'','Selecione…')}</select>`)}</div>
     <div id="lrows">${loteRowHtml({},false)}</div>
     <button type="button" class="btn sm" data-a="loteAddRow" style="margin-top:12px">+ Adicionar outro lote</button>
     ${foot('Salvar')}</form>`}
   else if(m.type==='lote'){const l=m.data||{};
     body=`<h3>${l.id?'Editar lote':'Agendar lote'}</h3>${err}<form data-form="lote" data-id="${l.id||''}" novalidate><div class="form">
-    ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(l.farm).map(f=>[f.id,f.name]),l.farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(l.farm).map(f=>[f.id,farmLbl(f)]),l.farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
     ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),l.proc,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
@@ -1701,6 +1704,8 @@ function modalHtml(){
     ${fldHtml('Cidade',`<select name="city">${opts(cityOpts(f.city),f.city,'Selecione…')}</select>`)}
     ${fldHtml('Estado',`<select name="state"${CIDADES.includes(f.city)?' tabindex="-1" style="pointer-events:none;background:var(--navy-soft)"':''}>${opts(UFS.map(x=>[x,x]),CIDADES.includes(f.city)?'MT':f.state,'Selecione…')}</select>`)}
     ${fldHtml('Tipo de Empresa',`<select name="tipo" required>${opts(TIPOS.map(x=>[x,x]),tp)}</select>`)}
+    ${fldHtml('Pertence à empresa',`<select name="parent">${opts(S.farms.filter(x=>!x.parent&&x.id!==f.id&&!(f.id&&S.farms.some(y=>y.parent===f.id))).map(x=>[x.id,x.name]),f.parent,'Nenhuma (empresa principal)')}</select>`)}
+    ${fldHtml('Agendamentos',`<label style="display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink);padding:8px 0"><input type="checkbox" name="nolote" style="width:auto"${f.nolote?' checked':''}> Não agenda lotes (só as fazendas vinculadas)</label>`)}
     </div>${foot('Salvar')}</form>`}
   if(m.type==='contact'){const c=m.data||{};
     body=`<h3>${c.id?'Editar contato':'Cadastrar contato'}</h3>${err}<form data-form="contact" data-id="${c.id||''}" novalidate><div class="form">
@@ -2035,10 +2040,10 @@ function vLotes(){
   return `<div class="card"><div class="card-h"><h3>Agendamentos</h3><div class="acts"><button class="btn" data-a="tab" data-v="agenda">📅 Calendário</button><button class="btn" data-a="printLotes">Imprimir</button><button class="btn pri" data-a="newLote">Agendar lote</button></div></div>
   <div class="filters" style="margin-bottom:12px">
    ${fldHtml('Status',`<select data-lf="status">${opts([['Aberto','Aberto'],['Arquivado','Arquivado']],f.status,'Todos')}</select>`)}
-   ${fldHtml('Fazenda',`<select data-lf="farm">${opts(FZC().map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-lf="farm">${opts(FZC().map(x=>[x.id,farmLbl(x)]),f.farm,'Todas')}</select>`)}
   </div>
   <div class="tw">${list.length?`<table><thead><tr><th>Fazenda / Lote</th><th class="num">Total</th><th>Início Parição</th><th>Final Parição</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-  ${list.map(l=>`<tr><td><b>${esc(F(l.farm).name)}</b> / ${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td><td>${esc(l.category)}</td>
+  ${list.map(l=>`<tr><td><b>${esc(farmLbl(F(l.farm)))}</b> / ${esc(l.name)}</td><td class="num">${fmt(l.total)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td><td>${esc(l.category)}</td>
    <td><span class="pill ${l.status==='Aberto'?'in':'ok'}">${esc(l.status)}</span></td>
    <td><div class="acts">${l.status==='Aberto'?`<button class="btn sm pri" data-a="iniAgendar" data-v="${l.id}">Agendar</button>`:''}<button class="btn sm" data-a="editLote" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLote" data-v="${l.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty(S.lotes.length?'Nenhum lote com esses filtros.':'Nenhum lote agendado. Clique em Agendar lote para começar.')}</div></div>`;
@@ -2209,7 +2214,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 21:00</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 21:30</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2369,6 +2374,7 @@ document.addEventListener('click',e=>{
        S.pmovs=rest;done('Movimentação excluída. Estoque atualizado.')});break;
    case 'wipe':ui.modal={type:'wipe'};render();break;
    case 'newFarm':ui.modal={type:'farm'};render();break;
+   case 'newSubFarm':ui.modal={type:'farm',data:{parent:v,tipo:tipoOf(F(v)),city:F(v).city,state:F(v).state}};render();break;
    case 'finPrint':ui.modal={type:'finpdf',kind:v};render();break;
    case 'agPrint':ui.modal={type:'agpdf'};render();break;
    case 'iniAgendar':{const l=S.lotes.find(x=>x.id===v);ui.modal={type:'ev',data:{lock:true,date:today(),periodo:'Dia Inteiro',farm:l.farm,lote:String(l.name||'').toUpperCase(),total:l.total,cat:NCATS.includes(l.category)?l.category:''}};render();break}
@@ -2710,7 +2716,7 @@ document.addEventListener('submit',e=>{
     if(!name)return modalErr('Informe o nome da empresa.');
     if(S.farms.some(f=>f.id!==id&&f.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe uma empresa com esse nome.');
     const city=(fd.city||'').trim();
-    const rec={name,segment:tc(fd.segment),tipo:tp,city,state:CIDADES.includes(city)?'MT':(fd.state||'')};
+    const rec={name,segment:tc(fd.segment),tipo:tp,city,state:CIDADES.includes(city)?'MT':(fd.state||''),parent:fd.parent||'',nolote:!!fd.nolote};
     if(id)Object.assign(F(id),rec);else S.farms.push({id:nid('f'),...rec});
     return done('Empresa salva.')}
   if(k==='ev'){
