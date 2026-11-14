@@ -1306,12 +1306,14 @@ function vEEst(){
   }
   const f=F(ui.efz);
   const sem=t==='p'?[]:(()=>{const m={};items(ui.efz).forEach(o=>{const g=m[o.b]||(m[o.b]={k:'s',name:o.name,cat:o.breed,un:'Dose',ent:0,sai:0,bal:0});g.ent+=o.ent;g.sai+=o.sai;g.bal+=o.bal});return Object.values(m)})();
-  const pro=t==='s'?[]:pItems(ui.efz).map(o=>({k:'p',name:o.p.name,cat:o.p.category,un:o.p.unit||'',ent:o.ent,sai:o.sai,bal:o.bal}));
+  const pro=t==='s'?[]:pItems(ui.efz).map(o=>({k:'p',id:o.p.id,min:o.p.min,name:o.p.name,cat:o.p.category,un:o.p.unit||'',ent:o.ent,sai:o.sai,bal:o.bal}));
   const list=[...sem,...pro].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
-  const rows=list.map(o=>`<tr><td><b>${esc(o.name)}</b></td><td>${esc(o.cat)}</td><td><span class="pill ${o.k==='s'?'ok':'in'}">${o.k==='s'?'Sêmen':'Produto'}</span></td><td>${o.un?esc(o.un):'<span class="muted">—</span>'}</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td></tr>`).join('');
+  const vale=isVale(f);
+  const minCell=o=>!vale?'':o.k!=='p'?'<td class="num"><span class="muted">—</span></td>':`<td class="num">${o.min>0?`<b>${fmt(o.min)}</b>${o.bal<o.min?' <span class="pill out">Baixo</span>':''}`:'<span class="muted">—</span>'} <button class="btn sm" data-a="editMin" data-v="${o.id}">Editar</button></td>`;
+  const rows=list.map(o=>`<tr><td><b>${esc(o.name)}</b></td><td>${esc(o.cat)}</td><td><span class="pill ${o.k==='s'?'ok':'in'}">${o.k==='s'?'Sêmen':'Produto'}</span></td><td>${o.un?esc(o.un):'<span class="muted">—</span>'}</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td>${minCell(o)}</tr>`).join('');
   return `<div class="card"><div class="card-h"><div><button class="btn sm" data-a="efzback">← Voltar às fazendas</button><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px"><h2 style="margin:0">${esc(f.name)}</h2><span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span></div></div>
     <button class="btn pri" data-a="efzPdf">Imprimir PDF</button></div>
-    <div class="tw">${list.length?`<table><thead><tr><th>Item</th><th>Categoria / raça</th><th>Tipo</th><th>Unidade</th><th class="num">Entrada</th><th class="num">Saída</th><th class="num">Saldo</th></tr></thead><tbody>${rows}</tbody></table>`:empty('Nenhum item em estoque nesta fazenda.')}</div></div>`;
+    <div class="tw">${list.length?`<table><thead><tr><th>Item</th><th>Categoria / raça</th><th>Tipo</th><th>Unidade</th><th class="num">Entrada</th><th class="num">Saída</th><th class="num">Saldo</th>${vale?'<th class="num">Estoque mínimo</th>':''}</tr></thead><tbody>${rows}</tbody></table>`:empty('Nenhum item em estoque nesta fazenda.')}</div></div>`;
 }
 
 function vEMov(){
@@ -1559,6 +1561,7 @@ function modalHtml(){
     ${fldHtml('Nome do produto',`<input name="name" value="${esc(p.name)}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(PCAT.map(x=>[x,x]),p.category,'Selecione…')}</select>`)}
     ${fldHtml('Unidade',`<select name="unit"${p.id?'':' required'}>${opts([...PUN,...(p.unit&&!PUN.includes(p.unit)?[p.unit]:[])].map(x=>[x,x]),p.unit,p.id?'Não informada':'Selecione…')}</select>`)}</div>${p.id?footX('Salvar',(p.inativo?`<button class="btn" type="button" data-a="ativProduct" data-v="${p.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatProduct" data-v="${p.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delProduct" data-v="${p.id}">Excluir</button>`):foot('Salvar')}</form>`}
+  if(m.type==='pmin'){const p=m.data;body=`<h3>Estoque mínimo</h3>${err}<form data-form="pmin" data-id="${p.id}" novalidate><p class="muted" style="margin:0 0 12px"><b>${esc(p.name)}</b> · Vale Animal. O produto entra no alerta do Painel quando o saldo ficar abaixo desse número.</p><div class="form">${fldHtml('Estoque mínimo'+(p.unit?' ('+esc(p.unit.toLowerCase())+')':''),`<input name="min" type="number" min="0" step="any" inputmode="decimal" placeholder="Deixe vazio para não alertar" value="${p.min>0?p.min:''}">`)}</div>${foot('Salvar')}</form>`}
   if(m.type==='pentrada')body=`<h3>Entrada de produtos</h3>${errBox('pentrada')}<form data-form="pentrada" novalidate>${pEntradaFields()}${pfoot('pentrada','entrada')}</form>`;
   if(m.type==='psaida')body=`<h3>Saída de produtos</h3>${errBox('psaida')}<form data-form="psaida" novalidate>${pSaidaFields()}${pfoot('psaida','saída')}</form>`;
   if(m.type==='pmov'){const x=m.data;
@@ -2180,6 +2183,7 @@ document.addEventListener('click',e=>{
    case 'ativProduct':delete PR(v).inativo;done(PR(v).name+' ativado. Ele voltou ao estoque de produtos.');break
    case 'ativBreeder':delete B(v).inativo;done(B(v).name+' ativado. Ele voltou ao estoque de sêmen.');break
    case 'ecT':ui.ecT=v;ui.q.ec='';render();break;
+   case 'editMin':ui.modal={type:'pmin',data:{...PR(v)}};render();break;
    case 'efz':ui.efz=v;ui.eft='';ui.farm=v;ui.pfarm=v;ui.fBreed='';ui.fInd='';ui.pcat='';render();break;
    case 'efzback':ui.efz=null;render();break;
    case 'eft':ui.eft=v;render();break;
@@ -2503,6 +2507,12 @@ document.addEventListener('submit',e=>{
     if(S.products.some(p=>p.id!==id&&p.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe um produto com esse nome.');
     if(id){Object.assign(PR(id),{name,category:fd.category});if(fd.unit)PR(id).unit=fd.unit;else delete PR(id).unit}else S.products.push({id:nid('r'),name,category:fd.category,unit:fd.unit});
     return done('Produto salvo.')}
+  if(k==='pmin'){
+    const id=form.dataset.id,pr=S.products.find(x=>x.id===id),raw=String(fd.min||'').trim().replace(',','.'),mn=Number(raw);
+    if(!pr)return done('Produto não encontrado.');
+    if(raw&&!(mn>=0))return modalErr('Informe um número maior ou igual a zero.');
+    if(raw&&mn>0)pr.min=mn;else delete pr.min;
+    return done('Estoque mínimo salvo.')}
   if(k==='pentrada'){
     const f=ui.f.pentrada,rows=f.rows||[];let er='';
     if(!f.date||!f.farm)er='Preencha a data e a fazenda.';
