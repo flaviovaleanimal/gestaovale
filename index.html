@@ -1256,7 +1256,7 @@ function saidaRow(r,i,n,its,farm){
   const tks=it?Object.entries(it.tanks).filter(([,q])=>q>0):[];
   const av=it&&r.tank?(it.tanks[r.tank]||0):null;
   return `<div class="line"><div class="line-h"><b>Sêmen ${i+1}</b>${n>1?`<button type="button" class="btn sm dng" data-a="delSRow" data-v="${i}">Remover</button>`:''}</div>
-   <div class="form c4">
+   <div class="form">
    ${fldHtml('Nome do reprodutor',`<select data-srow="${i}.item" data-r="1"${farm?'':' disabled'}>${opts(az(its.map(o=>[o.b,o.name])),r.item,farm?(its.length?'Selecione…':'Sem sêmen com saldo'):'Escolha a fazenda')}</select>
       ${it?`<span class="hint">Estoque disponível na ${esc(F(farm).name)}: ${fmt(it.bal)} doses.</span>`:''}`)}
    ${fldHtml('Localidade (Botijão com essas doses)',`<select data-srow="${i}.tank" data-r="1"${it?'':' disabled'}>${opts(tks.map(([t,q])=>[t,`${T(t).name} — ${fmt(q)} doses`]),r.tank,it?'Selecione…':'Escolha o sêmen')}</select>
