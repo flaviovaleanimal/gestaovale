@@ -156,7 +156,8 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .chk small{color:var(--muted)}
 .modal.xl{max-width:1040px;padding:28px}
 .modal.xl .form{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px 20px}
-.modal .form.c3,.modal.xl .form.c3{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.modal .form.c5,.modal.xl .form.c5{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}@media(max-width:640px){.modal .form.c3,.modal .form.c5,.modal.xl .form.c3,.modal.xl .form.c5{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
+.modal .form.c4,.modal.xl .form.c4{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.modal .form.c3,.modal.xl .form.c3{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.modal .form.c5,.modal.xl .form.c5{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}@media(max-width:640px){.modal .form.c3,.modal .form.c4,.modal .form.c5,.modal.xl .form.c3,.modal.xl .form.c4,.modal.xl .form.c5{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}}
 .modal.xl .fld input,.modal.xl .fld select,.modal.xl .fld textarea{padding:11px 12px;font-size:15px}
 .modal.xl h3{font-size:20px;margin-bottom:20px}
 .modal h3{margin-bottom:14px}
@@ -1825,7 +1826,7 @@ function pEntradaFields(){
    ${fldHtml('Data da entrada',fi('pentrada','date','date'))}
    ${fldHtml('Nome da fazenda',fs('pentrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…'))}
   </div>${f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="entrada" data-v="${i}">Remover</button>`:''}</div>
-   <div class="form">
+   <div class="form c4">
    ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(az(S.products.filter(p=>!p.inativo||p.id===r.product).map(p=>[p.id,p.name])),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
    ${fldHtml('Quantidade',`<input data-pf="entrada.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
    ${fldHtml('Localidade',`<select data-pf="entrada.${i}.loc">${opts([...PLOC,...(r.loc&&!PLOC.includes(r.loc)?[r.loc]:[])].map(x=>[x,x]),r.loc,'Selecione…')}</select>`)}
@@ -1839,7 +1840,7 @@ function pSaidaFields(){
    ${fldHtml('Data da saída',fi('psaida','date','date'))}
    ${fldHtml('Nome da fazenda',fs('psaida','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,i)=>{const it=its.find(o=>o.product===r.product);return `<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="saida" data-v="${i}">Remover</button>`:''}</div>
-   <div class="form">
+   <div class="form c4">
    ${fldHtml('Produto',`<select data-pf="saida.${i}.product" data-r="1"${f.farm?'':' disabled'}>${opts(az(its.map(o=>[o.product,o.p.name])),r.product,f.farm?(its.length?'Selecione…':'Sem produto com saldo'):'Escolha a fazenda')}</select>
       ${it?`<span class="hint">Estoque disponível na ${esc(F(f.farm).name)}: ${qtyU(it.bal,it.p.unit)}.</span>`:''}`)}
    ${fldHtml('Quantidade utilizada',`<input data-pf="saida.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
