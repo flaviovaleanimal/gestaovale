@@ -569,7 +569,7 @@ function vECad(){
   return `<div class="card"><div class="card-h"><h3>${inat?'Itens inativos':'Cadastro de estoque'}</h3>${tot?`<span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span>`:''}<span class="tk-sp"></span><button class="btn pri" data-a="newItem">Novo item</button></div>
   ${tot?`<div class="filters" style="margin-bottom:12px;align-items:flex-end">${searchBox('ec')}${(nI||inat)?`<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button>`:''}</div>`:''}
   <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>Categoria / raça</th><th>Tipo</th><th>Unidade</th><th class="num">Saldo</th><th>Ações</th></tr></thead><tbody>
-   ${list.map(o=>{const s=o.k==='s';return `<tr${qHide('ec',o.name+' '+o.cat+' '+(s?'sêmen':'produto'))}><td><b>${esc(o.name)}</b></td><td>${esc(o.cat)}</td><td><span class="pill ${s?'ok':'in'}">${s?'Sêmen':'Produto'}</span></td><td>${o.un?esc(o.un):s?'Dose':'<span class="muted">—</span>'}</td><td class="num">${fmt(o.bal)}</td>
+   ${list.map(o=>{const s=o.k==='s';return `<tr${qHide('ec',o.name+' '+o.cat+' '+(s?'sêmen':'produto'))}><td><b>${esc(o.name)}</b></td><td>${esc(o.cat)}</td><td><span class="pill ${s?'ok':'in'}">${s?'Sêmen':'Produto'}</span></td><td>${s?'Dose':o.un?esc(o.un):'<span class="muted">—</span>'}</td><td class="num">${fmt(o.bal)}</td>
    <td><div class="acts"><button class="btn sm" data-a="${s?'editBreeder':'editProduct'}" data-v="${o.id}">Editar</button></div></td></tr>`}).join('')}
   </tbody></table>`:empty(tot?'Nenhum item com esses filtros.':'Nenhum item cadastrado. Clique em Novo item para começar.')}</div></div>`;
 }
@@ -1160,7 +1160,7 @@ function vEstoque(){
       const tk=Object.entries(o.tanks).filter(([,q])=>q>0);
       const many=tk.length>1, op=ui.open[ui.farm+o.key];
       return `<tr><td>${many?`<button class="tog" data-a="toggle" data-v="${esc(ui.farm+o.key)}" aria-expanded="${!!op}">${op?'▼':'▶'} ${esc(o.name)}</button>`:esc(o.name)}</td>
-      <td>${esc(o.breed)}</td><td>${esc(o.ind)}</td><td>${esc(B(o.b).unit||'Dose')}</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td></tr>
+      <td>${esc(o.breed)}</td><td>${esc(o.ind)}</td><td>Dose</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td></tr>
       ${many&&op?tk.map(([t,q],i)=>`<tr class="loc"><td colspan="7">${i+1}. ${esc(f.name)} — ${esc(tkn(t))} — ${fmt(q)} doses</td></tr>`).join(''):''}`}).join('')}
     </tbody><tfoot><tr><td colspan="4">Totais</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`
     :empty('Nenhum sêmen em estoque com esses filtros.')}</div></div>`;
@@ -1344,10 +1344,9 @@ function modalHtml(){
   const tkSel=(v)=>`<select name="tank" required>${opts(S.tanks.map(t=>[t.id,t.name]),v,'Selecione…')}</select>`;
   let body='';
   if(m.type==='breeder'){const b=m.data||{};
-    body=`<h3>${b.id?'Editar reprodutor':'Novo reprodutor'}</h3>${err}<form data-form="breeder" data-id="${b.id||''}" novalidate><div class="form c3">
+    body=`<h3>${b.id?'Editar reprodutor':'Novo reprodutor'}</h3>${err}<form data-form="breeder" data-id="${b.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do reprodutor',`<input name="name" value="${esc(b.name)}" required>`)}
-    ${fldHtml('Raça',`<select name="breed" required>${opts(BREEDS.map(x=>[x,x]),b.breed,'Selecione…')}</select>`)}
-    ${fldHtml('Unidade',`<select name="unit">${opts(['Dose','Palheta'].map(x=>[x,x]),b.unit||'Dose')}</select>`)}</div>${b.id?footX('Salvar',(b.inativo?`<button class="btn" type="button" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delBreeder" data-v="${b.id}">Excluir</button>`):foot('Salvar')}</form>`}
+    ${fldHtml('Raça',`<select name="breed" required>${opts(BREEDS.map(x=>[x,x]),b.breed,'Selecione…')}</select>`)}</div>${b.id?footX('Salvar',(b.inativo?`<button class="btn" type="button" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delBreeder" data-v="${b.id}">Excluir</button>`):foot('Salvar')}</form>`}
   if(m.type==='estacao'){const e=m.data||{};
     body=`<h3>${e.id?'Editar estação':'Nova estação'}</h3>${err}<form data-form="estacao" data-id="${e.id||''}" novalidate><div class="form">
     ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
@@ -2422,7 +2421,7 @@ document.addEventListener('submit',e=>{
     const name=(fd.name||'').trim(),id=form.dataset.id;
     if(!name||!fd.breed)return modalErr('Informe o nome e a raça.');
     if(S.breeders.some(b=>b.id!==id&&b.name.toLowerCase()===name.toLowerCase()))return modalErr('Já existe um reprodutor com esse nome.');
-    const unit=fd.unit||'Dose';if(id){Object.assign(B(id),{name,breed:fd.breed,unit})}else S.breeders.push({id:nid('b'),name,breed:fd.breed,unit});
+    const unit='Dose';if(id){Object.assign(B(id),{name,breed:fd.breed,unit})}else S.breeders.push({id:nid('b'),name,breed:fd.breed,unit});
     return done('Reprodutor salvo.')}
   if(k==='estacao'){
     const id=form.dataset.id;
