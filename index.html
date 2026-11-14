@@ -1660,8 +1660,8 @@ function modalHtml(){
     const f=m.data||ui.fi,farm=f.farm?F(f.farm).name:'—';
     const rows=f.rows.filter(r=>r.date||r.proc||r.lote||r.etapa||r.total).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
     const mats=ficMats(f.mats).filter(x=>x.label);
-    body=`<h3>Ficha Saída</h3>
-    <div class="paper"><div class="paper-h plain"><div><b>Vale Animal</b><br><span>Ficha Saída</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
+    body=`<h3>Ficha de Saída de Produtos e Sêmen</h3>
+    <div class="paper"><div class="paper-h plain"><div><b>Vale Animal</b><br><span>Ficha de Saída de Produtos e Sêmen</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b">
      <table><tbody><tr><td><b>Data inicial:</b> ${f.from?dt(f.from):'—'}</td><td><b>Data final:</b> ${f.to?dt(f.to):'—'}</td></tr>
      <tr><td><b>Fazenda:</b> ${esc(farm)}</td><td><b>Técnico responsável:</b> ${esc(f.tech||'—')}</td></tr></tbody></table>
@@ -2023,7 +2023,7 @@ function vFicha(){
     ${fldHtml('Saída',`<input type="number" min="0" step="any" inputmode="decimal" data-fm="${i}.out" value="${esc(m.out??'')}"${x.label?'':' disabled'}>`)}
     ${fldHtml('Saldo',`<input type="number" step="any" inputmode="decimal" data-fm="${i}.bal" value="${esc(m.bal??'')}"${x.label?'':' disabled'}>`)}
    </div><button type="button" class="btn sm" data-a="addFM" data-v="${i}">+ Adicionar material</button></div>`}).join('');
-  return `<div class="card"><div class="card-h"><h3>${f.id?'Editando Ficha Saída':'Ficha Saída'}</h3><div class="acts">${f.id?'<button class="btn" data-a="cancelFicha">Cancelar edição</button>':'<button class="btn" data-a="fClear">Limpar</button>'}<button class="btn" data-a="fPdf">Imprimir ficha</button><button class="btn pri" data-a="fSave">${f.id?'Salvar alterações':'Salvar ficha'}</button></div></div><p class="muted" style="margin:0 0 12px">Registro de conferência do que saiu do escritório para o campo. Não altera o saldo do estoque.</p>
+  return `<div class="card"><div class="card-h"><h3>${f.id?'Editando Ficha de Saída de Produtos e Sêmen':'Ficha de Saída de Produtos e Sêmen'}</h3><div class="acts">${f.id?'<button class="btn" data-a="cancelFicha">Cancelar edição</button>':'<button class="btn" data-a="fClear">Limpar</button>'}<button class="btn" data-a="fPdf">Imprimir ficha</button><button class="btn pri" data-a="fSave">${f.id?'Salvar alterações':'Salvar ficha'}</button></div></div><p class="muted" style="margin:0 0 12px">Registro de conferência do que saiu do escritório para o campo. Não altera o saldo do estoque.</p>
   <div class="form" style="margin-bottom:16px">
    ${fldHtml('Data inicial',`<input type="date" data-fi="from" value="${esc(f.from)}">`)}
    ${fldHtml('Data final',`<input type="date" data-fi="to" value="${esc(f.to)}">`)}
