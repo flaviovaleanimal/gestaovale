@@ -1424,7 +1424,7 @@ function modalHtml(){
     ${fldHtml('Agenda Técnico',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`,'wide')}
     ${fldHtml('Cor',`<div class="ag-cols">${EVCOL.map(c=>`<label><input type="radio" name="color" value="${c}"${(e.color||EVCOL[0])===c?' checked':''}><span style="background:${c}"></span></label>`).join('')}</div>`,'wide')}
     ${fldHtml('Observação',`<textarea name="desc" rows="3">${esc(e.desc||'')}</textarea>`,'wide')}
-    </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
+    </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}${e.id&&(e.title==='IM'||e.title==='AV + IM')?`<button class="btn" type="button" data-a="agProto" data-v="${e.id}">Criar protocolo IATF</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='agfil'){const f=ui.ag.f;
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
     ${fldHtml('Técnico',`<select name="tec">${opts(AGTEC.map(x=>[x,x]),ui.ag.tec,'Todos')}</select>`)}
@@ -2324,6 +2324,7 @@ document.addEventListener('click',e=>{
    case 'agGoDay':ui.ag.date=v;ui.ag.view='week';render();break;
    case 'agNew':{const [d,h]=String(v).split('|');const H=h===undefined?null:+h;
      ui.modal={type:'ev',data:{date:d,periodo:H===null?'Dia Inteiro':(H<12?'Manhã':'Tarde')}};render();break}
+   case 'agProto':{const x=S.eventos.find(q=>q.id===v);if(!x)break;ui.modal={type:'evproto',ev:{...x},sel:{prot:'',niatf:''}};render();break}
    case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
    case 'agDel':{const x=S.eventos.find(q=>q.id===v);if(!x)break;ask(`Mover o evento "${x.title}" para a Lixeira? Você pode restaurar depois.`,()=>{S.eventos_lixo.push({...x,deletedAt:Date.now()});S.eventos=S.eventos.filter(q=>q.id!==v);done('Evento movido para a Lixeira.')},{title:'Mover para a Lixeira',ok:'Mover para a Lixeira'});break}
    case 'agRestore':{const x=S.eventos_lixo.find(q=>q.id===v);if(!x)break;const r={...x};delete r.deletedAt;S.eventos.push(r);S.eventos_lixo=S.eventos_lixo.filter(q=>q.id!==v);ui.ag.date=r.date;save();render();toast('Evento restaurado.');break}
