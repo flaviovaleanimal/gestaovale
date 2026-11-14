@@ -1297,7 +1297,7 @@ function vEMov(){
   const items=[...(t==='p'?[]:S.breeders.map(b=>['s:'+b.id,b.name+' (sêmen)'])),...(t==='s'?[]:S.products.map(x=>['p:'+x.id,x.name]))].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR',{sensitivity:'base'}));
   const pill=m=>`<span class="pill ${m.type==='entrada'?'in':'out'}">${m.type==='entrada'?'Entrada':'Saída'}</span>`;
   const rows=list.map(o=>{const m=o.m,s=o.k==='s',e=m.type==='entrada';
-    return `<tr><td>${dt(m.date)}</td><td>${s?'Sêmen':'Produto'}</td><td><b>${esc(s?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td>${s?esc(T(m.tank).name):'<span class="muted">—</span>'}</td><td>${pill(m)}</td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${s?' doses':''}</td>
+    return `<tr><td>${dt(m.date)}</td><td>${s?'Sêmen':'Produto'}</td><td><b>${esc(s?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td>${s?esc(T(m.tank).name):(m.loc?esc(m.loc):'<span class="muted">—</span>')}</td><td>${pill(m)}</td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${s?' doses':''}</td>
     <td><div class="acts"><button class="btn sm" data-a="${s?'editMov':'editPMov'}" data-v="${m.id}">Editar</button></div></td></tr>`}).join('');
   return `<div class="card"><div class="card-h"><h3>Movimentações</h3><span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span><span class="tk-sp"></span><div class="acts"><button class="btn" data-a="emPdf">Imprimir PDF</button><button class="btn pri" data-a="emNew" data-v="entrada">Nova entrada</button><button class="btn pri" data-a="emNew" data-v="saida">Nova saída</button></div></div>
   <div class="filters" style="margin-bottom:12px">
@@ -1544,7 +1544,8 @@ function modalHtml(){
     ${fldHtml('Produto',`<select name="product">${opts(az(S.products.filter(b=>!b.inativo||b.id===x.product).map(b=>[b.id,b.name])),x.product)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
-    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${footX('Salvar',`<button class="btn dng" type="button" data-a="delPMov" data-v="${x.id}">Excluir</button>`)}</form>`}
+    ${fldHtml('Localidade',`<input name="loc" list="plocs" value="${esc(x.loc||'')}" placeholder="Ex.: Geladeira" autocomplete="off">`)}
+    ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div><datalist id="plocs">${[...new Set(S.pmovs.map(m=>m.loc).filter(Boolean))].sort().map(v=>`<option value="${esc(v)}">`).join('')}</datalist>${footX('Salvar',`<button class="btn dng" type="button" data-a="delPMov" data-v="${x.id}">Excluir</button>`)}</form>`}
   if(m.type==='export'){
     const txt=JSON.stringify({app:'gestao-de-servicos',versao:1,exportado:new Date().toISOString(),dados:S});
     m.txt=txt;
@@ -1826,8 +1827,9 @@ function pEntradaFields(){
    <div class="form">
    ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(az(S.products.filter(p=>!p.inativo||p.id===r.product).map(p=>[p.id,p.name])),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
    ${fldHtml('Quantidade',`<input data-pf="entrada.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
+   ${fldHtml('Localidade',`<input data-pf="entrada.${i}.loc" list="plocs" value="${esc(r.loc??'')}" placeholder="Ex.: Geladeira" autocomplete="off">`)}
    ${fldHtml('Observação',`<textarea data-pf="entrada.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
-   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}`;
+   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="entrada" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`).join('')}<datalist id="plocs">${[...new Set(S.pmovs.map(m=>m.loc).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
 }
 function pSaidaFields(){
   const f=ui.f.psaida;if(!f.rows||!f.rows.length)f.rows=[{}];
@@ -1840,8 +1842,9 @@ function pSaidaFields(){
    ${fldHtml('Produto',`<select data-pf="saida.${i}.product" data-r="1"${f.farm?'':' disabled'}>${opts(az(its.map(o=>[o.product,o.p.name])),r.product,f.farm?(its.length?'Selecione…':'Sem produto com saldo'):'Escolha a fazenda')}</select>
       ${it?`<span class="hint">Estoque disponível na ${esc(F(f.farm).name)}: ${qtyU(it.bal,it.p.unit)}.</span>`:''}`)}
    ${fldHtml('Quantidade utilizada',`<input data-pf="saida.${i}.qty" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.qty??'')}">`)}
+   ${fldHtml('Localidade',`<input data-pf="saida.${i}.loc" list="plocs" value="${esc(r.loc??'')}" placeholder="Ex.: Geladeira" autocomplete="off">`)}
    ${fldHtml('Observação',`<textarea data-pf="saida.${i}.note" rows="1">${esc(r.note??'')}</textarea>`)}
-   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="saida" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`}).join('')}`;
+   </div><div class="plus"><button type="button" class="plusbtn" data-a="addPRow" data-k="saida" data-v="${i}" aria-label="Adicionar outro produto abaixo" title="Adicionar outro produto">+</button></div></div>`}).join('')}<datalist id="plocs">${[...new Set(S.pmovs.map(m=>m.loc).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
 }
 
 /* ---------- serviços da iatf ---------- */
@@ -2341,7 +2344,7 @@ document.addEventListener('change',e=>{
   if(t.name==='category'&&t.form&&t.form.dataset.form==='lote'){const bx=t.form.querySelector('.lote-dates');if(bx)bx.style.display=!t.value||LPAR.includes(t.value)?'contents':'none'}
   if(d.f){const [f,n]=d.f.split('.');ui.f[f][n]=t.value;
     if(f==='saida'&&n==='farm'){ui.f.saida.rows=(ui.f.saida.rows||[{}]).map(r=>({qty:r.qty,note:r.note}))}
-    if(f==='psaida'&&n==='farm'){ui.f.psaida.rows=(ui.f.psaida.rows||[{}]).map(r=>({qty:r.qty,note:r.note}))}
+    if(f==='psaida'&&n==='farm'){ui.f.psaida.rows=(ui.f.psaida.rows||[{}]).map(r=>({qty:r.qty,loc:r.loc,note:r.note}))}
     if(d.r)render()}
   if(d.pf){const [kd,i,k]=d.pf.split('.');ui.f['p'+kd].rows[+i][k]=t.value;if(d.r)render()}
   if(d.srow){const [i,k]=d.srow.split('.');const r=ui.f.saida.rows[+i];r[k]=t.value;
@@ -2474,7 +2477,7 @@ document.addEventListener('submit',e=>{
       if(!r.product)er=n+'escolha o produto.';else if(!(q>0))er=n+'a quantidade deve ser maior que zero.'}
     ui.err.pentrada=er;if(er){render();return}
     const ts=Date.now();
-    rows.forEach((r,i)=>S.pmovs.push({id:nid('p'),ts:ts+i,date:f.date,type:'entrada',product:r.product,farm:f.farm,qty:Number(r.qty),note:r.note||''}));
+    rows.forEach((r,i)=>S.pmovs.push({id:nid('p'),ts:ts+i,date:f.date,type:'entrada',product:r.product,farm:f.farm,qty:Number(r.qty),loc:(r.loc||'').trim(),note:r.note||''}));
     ui.f.pentrada={date:f.date,farm:f.farm,rows:[{}]};ui.modal=null;save();render();
     toast(rows.length>1?`${rows.length} entradas registradas. Estoque atualizado.`:'Entrada registrada. Estoque atualizado.');return}
   if(k==='psaida'){
@@ -2487,13 +2490,13 @@ document.addEventListener('submit',e=>{
         if(used[r.product]>b)er=n+`saída maior que o estoque disponível (${fmt(b)}).`}}
     ui.err.psaida=er;if(er){render();return}
     const ts=Date.now();
-    rows.forEach((r,i)=>S.pmovs.push({id:nid('p'),ts:ts+i,date:f.date,type:'saida',product:r.product,farm:f.farm,qty:Number(r.qty),note:r.note||''}));
+    rows.forEach((r,i)=>S.pmovs.push({id:nid('p'),ts:ts+i,date:f.date,type:'saida',product:r.product,farm:f.farm,qty:Number(r.qty),loc:(r.loc||'').trim(),note:r.note||''}));
     ui.f.psaida={date:f.date,farm:f.farm,rows:[{}]};ui.modal=null;save();render();
     toast(rows.length>1?`${rows.length} saídas registradas. Estoque atualizado.`:'Saída registrada. Estoque atualizado.');return}
   if(k==='pmov'){
     const id=form.dataset.id,q=Number(fd.qty);
     if(!(q>0)||!fd.date)return modalErr('Informe data e uma quantidade maior que zero.');
-    const upd=S.pmovs.map(m=>m.id===id?{...m,date:fd.date,product:fd.product,farm:fd.farm,qty:q,note:fd.note||''}:m);
+    const upd=S.pmovs.map(m=>m.id===id?{...m,date:fd.date,product:fd.product,farm:fd.farm,qty:q,loc:(fd.loc||'').trim(),note:fd.note||''}:m);
     const er=pcheck(upd);if(er)return modalErr(er);
     S.pmovs=upd;return done('Movimentação atualizada. Estoque recalculado.')}
   if(k==='import'){
