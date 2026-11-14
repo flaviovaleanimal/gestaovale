@@ -1298,7 +1298,7 @@ function vEMov(){
   const items=[...(t==='p'?[]:S.breeders.map(b=>['s:'+b.id,b.name+' (sêmen)'])),...(t==='s'?[]:S.products.map(x=>['p:'+x.id,x.name]))].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR',{sensitivity:'base'}));
   const pill=m=>`<span class="pill ${m.type==='entrada'?'in':'out'}">${m.type==='entrada'?'Entrada':'Saída'}</span>`;
   const rows=list.map(o=>{const m=o.m,s=o.k==='s',e=m.type==='entrada';
-    return `<tr><td>${dt(m.date)}</td><td><b>${esc(s?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td>${s?esc(T(m.tank).name):(m.loc?esc(m.loc):'<span class="muted">—</span>')}</td><td>${s?'Sêmen':'Produto'}</td><td>${pill(m)}</td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${s?' doses':''}</td>
+    return `<tr><td>${dt(m.date)}</td><td><b>${esc(s?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td>${s?esc(T(m.tank).name):(m.loc?esc(m.loc.toUpperCase()):'<span class="muted">—</span>')}</td><td>${s?'Sêmen':'Produto'}</td><td>${pill(m)}</td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${s?' doses':''}</td>
     <td><div class="acts"><button class="btn sm" data-a="${s?'editMov':'editPMov'}" data-v="${m.id}">Editar</button></div></td></tr>`}).join('');
   return `<div class="card"><div class="card-h"><h3>Movimentações</h3><span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span><span class="tk-sp"></span><div class="acts"><button class="btn" data-a="emPdf">Imprimir PDF</button><button class="btn pri" data-a="emNew" data-v="entrada">Nova entrada</button><button class="btn pri" data-a="emNew" data-v="saida">Nova saída</button></div></div>
   <div class="filters" style="margin-bottom:12px">
@@ -1545,7 +1545,7 @@ function modalHtml(){
     ${fldHtml('Produto',`<select name="product">${opts(az(S.products.filter(b=>!b.inativo||b.id===x.product).map(b=>[b.id,b.name])),x.product)}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
-    ${fldHtml('Localidade',`<select name="loc">${opts([...PLOC,...(x.loc&&!PLOC.includes(x.loc)?[x.loc]:[])].map(v=>[v,v]),x.loc,'Não informada')}</select>`)}
+    ${fldHtml('Localidade',`<select name="loc">${opts([...PLOC,...(x.loc&&!PLOC.includes(x.loc.toUpperCase())?[x.loc]:[])].map(v=>[v,v]),(x.loc||'').toUpperCase(),'Não informada')}</select>`)}
     ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${footX('Salvar',`<button class="btn dng" type="button" data-a="delPMov" data-v="${x.id}">Excluir</button>`)}</form>`}
   if(m.type==='export'){
     const txt=JSON.stringify({app:'gestao-de-servicos',versao:1,exportado:new Date().toISOString(),dados:S});
@@ -1704,7 +1704,7 @@ function modalHtml(){
 }
 
 /* ---------- produtos ---------- */
-const PLOC=['Escritório','Fazenda'];
+const PLOC=['ESCRITÓRIO','FAZENDA'];
 const PUN=['Unidade','Quilo (kg)','Litro (L)','Frasco','Caixa','Pacote','Dose'];
 const PCAT=['Medicamento','Hormônio IATF','Vacina','Material Descartável','Equipamentos'];
 const SHORTU={'Unidade':'un','Quilo (kg)':'kg','Litro (L)':'L','Frasco':'fr','Caixa':'cx','Pacote':'pct','Dose':'doses'};
