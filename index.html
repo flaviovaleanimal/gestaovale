@@ -657,7 +657,7 @@ const agMatch=e=>{const f=ui.ag.f;return (!f.farm||e.farm===f.farm)&&(!f.title||
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
 const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tec&&'Técnico: '+ui.ag.tec,f.farm&&'Fazenda: '+farmShort(f.farm),f.title&&'Serviço: '+f.title,f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
 const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tec||evTec(e,ui.ag.tec))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
-const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Indução','Andrológico'];
+const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','Andrológico'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Primíparas','Secundíparas','Multíparas','Solteiras'];
 const catOpts=cur=>[...NCATS,...(cur&&!NCATS.includes(cur)?[cur]:[])].map(x=>[x,x]);
 const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Arquivado').sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${esc(String(l.name).toUpperCase())}</option>`).join('');
@@ -665,10 +665,12 @@ const PERIODOS=['Manhã','Tarde','Dia Inteiro'],EVCATS=NCATS,PERH={'Manhã':['07
 const perOf=e=>e.periodo||(e.allday!==false?'Dia Inteiro':(tmin(e.start)<720?'Manhã':'Tarde'));
 const tcTeam=v=>tc(v).replace(/\sE\s/g,' e ');
 const evProto=(im,p)=>{const re=addDays(im,p),ia=addDays(re,2);return {re,ia,res:addDays(ia,30)}};
+const evPlano=(im,p,n)=>{const L=[];let ia=null;for(let r=1;r<=n;r++){let s=im;if(r>1){s=addDays(ia,30);L.push(['RES',s])}const re=addDays(s,p);ia=addDays(re,2);L.push(['RE',re]);L.push(['IA',ia])}
+  if(n<3)L.push(['Entourar',addDays(ia,10)]);L.push(['DG',addDays(ia,30)]);return L};
 const farmShort=id=>tc(evFarm({farm:id}).replace(/^\s*fazenda\s+/i,''));
 const firstNames=t=>String(t||'').split(/[,;\/]|\se\s/i).map(x=>tc(x.trim().split(/\s+/)[0])).filter(Boolean).join(', ');
 const evLabel=e=>[farmShort(e.farm),(e.title||'')+(e.lote?` (${e.lote})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
-const evpPrev=(im,p,rs)=>{p=Number(p)||0;if(!p)return 'Escolha o protocolo para ver as datas.';const d=evProto(im,p);return `RE: <b>${dt(d.re)}</b> · IA: <b>${dt(d.ia)}</b>${rs?` · RES: <b>${dt(d.res)}</b>`:''}`};
+const evpPrev=(im,p,n)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';return evPlano(im,p,n).map(([t,x])=>`${t}: <b>${dt(x)}</b>`).join(' · ')};
 const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – '+e.etime:''));
 const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='day')return `${WDL[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
@@ -1447,9 +1449,9 @@ function modalHtml(){
   if(m.type==='evproto'){const ev=m.ev,sel=m.sel||{};
     body=`<h3>Protocolo IATF</h3>${err}<p style="margin:0 0 12px">Evento <b>${esc(evLabel(ev))}</b> salvo em ${dt(ev.date)}. Deseja criar os próximos eventos automaticamente?</p>
     <form data-form="evproto" data-im="${ev.date}" novalidate><div class="form">
-    ${fldHtml('Protocolo',`<select name="prot">${opts([[7,'7 dias'],[8,'8 dias'],[9,'9 dias']],sel.prot,'Não criar outros eventos')}</select>`)}
-    ${fldHtml('Haverá ressincronização?',`<select name="resync">${opts([['Não','Não'],['Sim','Sim (RES 30 dias após a IA)']],sel.resync||'Não')}</select>`)}
-    </div><div id="evp-prev" class="muted" style="margin:12px 0 0;font-size:13px">${evpPrev(ev.date,sel.prot,sel.resync==='Sim')}</div>
+    ${fldHtml('Quantas IATF?',`<select name="niatf">${opts([[1,'1 IATF (IATF + Entourar)'],[2,'2 IATF (IATF + IATF + Entourar)'],[3,'3 IATF (IATF + IATF + IATF)']],sel.niatf,'Não criar outros eventos')}</select>`)}
+    ${fldHtml('Protocolo (IM até a RE)',`<select name="prot">${opts([[7,'7 dias'],[8,'8 dias'],[9,'9 dias']],sel.prot,'Selecione…')}</select>`)}
+    </div><div id="evp-prev" class="muted" style="margin:12px 0 0;font-size:13px">${evpPrev(ev.date,sel.prot,sel.niatf)}</div>
     <div class="mf"><button class="btn" type="button" data-a="close">Agora não</button><button class="btn pri" type="submit">Criar eventos</button></div></form>`}
   if(m.type==='finpdf'){
     const k=m.kind,c=FIN[k],f=ui.ff[k],list=finList(k),tot=r2(list.reduce((a,r)=>a+finTot(r),0));
@@ -2353,7 +2355,7 @@ document.addEventListener('input',e=>{
   if(t.name==='phone'&&t.closest&&t.closest('form[data-form=contact]')){t.value=fmtFone(t.value)}
   if(t.name==='allday'&&t.closest&&t.closest('form[data-form=ev]')){const a=document.getElementById('ev-times'),b=document.getElementById('ev-endd');if(a)a.style.display=t.checked?'none':'contents';if(b)b.style.display=t.checked?'contents':'none'}
   if(t.name==='lote'&&t.closest&&t.closest('form[data-form=ev]')){const p=t.selectionStart;t.value=t.value.toUpperCase();try{t.setSelectionRange(p,p)}catch(e){}}
-  if(t.closest&&t.closest('form[data-form=evproto]')){const f=t.closest('form').elements,o=document.getElementById('evp-prev');if(o)o.innerHTML=evpPrev(t.closest('form').dataset.im,f.prot.value,f.resync.value==='Sim')}
+  if(t.closest&&t.closest('form[data-form=evproto]')){const f=t.closest('form').elements,o=document.getElementById('evp-prev');if(o)o.innerHTML=evpPrev(t.closest('form').dataset.im,f.prot.value,f.niatf.value)}
   if(t.closest&&t.closest('form[data-form=ev]')){const en=t.closest('form').elements.end;if(t.name==='end')t.dataset.touched='1';if(t.name==='date'&&en&&(!en.dataset.touched||en.value<t.value))en.value=t.value}
   if(t.dataset.agq){ui.ag.f.q=t.value;const b=document.getElementById('ag-list');if(b)b.innerHTML=agList();return}
   if(t.dataset.fq){const k=t.dataset.fq;ui.ff[k].q=t.value;const b=document.getElementById('fin-tbl');if(b)b.innerHTML=finTable(k);return}
@@ -2611,16 +2613,17 @@ document.addEventListener('submit',e=>{
     const msg='Evento salvo.'+(lt?` O lote ${lt.name} foi arquivado.`:'');
     if(id){Object.assign(S.eventos.find(x=>x.id===id),rec);return done(msg)}
     const ne={id:nid('e'),...rec};S.eventos.push(ne);
-    if(title==='IM'||title==='AV + IM'){save();ui.modal={type:'evproto',ev:ne,sel:{prot:'',resync:'Não'}};render();toast(msg);return}
+    if(title==='IM'||title==='AV + IM'){save();ui.modal={type:'evproto',ev:ne,sel:{prot:'',niatf:''}};render();toast(msg);return}
     return done(msg)}
   if(k==='agfil'){ui.ag.tec=fd.tec||'';ui.ag.f={farm:fd.farm||'',title:fd.title||'',cat:fd.cat||'',periodo:fd.periodo||'',lote:(fd.lote||'').trim().toUpperCase(),q:(fd.q||'').trim()};ui.modal=null;render();return}
   if(k==='evproto'){
-    const m0=ui.modal,ev=m0.ev,prot=Number(fd.prot)||0,rs=fd.resync==='Sim';
-    if(!prot){if(rs){m0.sel={prot:'',resync:'Sim'};m0.err='Escolha o protocolo (7, 8 ou 9 dias) para calcular a ressincronização.';return render()}return done()}
-    const d=evProto(ev.date,prot),base={title:'',date:'',end:'',allday:ev.allday,periodo:ev.periodo,start:ev.start||'',etime:ev.etime||'',cat:ev.cat||'',color:ev.color,farm:ev.farm,total:ev.total,lote:ev.lote,team:ev.team,tecs:ev.tecs||[],desc:ev.desc};
-    const add=(t,x)=>S.eventos.push({id:nid('e'),...base,title:t,date:x,end:x});
-    add('RE',d.re);add('IA',d.ia);if(rs)add('RES',d.res);
-    return done(rs?'3 eventos criados: RE, IA e RES.':'2 eventos criados: RE e IA.')}
+    const m0=ui.modal,ev=m0.ev,prot=Number(fd.prot)||0,n=Number(fd.niatf)||0;
+    if(!n)return done();
+    if(!prot){m0.sel={prot:'',niatf:n};m0.err='Escolha o protocolo (7, 8 ou 9 dias) para calcular as datas.';return render()}
+    const base={title:'',date:'',end:'',allday:ev.allday,periodo:ev.periodo,start:ev.start||'',etime:ev.etime||'',cat:ev.cat||'',color:ev.color,farm:ev.farm,total:ev.total,lote:ev.lote,team:ev.team,tecs:ev.tecs||[],desc:ev.desc};
+    const pl=evPlano(ev.date,prot,n);
+    pl.forEach(([t,x])=>S.eventos.push({id:nid('e'),...base,title:t,date:x,end:x}));
+    return done(pl.length+' eventos criados: '+pl.map(x=>x[0]).join(', ')+'.')}
   if(k==='fin'){
     const kind=form.dataset.kind,c=FIN[kind],id=form.dataset.id,rows=finRead(form);
     ui.modal.rows=rows;
