@@ -1297,7 +1297,7 @@ function vEMov(){
   const items=[...(t==='p'?[]:S.breeders.map(b=>['s:'+b.id,b.name+' (sêmen)'])),...(t==='s'?[]:S.products.map(x=>['p:'+x.id,x.name]))].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR',{sensitivity:'base'}));
   const pill=m=>`<span class="pill ${m.type==='entrada'?'in':'out'}">${m.type==='entrada'?'Entrada':'Saída'}</span>`;
   const rows=list.map(o=>{const m=o.m,s=o.k==='s',e=m.type==='entrada';
-    return `<tr><td>${dt(m.date)}</td><td><b>${esc(s?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td>${s?esc(T(m.tank).name):(m.loc?esc(m.loc):'<span class="muted">—</span>')}</td><td>${pill(m)}</td><td>${s?'Sêmen':'Produto'}</td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${s?' doses':''}</td>
+    return `<tr><td>${dt(m.date)}</td><td><b>${esc(s?B(m.b).name:PR(m.product).name)}</b></td><td>${esc(F(m.farm).name)}</td><td>${s?esc(T(m.tank).name):(m.loc?esc(m.loc):'<span class="muted">—</span>')}</td><td>${s?'Sêmen':'Produto'}</td><td>${pill(m)}</td><td class="num ${e?'in-t':'out-t'}">${e?'+':'−'}${fmt(m.qty)}${s?' doses':''}</td>
     <td><div class="acts"><button class="btn sm" data-a="${s?'editMov':'editPMov'}" data-v="${m.id}">Editar</button></div></td></tr>`}).join('');
   return `<div class="card"><div class="card-h"><h3>Movimentações</h3><span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span><span class="tk-sp"></span><div class="acts"><button class="btn" data-a="emPdf">Imprimir PDF</button><button class="btn pri" data-a="emNew" data-v="entrada">Nova entrada</button><button class="btn pri" data-a="emNew" data-v="saida">Nova saída</button></div></div>
   <div class="filters" style="margin-bottom:12px">
@@ -1306,7 +1306,7 @@ function vEMov(){
    ${fldHtml('Movimento',`<select data-em="type">${opts([['entrada','Entrada'],['saida','Saída']],h.type,'Todos')}</select>`)}
    ${fldHtml('Fazenda',`<select data-em="farm">${opts(FZ().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
    ${fldHtml('Item',`<select data-em="item">${opts(items,it,'Todos')}</select>`)}
-  </div><div class="tw">${list.length?`<table><thead><tr><th>Data</th><th>Item</th><th>Fazenda</th><th>Localidade</th><th>Movimento</th><th>Tipo</th><th class="num">Quantidade</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>`:empty('Nenhuma movimentação encontrada.')}</div></div>`;
+  </div><div class="tw">${list.length?`<table><thead><tr><th>Data</th><th>Item</th><th>Fazenda</th><th>Localidade</th><th>Tipo</th><th>Movimento</th><th class="num">Quantidade</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>`:empty('Nenhuma movimentação encontrada.')}</div></div>`;
 }
 function vMovs(){
   const sub=ui.msub,h=ui.hm;
