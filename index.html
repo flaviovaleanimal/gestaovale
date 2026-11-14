@@ -269,7 +269,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-day.out .ag-num{color:var(--muted);font-weight:500}
 .ag-num{display:inline-flex;min-width:26px;height:26px;align-items:center;justify-content:center;border-radius:13px;font-size:13px;font-weight:600;border:0;background:none;color:var(--ink);cursor:pointer;padding:0 4px}
 .ag-num.today{background:var(--navy);color:var(--navy-ink)}
-.ag-chip{display:block;width:100%;text-align:left;border:0;border-radius:4px;padding:1px 6px;margin-top:2px;font-size:10.5px;line-height:1.5;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;font-family:inherit}
+.ag-chip{position:relative;display:block;width:100%;text-align:left;border:0;border-radius:4px;padding:1px 6px;margin-top:2px;font-size:10.5px;line-height:1.5;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;font-family:inherit}
 .ag-chip.t{background:none;color:var(--ink)}.ag-chip.t:hover{background:var(--navy-soft)}
 .ag-chip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
 .ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
@@ -282,6 +282,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-col{position:relative;border-left:1px solid var(--line)}
 .ag-slot{height:48px;border-bottom:1px solid var(--line);box-sizing:border-box;cursor:pointer}.ag-slot:hover{background:var(--navy-soft)}
 .ag-hr{height:48px;font-size:11px;color:var(--muted);text-align:right;padding-right:6px;box-sizing:border-box;position:relative}.ag-hr span{position:relative;top:-7px}
+.ag-x{display:none;position:absolute;right:2px;top:1px;background:rgba(0,0,0,.55);border-radius:3px;padding:0 4px;font-size:11px;line-height:1.5;cursor:pointer;z-index:3}.ag-chip:hover .ag-x,.ag-ev:hover .ag-x{display:inline-block}@media(hover:none){.ag-x{display:inline-block}}
 .ag-ev{position:absolute;border-radius:5px;padding:2px 5px;font-size:10.5px;color:#fff;overflow:hidden;border:1px solid var(--surface);text-align:left;cursor:pointer;line-height:1.25;box-sizing:border-box;font-family:inherit;z-index:1}
 .ag-ev b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-ev span{display:block;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -676,7 +677,7 @@ const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='trash')return 'Lixeira';
   if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
   return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
-const evChip=e=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e))}</button>`;
+const evChip=e=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
 function agMonth(){
   const d=Dt(ui.ag.date),first=isoD(new Date(d.getFullYear(),d.getMonth(),1)),st=weekStart(first),td=today();
   const n=Math.ceil((wdi(first)+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
@@ -701,7 +702,7 @@ function agWeek(days){
     const now=new Date(),nowLine=x===td?`<div class="ag-now" style="top:${(now.getHours()*60+now.getMinutes())*48/60}px"></div>`:'';
     return `<div class="ag-col">${hrs.map(h=>`<div class="ag-slot" data-a="agNew" data-v="${x}|${h}" data-drop="${x}|${h}"></div>`).join('')}${nowLine}
     ${ev.map(e=>{const l=L[e.id],top=l.s*48/60,ht=Math.max(20,(l.e-l.s)*48/60),w=100/l.n;
-      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}"><b>${esc(evLabel(e))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}</button>`}).join('')}</div>`}).join('');
+      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${e.color||EVCOL[0]}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}"><b>${esc(evLabel(e))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
   return `<div class="ag-wrap"><div style="--n:${n}">
    <div class="ag-gridrow"><div></div>${head}</div>
    <div class="ag-gridrow"><div class="ag-hr" style="height:auto;font-size:10px;padding-top:8px">dia todo</div>${ad}</div>
