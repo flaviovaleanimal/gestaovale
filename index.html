@@ -1307,7 +1307,8 @@ function vEEst(){
   const f=F(ui.efz);
   const sem=t==='p'?[]:(()=>{const m={};items(ui.efz).forEach(o=>{const g=m[o.b]||(m[o.b]={k:'s',name:o.name,cat:o.breed,un:'Dose',ent:0,sai:0,bal:0});g.ent+=o.ent;g.sai+=o.sai;g.bal+=o.bal});return Object.values(m)})();
   const pro=t==='s'?[]:pItems(ui.efz).map(o=>({k:'p',id:o.p.id,min:o.p.min,name:o.p.name,cat:o.p.category,un:o.p.unit||'',ent:o.ent,sai:o.sai,bal:o.bal}));
-  const list=[...sem,...pro].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+  const az2=(a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'});
+  const list=[...pro.sort((a,b)=>pRank(a.name)-pRank(b.name)||az2(a,b)),...sem.sort(az2)];
   const vale=isVale(f);
   const minCell=o=>!vale?'':o.k!=='p'?'<td class="num"><span class="muted">—</span></td>':`<td class="num">${o.min>0?`<b>${fmt(o.min)}</b>${o.bal<o.min?' <span class="pill out">Baixo</span>':''}`:'<span class="muted">—</span>'} <button class="btn sm" data-a="editMin" data-v="${o.id}">Editar</button></td>`;
   const rows=list.map(o=>`<tr><td><b>${esc(o.name)}</b></td><td>${esc(o.cat)}</td><td><span class="pill ${o.k==='s'?'ok':'in'}">${o.k==='s'?'Sêmen':'Produto'}</span></td><td>${o.un?esc(o.un):'<span class="muted">—</span>'}</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td>${minCell(o)}</tr>`).join('');
@@ -1729,7 +1730,7 @@ function modalHtml(){
 }
 
 /* ---------- produtos ---------- */
-const PORD=['PRIMER MONODOSE','PRIMER 1º USO','PRIMER 2º USO','PRIMER 3º USO','RIC-BE','CIPIOTEC','ESTRON','ECEGON 25ML','ECEGON 100ML','PROGECIO','BAINHAS IA','TEC RELIN'];
+const PORD=['PRIMER MONODOSE','PRIMER 1º USO','PRIMER 2º USO','PRIMER 3º USO','RIC-BE','CIPIOTEC','ESTRON','ECEGON 25ML','ECEGON 100ML','PROGECIO','TEC RELIN','BAINHAS IA'];
 const pRank=n=>{const f=s=>nrm(s).replace(/\bfr\b/g,' ').replace(/\s+/g,' ').trim(),k=f(n);let best=-1,len=-1;PORD.forEach((x,i)=>{const y=f(x);if((k===y||k.startsWith(y+' '))&&y.length>len){best=i;len=y.length}});return best<0?999:best};
 const pSort=(a,b)=>pRank(a.p.name)-pRank(b.p.name)||b.v-a.v||a.p.name.localeCompare(b.p.name);
 const PLOC=['ESCRITÓRIO','FAZENDA'];
@@ -1749,7 +1750,7 @@ function pItems(fid,cat){
   const m={};
   S.pmovs.filter(x=>x.farm===fid).forEach(x=>{const o=m[x.product]||(m[x.product]={product:x.product,ent:0,sai:0});if(x.type==='entrada')o.ent+=x.qty;else o.sai+=x.qty});
   return Object.values(m).filter(o=>!PR(o.product).inativo).map(o=>({...o,ent:r3(o.ent),sai:r3(o.sai),bal:r3(o.ent-o.sai),p:PR(o.product)}))
-    .filter(o=>o.bal>0&&(!cat||o.p.category===cat)).sort((a,b)=>a.p.name.localeCompare(b.p.name));
+    .filter(o=>o.bal>0&&(!cat||o.p.category===cat)).sort((a,b)=>pRank(a.p.name)-pRank(b.p.name)||a.p.name.localeCompare(b.p.name,'pt-BR',{sensitivity:'base'}));
 }
 function pcheck(movs){
   const g={};movs.forEach(m=>{const k=m.farm+'|'+m.product;g[k]=r3((g[k]||0)+psg(m))});
