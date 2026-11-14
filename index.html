@@ -709,7 +709,8 @@ const evPlano=(im,p,n,farm)=>{const L=[];let ia=null,dom=[];const LT=i=>n>1?'ABC
   L.push(['DG',pertoDe(addDays(ia,30),x=>!isDom(x),farm),LT(n)]);L.dom=dom;return L};
 const farmShort=id=>tc(evFarm({farm:id}).replace(/^\s*fazenda\s+/i,''));
 const firstNames=t=>String(t||'').split(/[,;\/]|\se\s/i).map(x=>tc(x.trim().split(/\s+/)[0])).filter(Boolean).join(', ');
-const evLabel=e=>[farmShort(e.farm),(e.title||'')+(e.lote?` (${e.lote}${e.suf||''})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
+const SVN={'AV + IM':'Avaliação + Implante','IM':'Implante','RE':'Retirada','IA':'Inseminação','RES':'Ressincronização','DG':'Diagnóstico','DG Final':'Diagnóstico Final'},svn=t=>SVN[t]||t;
+const evLabel=(e,full)=>[farmShort(e.farm),(full?svn(e.title||''):(e.title||''))+(e.lote?` (${e.lote}${e.suf||''})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
 const evpPrev=(im,p,n,farm)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';const L=evPlano(im,p,n,farm);return L.map(([t,x])=>`${t}: <b>${dt(x)}</b> (${WDS[Dt(x).getDay()]})`).join(' · ')+(L.dom.length?`<br><b style="color:var(--dng,#b42318)">Atenção: ${L.dom.join(' e ')} cai no domingo. Escolha outro protocolo (7, 8 ou 9 dias).</b>`:'')};
 const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – '+e.etime:''));
 const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
@@ -719,14 +720,14 @@ const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='trash')return 'Lixeira';
   if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
   return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
-const evChip=e=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
+const evChip=(e,full)=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e,full))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e,full))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
 function agMonth(){
   const d=Dt(ui.ag.date),first=isoD(new Date(d.getFullYear(),d.getMonth(),1)),st=weekStart(first),td=today();
   const n=Math.ceil((wdi(first)+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
   let h=WDM.map(w=>`<div class="ag-wd">${w}</div>`).join('');
   for(let i=0;i<n;i++){const x=addDays(st,i),dd=Dt(x),ev=evOn(x),out=dd.getMonth()!==d.getMonth();
     h+=`<div class="ag-day${out?' out':''}" data-a="agNew" data-v="${x}" data-drop="${x}"><button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}" aria-label="Ver dia ${dt(x)}">${dd.getDate()===1?dd.getDate()+' '+MESES[dd.getMonth()].slice(0,3):dd.getDate()}</button>
-    ${ev.slice(0,3).map(evChip).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agGoDay" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
+    ${ev.slice(0,3).map(e=>evChip(e,false)).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agGoDay" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
   return `<div class="ag-month">${h}</div>`}
 function agLanes(list){const out={};let cl=[],cend=-1;
   const flush=()=>{const L=cl.reduce((m,e)=>Math.max(m,out[e.id].lane+1),1);cl.forEach(e=>out[e.id].n=L);cl=[]};
@@ -739,12 +740,12 @@ function agLanes(list){const out={};let cl=[],cend=-1;
 function agWeek(days){
   const td=today(),n=days.length,hrs=Array.from({length:24},(_,h)=>h);
   const head=days.map(x=>{const dd=Dt(x);return `<div class="ag-hd">${WDS[dd.getDay()]}<button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}">${dd.getDate()}</button></div>`}).join('');
-  const ad=days.map(x=>`<div class="ag-ad" data-drop="${x}">${evOn(x).filter(e=>e.allday).map(evChip).join('')}</div>`).join('');
+  const ad=days.map(x=>`<div class="ag-ad" data-drop="${x}">${evOn(x).filter(e=>e.allday).map(e=>evChip(e,true)).join('')}</div>`).join('');
   const cols=days.map(x=>{const ev=evOn(x).filter(e=>!e.allday).sort((a,b)=>tmin(a.start)-tmin(b.start)||tmin(a.etime)-tmin(b.etime)),L=agLanes(ev);
     const now=new Date(),nowLine=x===td?`<div class="ag-now" style="top:${(now.getHours()*60+now.getMinutes())*48/60}px"></div>`:'';
     return `<div class="ag-col">${hrs.map(h=>`<div class="ag-slot" data-a="agNew" data-v="${x}|${h}" data-drop="${x}|${h}"></div>`).join('')}${nowLine}
     ${ev.map(e=>{const l=L[e.id],top=l.s*48/60,ht=Math.max(20,(l.e-l.s)*48/60),w=100/l.n;
-      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e))}"><b>${esc(evLabel(e))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
+      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e,true))}"><b>${esc(evLabel(e,true))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
   return `<div class="ag-wrap"><div style="--n:${n}">
    <div class="ag-gridrow"><div></div>${head}</div>
    <div class="ag-gridrow"><div class="ag-hr" style="height:auto;font-size:10px;padding-top:8px">dia todo</div>${ad}</div>
@@ -753,7 +754,7 @@ function agRange(){const a=ui.ag.lf||ui.ag.date;let e=ui.ag.lt||addDays(a,59);if
 function agList(){
   let h='',any=false;const [a0,n0]=agRange();
   for(let i=0;i<n0;i++){const x=addDays(a0,i),ev=evOn(x);if(!ev.length)continue;any=true;const dd=Dt(x);
-    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<div class="ag-liw"><button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button><button type="button" class="btn sm dng ag-lix" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">Excluir</button></div>`).join('')}</div></div>`}
+    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<div class="ag-liw"><button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e,true))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button><button type="button" class="btn sm dng ag-lix" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">Excluir</button></div>`).join('')}</div></div>`}
   return any?h:empty('Nenhum evento neste período.')}
 function agTrash(){
   const L=[...S.eventos_lixo].sort((a,b)=>(b.deletedAt||0)-(a.deletedAt||0));
@@ -761,7 +762,7 @@ function agTrash(){
   if(!L.length)return note+empty('A Lixeira está vazia.');
   const sel=(ui.ag.sel||[]).filter(id=>L.some(e=>e.id===id)),all=sel.length===L.length;
   const bar=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px"><label style="display:flex;gap:8px;align-items:center;font-weight:600;color:var(--ink);cursor:pointer"><input type="checkbox" data-a="agSelAll"${all?' checked':''} style="width:auto"> Selecionar todos</label><span class="muted" style="font-size:13px">${sel.length?sel.length+' selecionado(s)':'Nenhum selecionado'}</span><span style="flex:1"></span><button type="button" class="btn sm" data-a="agRestoreSel"${sel.length?'':' disabled'}>Restaurar selecionados</button><button type="button" class="btn sm dng" data-a="agPurgeSel"${sel.length?'':' disabled'}>Excluir selecionados definitivamente</button></div>`;
-  return note+bar+L.map(e=>{const dd=Dt(e.date);return `<div class="ag-list-d" style="align-items:center"><input type="checkbox" data-a="agSel" data-v="${e.id}"${sel.includes(e.id)?' checked':''} style="width:auto;flex:none"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0"><div class="ag-li" style="cursor:default;flex-wrap:wrap"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span style="flex:1;min-width:180px"><b>${esc(evLabel(e))}</b>${e.total?` · <span class="muted">Total: ${esc(e.total)}</span>`:''}<br><small class="muted">Excluído em ${e.deletedAt?new Date(e.deletedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—'}</small></span><button type="button" class="btn sm" data-a="agRestore" data-v="${e.id}">Restaurar</button></div></div></div>`}).join('')}
+  return note+bar+L.map(e=>{const dd=Dt(e.date);return `<div class="ag-list-d" style="align-items:center"><input type="checkbox" data-a="agSel" data-v="${e.id}"${sel.includes(e.id)?' checked':''} style="width:auto;flex:none"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0"><div class="ag-li" style="cursor:default;flex-wrap:wrap"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span style="flex:1;min-width:180px"><b>${esc(evLabel(e,true))}</b>${e.total?` · <span class="muted">Total: ${esc(e.total)}</span>`:''}<br><small class="muted">Excluído em ${e.deletedAt?new Date(e.deletedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—'}</small></span><button type="button" class="btn sm" data-a="agRestore" data-v="${e.id}">Restaurar</button></div></div></div>`}).join('')}
 function vAgenda(){
   if(ui.ag.view==='day')ui.ag.view='week';
   const {view,date}=ui.ag,vb=(v,l)=>`<button class="btn ${view===v?'pri':''}" data-a="agView" data-v="${v}">${l}</button>`;
@@ -1173,7 +1174,7 @@ function vInicio(){
    ${tkHoje.length?tkHoje.map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty('Nenhuma tarefa para hoje.')}</div>
   <div class="ini-two">
    <div class="card"><div class="card-h"><h3>Eventos de hoje</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Calendário</button></div>
-    ${hoje.length?hoje.map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><span><b>${esc(evLabel(e))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
+    ${hoje.length?hoje.map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><span><b>${esc(evLabel(e,true))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
    <div class="card"><div class="card-h"><h3>Lotes para agendar serviço <small class="muted">(em aberto: ${abertos.length})</small></h3><button class="btn sm" data-a="go" data-v="i-lotes">Agendamentos</button></div>
     ${abertos.length?abertos.map(l=>`<div class="ini-row"><div><b>${esc(farmShort(l.farm)||F(l.farm).name)}</b> / ${esc(l.name)}<small>${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${l.start?' · parição '+dt(l.start)+' a '+dt(l.end):''}</small></div><span style="display:flex;gap:8px;align-items:center">${loteTemServico(l)?'<span class="muted" style="font-size:12px">✓ Com serviço</span>':'<span style="font-size:12px;font-weight:600">Falta agendar</span>'}<button class="btn sm ${loteTemServico(l)?'':'pri'}" data-a="iniAgendar" data-v="${l.id}">Agendar</button></span></div>`).join(''):empty('Nenhum lote em aberto.')}</div>
   </div>
@@ -1443,7 +1444,7 @@ function modalHtml(){
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
     ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     </div><div class="form c4" style="margin-top:12px">
-    ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,x]),e.title,'Selecione…')}</select>`)}
+    ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,svn(x)]),e.title,'Selecione…')}</select>`)}
     ${e.lock?fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
     ${e.lock?'':fldHtml('Lote',`<select name="lote">${evLoteSel(e.farm,e.lote).replace('value="'+esc(String(e.lote||'').toUpperCase())+'"','value="'+esc(String(e.lote||'').toUpperCase())+'" selected')}</select>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly placeholder="Vem do lote">`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly placeholder="Vem do lote">`)}
     </div><div class="form c2" style="margin-top:12px">
@@ -1456,7 +1457,7 @@ function modalHtml(){
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
     ${fldHtml('Profissional',`<select name="tec">${opts(AGTEC.map(x=>[x,x]),ui.ag.tec,'Todos')}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name]),f.farm,'Todas')}</select>`)}
-    ${fldHtml('Serviço',`<select name="title">${opts(EVTIT.map(x=>[x,x]),f.title,'Todos')}</select>`)}
+    ${fldHtml('Serviço',`<select name="title">${opts(EVTIT.map(x=>[x,svn(x)]),f.title,'Todos')}</select>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),f.periodo,'Todos')}</select>`)}
     ${fldHtml('Lote',`<input name="lote" value="${esc(f.lote)}" autocomplete="off" style="text-transform:uppercase">`)}
     ${fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),f.cat,'Todas')}</select>`)}
@@ -1470,9 +1471,9 @@ function modalHtml(){
     const rows=[];for(let i=0;i<n;i++){const x=addDays(a,i);evOn(x).forEach(e=>rows.push([x,e]))}
     const per=agTitle()+(agFilList().length?' · '+agFilList().join(' · '):'');
     const fs=(()=>{try{const c=document.createElement('canvas').getContext('2d');c.font='8px '+getComputedStyle(document.body).fontFamily;
-      const w=Math.max(0,...rows.map(([x,e])=>c.measureText((view==='week'&&!e.allday?perOf(e)+' ':'')+evLabel(e)).width)),av=138;
+      const w=Math.max(0,...rows.map(([x,e])=>c.measureText((view==='week'&&!e.allday?perOf(e)+' ':'')+evLabel(e,view==='week')).width)),av=138;
       return w>av?Math.max(4.5,Math.floor(80*av/w)/10):8}catch(err){return 8}})();
-    const pc=(e,wk)=>`<div style="background:${evCol(e)};color:#fff;border-radius:3px;padding:1px 2px;margin-top:2px;font-size:${fs}px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:clip;-webkit-print-color-adjust:exact;print-color-adjust:exact">${wk&&!e.allday?`<small style="font-size:${Math.max(4,fs-1)}px;opacity:.9">${esc(perOf(e))}</small> `:''}${esc(evLabel(e))}</div>`;
+    const pc=(e,wk)=>`<div style="background:${evCol(e)};color:#fff;border-radius:3px;padding:1px 2px;margin-top:2px;font-size:${fs}px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:clip;-webkit-print-color-adjust:exact;print-color-adjust:exact">${wk&&!e.allday?`<small style="font-size:${Math.max(4,fs-1)}px;opacity:.9">${esc(perOf(e))}</small> `:''}${esc(evLabel(e,wk))}</div>`;
     const bd='1px solid #888',hd=x=>`style="padding:2px;text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;border-right:${bd};border-bottom:${bd};background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact"`;
     let cal='';
     if(view==='month'){
@@ -1486,7 +1487,7 @@ function modalHtml(){
     body=`<h3>Calendário</h3>
     <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Calendário · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b" style="font-size:12px">${cal}${cal&&view==='month'?'<div style="break-before:page;page-break-before:always;height:0"></div><div style="font-weight:700;margin:0 0 8px">Detalhamento dos eventos</div>':''}${(!cal||view==='month')?(rows.length?`<table><thead><tr><th>Data</th><th>Serviço</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Fazenda</th></tr></thead><tbody>
-    ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(e.title)}</td><td>${esc(e.lote||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(evFarm(e)||'—')}</td></tr>`).join('')}
+    ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(svn(e.title))}</td><td>${esc(e.lote||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(evFarm(e)||'—')}</td></tr>`).join('')}
     </tbody><tfoot><tr><td colspan="6">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>'):''}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês (sem domingo) + lista detalhada na 2ª página':view==='week'?'semana (sem domingo)':view==='day'?'lista do dia':'lista'}.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
@@ -1507,7 +1508,7 @@ function modalHtml(){
     body=`<h3>Mover para a Lixeira</h3><p style="margin:0 0 10px">Evento <b>${esc(evLabel(x))}</b> em ${dt(x.date)} será movido para a Lixeira.</p>
     <p style="margin:0 0 8px"><b>Deseja excluir também algum destes eventos próximos${x.lote?' do lote '+esc(x.lote):''}?</b></p>
     <form data-form="agdelm" data-id="${x.id}" novalidate><div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px">
-    ${rel.map(e=>`<label style="display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink)"><input type="checkbox" name="rel" value="${e.id}" style="width:auto"> ${dt(e.date)} · ${esc(evLabel(e))}</label>`).join('')}</div>
+    ${rel.map(e=>`<label style="display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink)"><input type="checkbox" name="rel" value="${e.id}" style="width:auto"> ${dt(e.date)} · ${esc(evLabel(e,true))}</label>`).join('')}</div>
     <div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn" type="button" data-a="agDelAll">Marcar todos</button><button class="btn dng" type="submit">Mover para a Lixeira</button></div></form>`}
   if(m.type==='evproto'){const ev=m.ev,sel=m.sel||{};
     body=`<h3>Protocolo IATF</h3>${err}<p style="margin:0 0 12px">Evento <b>${esc(evLabel(ev))}</b> salvo em ${dt(ev.date)}. Deseja criar os próximos eventos automaticamente?</p>
@@ -2198,7 +2199,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 19:35</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 19:50</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
