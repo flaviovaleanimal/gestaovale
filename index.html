@@ -475,7 +475,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={brInat:false,ecT:'',eft:'',efz:null,emT:'',emItem:'',ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:'',lt:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={brInat:false,ecT:'',eft:'',efz:null,emT:'',emItem:'',ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:'',lt:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
@@ -2217,7 +2217,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 22:35</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 22:50</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
