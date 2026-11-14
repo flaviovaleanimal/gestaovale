@@ -1476,18 +1476,18 @@ function modalHtml(){
     let cal='';
     if(view==='month'){
       const first=a,st=weekStart(first),nn=Math.ceil((wdi(first)+n)/7)*7;
-      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${WDM.map(w=>`<div ${hd()}>${w}</div>`).join('')}
-      ${Array.from({length:nn},(_,i)=>{const x=addDays(st,i),dd=Dt(x),out=dd.getMonth()!==d.getMonth();
-        return `<div style="min-height:70px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd};break-inside:avoid;${out?'color:#999':''}"><b style="font-size:9px">${dd.getDate()}</b>${out?'':evOn(x).map(e=>pc(e,false)).join('')}</div>`}).join('')}</div>`}
+      cal=`<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:${bd};border-left:${bd}">${WDM.slice(0,6).map(w=>`<div ${hd()}>${w}</div>`).join('')}
+      ${Array.from({length:nn},(_,i)=>i).filter(i=>i%7!==6).map(i=>{const x=addDays(st,i),dd=Dt(x),out=dd.getMonth()!==d.getMonth();
+        return `<div style="min-height:92px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd};break-inside:avoid;${out?'color:#999':''}"><b style="font-size:9px">${dd.getDate()}</b>${out?'':evOn(x).map(e=>pc(e,false)).join('')}</div>`}).join('')}</div>`}
     else if(view==='week'){
-      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div ${hd()}>${WDS[Dt(x).getDay()]} ${dt(x).slice(0,5)}</div>`}).join('')}
-      ${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
+      cal=`<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:${bd};border-left:${bd}">${Array.from({length:6},(_,i)=>{const x=addDays(a,i);return `<div ${hd()}>${WDS[Dt(x).getDay()]} ${dt(x).slice(0,5)}</div>`}).join('')}
+      ${Array.from({length:6},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
     body=`<h3>Calendário</h3>
     <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Calendário · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
-    <div class="paper-b" style="font-size:12px">${cal||(rows.length?`<table><thead><tr><th>Data</th><th>Período</th><th>Fazenda</th><th>Serviço</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Equipe</th></tr></thead><tbody>
+    <div class="paper-b" style="font-size:12px">${cal}${cal&&view==='month'?'<div style="break-before:page;page-break-before:always;height:0"></div><div style="font-weight:700;margin:0 0 8px">Detalhamento dos eventos</div>':''}${(!cal||view==='month')?(rows.length?`<table><thead><tr><th>Data</th><th>Período</th><th>Fazenda</th><th>Serviço</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Equipe</th></tr></thead><tbody>
     ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(perOf(e))}</td><td>${esc(evFarm(e)||'—')}</td><td>${esc(e.title)}</td><td>${esc(e.lote||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(e.team||(e.tecs||[]).join(', ')||'—')}</td></tr>`).join('')}
-    </tbody><tfoot><tr><td colspan="8">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>')}</div></div>
-    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês':view==='week'?'semana':view==='day'?'lista do dia':'lista'}.</p>
+    </tbody><tfoot><tr><td colspan="8">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>'):''}</div></div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês (sem domingo) + lista detalhada na 2ª página':view==='week'?'semana (sem domingo)':view==='day'?'lista do dia':'lista'}.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
   if(m.type==='diaimp'){const L=diaProp(m.from,m.to,m.tec),sel=m.sel||[],novas=L.filter(x=>!x.exists),all=novas.length&&novas.every(x=>sel.includes(x.key));
     const tot=r2(L.filter(x=>sel.includes(x.key)).reduce((s,x)=>s+x.unit,0));
@@ -2196,7 +2196,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 17:20</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 17:40</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
