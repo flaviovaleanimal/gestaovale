@@ -563,10 +563,10 @@ function vECad(){
   const sem=t==='p'?[]:S.breeders.filter(b=>!!b.inativo===inat).map(b=>({k:'s',id:b.id,name:b.name,cat:b.breed,bal:breederBal(b.id),inat:!!b.inativo}));
   const pro=t==='s'?[]:S.products.filter(p=>!!p.inativo===inat).map(p=>({k:'p',id:p.id,name:p.name,cat:p.category,bal:pTotal(p.id),inat:!!p.inativo}));
   const list=[...sem,...pro].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
-  const seg=(v,l)=>`<button class="btn${t===v?' pri':''}" data-a="ecT" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
+  const seg=(v,l)=>`<button class="btn sm${t===v?' pri':''}" data-a="ecT" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
   const tot=S.breeders.length+S.products.length;
-  return `<div class="card"><div class="card-h"><h3>${inat?'Itens inativos':'Cadastro de estoque'}</h3><button class="btn pri" data-a="newItem">Novo item</button></div>
-  ${tot?`<div class="filters" style="margin-bottom:12px;align-items:flex-end"><div class="acts">${seg('','Todos')}${seg('s','Sêmen')}${seg('p','Produtos')}</div>${searchBox('ec')}${(nI||inat)?`<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button>`:''}</div>`:''}
+  return `<div class="card"><div class="card-h"><h3>${inat?'Itens inativos':'Cadastro de estoque'}</h3>${tot?`<span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span>`:''}<span class="tk-sp"></span><button class="btn pri" data-a="newItem">Novo item</button></div>
+  ${tot?`<div class="filters" style="margin-bottom:12px;align-items:flex-end">${searchBox('ec')}${(nI||inat)?`<button class="btn" data-a="brInat">${inat?'← Voltar aos ativos':'Ver inativos ('+nI+')'}</button>`:''}</div>`:''}
   <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>Tipo</th><th>Categoria / raça</th><th class="num">Saldo</th><th>Ações</th></tr></thead><tbody>
    ${list.map(o=>{const s=o.k==='s';return `<tr${qHide('ec',o.name+' '+o.cat+' '+(s?'sêmen':'produto'))}><td><b>${esc(o.name)}</b></td><td><span class="pill ${s?'ok':'in'}">${s?'Sêmen':'Produto'}</span></td><td>${esc(o.cat)}</td><td class="num">${fmt(o.bal)}${s?' doses':''}</td>
    <td><div class="acts"><button class="btn sm" data-a="${s?'editBreeder':'editProduct'}" data-v="${o.id}">Editar</button>${o.inat?`<button class="btn sm pri" data-a="${s?'ativBreeder':'ativProduct'}" data-v="${o.id}">Ativar</button>`:`<button class="btn sm" data-a="${s?'inatBreeder':'inatProduct'}" data-v="${o.id}">Inativar</button>`}<button class="btn sm dng" data-a="${s?'delBreeder':'delProduct'}" data-v="${o.id}">Excluir</button></div></td></tr>`}).join('')}
