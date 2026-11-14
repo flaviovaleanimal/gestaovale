@@ -1626,14 +1626,14 @@ function modalHtml(){
   if(m.type==='lote'&&!(m.data||{}).id){
     body=`<h3>Agendar lote</h3>${err}<form data-form="lote" data-id="" data-multi="1" novalidate>
     <div class="form c2">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ().map(f=>[f.id,f.name]),(m.data||{}).farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
-    ${fldHtml('Procedimento',`<select name="proc">${opts(LPROC.map(x=>[x,x]),'','Selecione…')}</select>`)}</div>
+    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),'','Selecione…')}</select>`)}</div>
     <div id="lrows">${loteRowHtml({},false)}</div>
     <button type="button" class="btn sm" data-a="loteAddRow" style="margin-top:12px">+ Adicionar outro lote</button>
     ${foot('Salvar')}</form>`}
   else if(m.type==='lote'){const l=m.data||{};
     body=`<h3>${l.id?'Editar lote':'Agendar lote'}</h3>${err}<form data-form="lote" data-id="${l.id||''}" novalidate><div class="form">
     ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(l.farm).map(f=>[f.id,f.name]),l.farm,FZ().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
-    ${fldHtml('Procedimento',`<select name="proc">${opts(LPROC.map(x=>[x,x]),l.proc,'Selecione…')}</select>`)}
+    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),l.proc,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
@@ -2208,7 +2208,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 20:30</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 20:40</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2471,7 +2471,6 @@ document.addEventListener('input',e=>{
 });
 const carOpts=cur=>{const c=String(cur||'').trim(),L=Array.from({length:12},(_,i)=>String(i+1));return `<option value="">Selecione…</option>${[...L,...(c&&!L.includes(c)?[c]:[])].map(x=>`<option value="${esc(x)}"${x===c?' selected':''}>${esc(x)}</option>`).join('')}`};
 
-const LPROC=['1 IATF','2 IATF','3 IATF'];
 const loteRowHtml=(l,x)=>`<div class="lrow" style="border-top:1px solid var(--line);padding-top:12px;margin-top:12px"><div class="form c4">
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name||'')}" placeholder="Ex.: Lote 1" autocomplete="off">`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}">`)}
