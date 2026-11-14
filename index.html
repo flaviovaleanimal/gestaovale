@@ -667,17 +667,27 @@ const perOf=e=>e.periodo||(e.allday!==false?'Dia Inteiro':(tmin(e.start)<720?'Ma
 const tcTeam=v=>tc(v).replace(/\sE\s/g,' e ');
 const evProto=(im,p)=>{const re=addDays(im,p),ia=addDays(re,2);return {re,ia,res:addDays(ia,30)}};
 const isDom=x=>Dt(x).getDay()===0,isSab=x=>Dt(x).getDay()===6;
-const pertoDe=(base,ok)=>{for(const k of [0,-1,1,-2,2]){const x=addDays(base,k);if(ok(x))return x}return base};
-const evPlano=(im,p,n)=>{const L=[];let ia=null,dom=[];
+const cKey=c=>nrm(c||'').toUpperCase().replace(/\bDO\b/g,'').replace(/\s+/g,' ').trim();
+const VIZ=[['COCALINHO','NOVA NAZARE','AGUA BOA'],['AGUA BOA','NOVA XAVANTINA'],['ARAGUAIANA','NOVA XAVANTINA'],['NOVA XAVANTINA','NOVO SAO JOAQUIM'],['RIBEIRAO CASCALHEIRA','SAO JOSE XINGU']];
+const vizinhas=(a,b)=>{a=cKey(a);b=cKey(b);return !!a&&!!b&&(a===b||VIZ.some(g=>g.includes(a)&&g.includes(b)))};
+// pontuação de um dia para uma fazenda: 2 = já tem evento da mesma cidade, 1 = de cidade vizinha, -1 = só de cidade distante
+const agrup=(farm,x)=>{const c=(S.farms.find(f=>f.id===farm)||{}).city;let s=0;S.eventos.forEach(e=>{if(e.date!==x)return;const ce=(S.farms.find(f=>f.id===e.farm)||{}).city;if(cKey(ce)===cKey(c))s=Math.max(s,2);else if(vizinhas(c,ce))s=Math.max(s,1);else if(!s)s=-1});return s};
+const evHint=(farm,x)=>{if(!farm||!x)return '';const c=(S.farms.find(f=>f.id===farm)||{}).city;const L=S.eventos.filter(e=>e.date===x);if(!L.length)return 'Dia livre: nenhum evento marcado nesta data.';
+  const nm=e=>{const f=S.farms.find(q=>q.id===e.farm)||{};return (f.name||'?')+(f.city?' ('+f.city+')':'')};
+  const perto=L.filter(e=>vizinhas(c,(S.farms.find(f=>f.id===e.farm)||{}).city)),longe=L.filter(e=>!perto.includes(e));
+  return (perto.length?'<span style="color:#1d6b52">✔ Já há evento próximo neste dia: '+esc([...new Set(perto.map(nm))].join(', '))+'.</span> ':'')+(longe.length?'<span style="color:#b45309">⚠ Outras cidades neste dia: '+esc([...new Set(longe.map(nm))].join(', '))+'.</span>':'')};
+const pertoDe=(base,ok,farm)=>{const cand=[0,-1,1,-2,2].map(k=>addDays(base,k)).filter(ok);if(!cand.length)return base;if(!farm)return cand[0];
+  let best=cand[0],bs=agrup(farm,best);cand.forEach(x=>{const s=agrup(farm,x);if(s>bs){best=x;bs=s}});return best};
+const evPlano=(im,p,n,farm)=>{const L=[];let ia=null,dom=[];
   for(let r=1;r<=n;r++){let s=im;
-    if(r>1){const base=addDays(ia,30);s=pertoDe(base,x=>!isDom(x)&&!isSab(x)&&!isDom(addDays(x,p))&&!isDom(addDays(x,p+2)));L.push(['RES',s])}
+    if(r>1){const base=addDays(ia,30);s=pertoDe(base,x=>!isDom(x)&&!isSab(x)&&!isDom(addDays(x,p))&&!isDom(addDays(x,p+2)),farm);L.push(['RES',s])}
     const re=addDays(s,p);ia=addDays(re,2);L.push(['RE',re]);L.push(['IA',ia]);if(isDom(re))dom.push('RE');if(isDom(ia))dom.push('IA')}
   if(n<3){const en=addDays(ia,10);L.push(['Entourar',isDom(en)?addDays(en,1):en])}
-  L.push(['DG',pertoDe(addDays(ia,30),x=>!isDom(x))]);L.dom=dom;return L};
+  L.push(['DG',pertoDe(addDays(ia,30),x=>!isDom(x),farm)]);L.dom=dom;return L};
 const farmShort=id=>tc(evFarm({farm:id}).replace(/^\s*fazenda\s+/i,''));
 const firstNames=t=>String(t||'').split(/[,;\/]|\se\s/i).map(x=>tc(x.trim().split(/\s+/)[0])).filter(Boolean).join(', ');
 const evLabel=e=>[farmShort(e.farm),(e.title||'')+(e.lote?` (${e.lote})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
-const evpPrev=(im,p,n)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';const L=evPlano(im,p,n);return L.map(([t,x])=>`${t}: <b>${dt(x)}</b> (${WDS[Dt(x).getDay()]})`).join(' · ')+(L.dom.length?`<br><b style="color:var(--dng,#b42318)">Atenção: ${L.dom.join(' e ')} cai no domingo. Escolha outro protocolo (7, 8 ou 9 dias).</b>`:'')};
+const evpPrev=(im,p,n,farm)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';const L=evPlano(im,p,n,farm);return L.map(([t,x])=>`${t}: <b>${dt(x)}</b> (${WDS[Dt(x).getDay()]})`).join(' · ')+(L.dom.length?`<br><b style="color:var(--dng,#b42318)">Atenção: ${L.dom.join(' e ')} cai no domingo. Escolha outro protocolo (7, 8 ou 9 dias).</b>`:'')};
 const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – '+e.etime:''));
 const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='day')return `${WDL[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
@@ -1404,7 +1414,7 @@ function modalHtml(){
     ${fldHtml('Final EM',`<input name="end" type="date" value="${e.end||''}" required>`)}</div>${foot('Salvar')}</form>`}
   if(m.type==='ev'){const e=m.data||{},per=e.id||e.periodo||e.allday!==undefined?perOf(e):'Dia Inteiro',tits=[...EVTIT,...(e.title&&!EVTIT.includes(e.title)?[e.title]:[])];
     body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form">
-    ${fldHtml('Data Serviço',`<input name="date" type="date" value="${esc(e.date||today())}" required>`)}
+    ${fldHtml('Data Serviço',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
     ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZ(e.farm).map(f=>[f.id,f.name]),e.farm,FZ().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     ${fldHtml('Serviço',`<select name="title" required>${opts(tits.map(x=>[x,x]),e.title,'Selecione…')}</select>`)}
@@ -1455,10 +1465,10 @@ function modalHtml(){
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
   if(m.type==='evproto'){const ev=m.ev,sel=m.sel||{};
     body=`<h3>Protocolo IATF</h3>${err}<p style="margin:0 0 12px">Evento <b>${esc(evLabel(ev))}</b> salvo em ${dt(ev.date)}. Deseja criar os próximos eventos automaticamente?</p>
-    <form data-form="evproto" data-im="${ev.date}" novalidate><div class="form">
+    <form data-form="evproto" data-im="${ev.date}" data-farm="${ev.farm}" novalidate><div class="form">
     ${fldHtml('Quantas IATF?',`<select name="niatf">${opts([[1,'1 IATF (IATF + Entourar)'],[2,'2 IATF (IATF + IATF + Entourar)'],[3,'3 IATF (IATF + IATF + IATF)']],sel.niatf,'Não criar outros eventos')}</select>`)}
     ${fldHtml('Protocolo (IM até a RE)',`<select name="prot">${opts([[7,'7 dias'],[8,'8 dias'],[9,'9 dias']],sel.prot,'Selecione…')}</select>`)}
-    </div><div id="evp-prev" class="muted" style="margin:12px 0 0;font-size:13px">${evpPrev(ev.date,sel.prot,sel.niatf)}</div>
+    </div><div id="evp-prev" class="muted" style="margin:12px 0 0;font-size:13px">${evpPrev(ev.date,sel.prot,sel.niatf,ev.farm)}</div>
     <div class="mf"><button class="btn" type="button" data-a="close">Agora não</button><button class="btn pri" type="submit">Criar eventos</button></div></form>`}
   if(m.type==='finpdf'){
     const k=m.kind,c=FIN[k],f=ui.ff[k],list=finList(k),tot=r2(list.reduce((a,r)=>a+finTot(r),0));
@@ -2362,7 +2372,7 @@ document.addEventListener('input',e=>{
   if(t.name==='phone'&&t.closest&&t.closest('form[data-form=contact]')){t.value=fmtFone(t.value)}
   if(t.name==='allday'&&t.closest&&t.closest('form[data-form=ev]')){const a=document.getElementById('ev-times'),b=document.getElementById('ev-endd');if(a)a.style.display=t.checked?'none':'contents';if(b)b.style.display=t.checked?'contents':'none'}
   if(t.name==='lote'&&t.closest&&t.closest('form[data-form=ev]')){const p=t.selectionStart;t.value=t.value.toUpperCase();try{t.setSelectionRange(p,p)}catch(e){}}
-  if(t.closest&&t.closest('form[data-form=evproto]')){const f=t.closest('form').elements,o=document.getElementById('evp-prev');if(o)o.innerHTML=evpPrev(t.closest('form').dataset.im,f.prot.value,f.niatf.value)}
+  if(t.closest&&t.closest('form[data-form=evproto]')){const f=t.closest('form').elements,o=document.getElementById('evp-prev');if(o)o.innerHTML=evpPrev(t.closest('form').dataset.im,f.prot.value,f.niatf.value,t.closest('form').dataset.farm)}
   if(t.closest&&t.closest('form[data-form=ev]')){const en=t.closest('form').elements.end;if(t.name==='end')t.dataset.touched='1';if(t.name==='date'&&en&&(!en.dataset.touched||en.value<t.value))en.value=t.value}
   if(t.dataset.agq){ui.ag.f.q=t.value;const b=document.getElementById('ag-list');if(b)b.innerHTML=agList();return}
   if(t.dataset.fq){const k=t.dataset.fq;ui.ff[k].q=t.value;const b=document.getElementById('fin-tbl');if(b)b.innerHTML=finTable(k);return}
@@ -2392,7 +2402,7 @@ const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el[
   const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Arquivado'&&nrm(x.name)===nrm(v));if(!l)return;
   el['lote'].value=String(l.name).toUpperCase();el['total'].value=l.total;el['cat'].value=NCATS.includes(l.category)?l.category:''};
 document.addEventListener('input',e=>{const t=e.target;if(t.name==='lote'&&t.form&&t.form.dataset.form==='ev'){t.dataset.auto='';evLoteFill(t.form)}});
-document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
+document.addEventListener('change',e=>{const t=e.target;if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
   {
     const pend=S.lotes.find(l=>l.farm===t.value&&l.status!=='Arquivado'&&String(l.name).toUpperCase()===(lo.options[1]||{}).value);
     if(pend){lo.value=String(pend.name).toUpperCase();lo.dataset.auto='1';evLoteFill(t.form)}
@@ -2632,7 +2642,7 @@ document.addEventListener('submit',e=>{
     if(!n)return done();
     if(!prot){m0.sel={prot:'',niatf:n};m0.err='Escolha o protocolo (7, 8 ou 9 dias) para calcular as datas.';return render()}
     const base={title:'',date:'',end:'',allday:ev.allday,periodo:ev.periodo,start:ev.start||'',etime:ev.etime||'',cat:ev.cat||'',color:ev.color,farm:ev.farm,total:ev.total,lote:ev.lote,team:ev.team,tecs:ev.tecs||[],desc:ev.desc};
-    const pl=evPlano(ev.date,prot,n);
+    const pl=evPlano(ev.date,prot,n,ev.farm);
     if(pl.dom.length){m0.sel={prot:fd.prot,niatf:n};m0.err='A '+pl.dom.join(' e a ')+' cairia no domingo. Escolha outro protocolo.';return render()}
     pl.forEach(([t,x])=>S.eventos.push({id:nid('e'),...base,title:t,date:x,end:x}));
     return done(pl.length+' eventos criados: '+pl.map(x=>x[0]).join(', ')+'.')}
