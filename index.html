@@ -2205,7 +2205,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 20:05</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 20:15</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2469,9 +2469,9 @@ document.addEventListener('input',e=>{
 const carOpts=cur=>{const c=String(cur||'').trim(),L=Array.from({length:12},(_,i)=>String(i+1));return `<option value="">Selecione…</option>${[...L,...(c&&!L.includes(c)?[c]:[])].map(x=>`<option value="${esc(x)}"${x===c?' selected':''}>${esc(x)}</option>`).join('')}`};
 
 const loteRowHtml=(l,x)=>`<div class="lrow" style="border-top:1px solid var(--line);padding-top:12px;margin-top:12px"><div class="form c4">
+    ${fldHtml('Categoria',`<select name="category">${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<input name="name" value="${esc(l.name||'')}" placeholder="Ex.: Lote 1" autocomplete="off">`)}
     ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}">`)}
-    ${fldHtml('Categoria',`<select name="category">${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
     ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
     <div class="lote-dates" style="display:${!l.category||LPAR.includes(l.category)?'contents':'none'}">
     ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
