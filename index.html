@@ -2413,7 +2413,7 @@ const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el[
   const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Arquivado'&&nrm(x.name)===nrm(v));if(!l)return;
   el['lote'].value=String(l.name).toUpperCase();el['total'].value=l.total;el['cat'].value=NCATS.includes(l.category)?l.category:''};
 document.addEventListener('input',e=>{const t=e.target;if(t.name==='lote'&&t.form&&t.form.dataset.form==='ev'){t.dataset.auto='';evLoteFill(t.form)}});
-document.addEventListener('change',e=>{const t=e.target;if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
+document.addEventListener('change',e=>{const t=e.target;if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const c=t.form.elements['cat'];if(c){if(t.value==='Andrológico')c.value='Touros';else if(c.value==='Touros'){c.value='';evLoteFill(t.form)}}}if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
   {
     const pend=S.lotes.find(l=>l.farm===t.value&&l.status!=='Arquivado'&&String(l.name).toUpperCase()===(lo.options[1]||{}).value);
     if(pend){lo.value=String(pend.name).toUpperCase();lo.dataset.auto='1';evLoteFill(t.form)}
@@ -2637,7 +2637,7 @@ document.addEventListener('submit',e=>{
     const [start,etime]=all?['','']:PERH[per];
     const rec={title,date:fd.date,end:fd.date,allday:all,periodo:per,start,etime,cat:fd.cat||'',color:fd.color||EVCOL[0],farm:fd.farm,total:fd.total===''||fd.total===undefined?'':Number(fd.total),lote:(fd.lote||'').trim().toUpperCase(),team:tcTeam(fd.team),tecs,desc:(fd.desc||'').trim()};
     let ajuste='';
-    if(rec.cat==='Touros'&&(rec.title==='IM'||rec.title==='AV + IM')){rec.title='Andrológico';ajuste=' Serviço ajustado para Andrológico (Touros).'}
+    if(rec.title==='Andrológico'){if(rec.cat!=='Touros'){rec.cat='Touros';ajuste=' Categoria ajustada para Touros.'}}
     else if(rec.title==='IM'&&AVCATS.includes(rec.cat)){rec.title='AV + IM';ajuste=' Serviço ajustado para AV + IM ('+rec.cat+').'}
     else if(rec.title==='AV + IM'&&LPAR.includes(rec.cat)){rec.title='IM';ajuste=' Serviço ajustado para IM ('+rec.cat+').'}
     ui.ag.date=fd.date;
