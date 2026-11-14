@@ -1728,7 +1728,7 @@ function modalHtml(){
 
 /* ---------- produtos ---------- */
 const PORD=['PRIMER MONODOSE','PRIMER 1º USO','PRIMER 2º USO','PRIMER 3º USO','RIC-BE','CIPIOTEC','ESTRON','ECEGON 25ML','ECEGON 100ML','PROGECIO','BAINHAS IA','TEC RELIN'];
-const pRank=n=>{const k=nrm(n).replace(/\s+/g,' ').trim(),i=PORD.findIndex(x=>nrm(x).replace(/\s+/g,' ').trim()===k);return i<0?999:i};
+const pRank=n=>{const f=s=>nrm(s).replace(/\bfr\b/g,' ').replace(/\s+/g,' ').trim(),k=f(n);let best=-1,len=-1;PORD.forEach((x,i)=>{const y=f(x);if((k===y||k.startsWith(y+' '))&&y.length>len){best=i;len=y.length}});return best<0?999:best};
 const pSort=(a,b)=>pRank(a.p.name)-pRank(b.p.name)||b.v-a.v||a.p.name.localeCompare(b.p.name);
 const PLOC=['ESCRITÓRIO','FAZENDA'];
 const PUN=['Unidade','Quilo (kg)','Litro (L)','Frasco','Caixa','Pacote','Dose'];
