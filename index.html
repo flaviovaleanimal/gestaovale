@@ -486,6 +486,8 @@ const isAtivo=f=>tipoOf(f)==='Cliente ativo';
 const TIPOCLS={'Cliente ativo':'in','Cliente inativo':'out','Fornecedor':'warn','Lead':'ok'};
 const tipoPill=t=>`<span class="pill ${TIPOCLS[t]||'ok'}">${esc(t)}</span>`;
 const FZ=sel=>S.farms.filter(f=>isAtivo(f)||(sel&&f.id===sel));
+const isVale=f=>String(f.name||'').trim().toLowerCase()==='vale animal';
+const FZV=sel=>{const a=FZ(sel);return [...a.filter(isVale),...a.filter(f=>!isVale(f))]};
 const T=id=>S.tanks.find(x=>x.id===id)||{name:'?'};
 const sg=m=>m.type==='entrada'?m.qty:-m.qty;
 const tankStock=id=>S.movs.filter(m=>m.tank===id).reduce((a,m)=>a+sg(m),0);
@@ -1239,7 +1241,7 @@ function entradaFields(){
   const f=ui.f.entrada;if(!f.rows||!f.rows.length)f.rows=[{}];
   return `<div class="form">
    ${fldHtml('Data da entrada',fi('entrada','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('entrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
+   ${fldHtml('Nome da fazenda',fs('entrada','farm',FZV().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,i)=>entradaRow(r,i,f.rows.length)).join('')}`;
 }
 function bItems(fid){
@@ -1271,7 +1273,7 @@ function saidaFields(){
   const its=f.farm?bItems(f.farm):[];
   return `<div class="form">
    ${fldHtml('Data da saída',fi('saida','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('saida','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
+   ${fldHtml('Nome da fazenda',fs('saida','farm',FZV().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,k)=>saidaRow(r,k,f.rows.length,its,f.farm)).join('')}`;
 }
 function movList(){
@@ -1295,9 +1297,9 @@ function emList(){
 function vEEst(){
   const t=ui.eft||'';
   const seg=(v,l)=>`<button class="btn sm${t===v?' pri':''}" data-a="eft" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
-  if(!ui.efz||!FZ().some(f=>f.id===ui.efz)){
+  if(!ui.efz||!FZV().some(f=>f.id===ui.efz)){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
-    ${FZ().length?FZ().map(f=>{const ns=bItems(f.id).length,np=pItems(f.id).length,d=farmTotal(f.id),n=ns+np;
+    ${FZV().length?FZV().map(f=>{const ns=bItems(f.id).length,np=pItems(f.id).length,d=farmTotal(f.id),n=ns+np;
       return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'item':'itens'} · ${fmt(d)} doses de sêmen</div></div><button class="btn" data-a="efz" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}
     <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
@@ -1324,7 +1326,7 @@ function vEMov(){
    ${fldHtml('Data inicial',`<input type="date" data-em="from" value="${h.from}">`)}
    ${fldHtml('Data final',`<input type="date" data-em="to" value="${h.to}">`)}
    ${fldHtml('Movimento',`<select data-em="type">${opts([['entrada','Entrada'],['saida','Saída']],h.type,'Todos')}</select>`)}
-   ${fldHtml('Fazenda',`<select data-em="farm">${opts(FZ().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
+   ${fldHtml('Fazenda',`<select data-em="farm">${opts(FZV().map(x=>[x.id,x.name]),h.farm,'Todas')}</select>`)}
    ${fldHtml('Item',`<select data-em="item">${opts(items,it,'Todos')}</select>`)}
   </div><div class="tw">${list.length?`<table><thead><tr><th>Data</th><th>Item</th><th>Fazenda</th><th>Localidade</th><th>Tipo</th><th>Movimento</th><th class="num">Quantidade</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table>`:empty('Nenhuma movimentação encontrada.')}</div></div>`;
 }
@@ -1562,7 +1564,7 @@ function modalHtml(){
     body=`<h3>Editar ${x.type==='entrada'?'entrada':'saída'}</h3>${err}<form data-form="pmov" data-id="${x.id}" novalidate><div class="form">
     ${fldHtml('Data',`<input name="date" type="date" value="${x.date}" required>`)}
     ${fldHtml('Produto',`<select name="product">${opts(az(S.products.filter(b=>!b.inativo||b.id===x.product).map(b=>[b.id,b.name])),x.product)}</select>`)}
-    ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm">${opts(FZV(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="0" step="any" value="${x.qty}" required>`)}
     ${fldHtml('Localidade',`<select name="loc">${opts([...PLOC,...(x.loc&&!PLOC.includes(x.loc.toUpperCase())?[x.loc]:[])].map(v=>[v,v]),(x.loc||'').toUpperCase(),'Não informada')}</select>`)}
     ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${footX('Salvar',`<button class="btn dng" type="button" data-a="delPMov" data-v="${x.id}">Excluir</button>`)}</form>`}
@@ -1639,7 +1641,7 @@ function modalHtml(){
     ${fldHtml('Data',`<input name="date" type="date" value="${x.date}" required>`)}
     ${fldHtml('Reprodutor',`<select name="b">${opts(az(S.breeders.filter(b=>!b.inativo||b.id===x.b).map(b=>[b.id,b.name])),x.b)}</select>`)}
     ${fldHtml('Indicação',`<select name="ind">${opts(INDS.map(i=>[i,i]),x.ind)}</select>`)}
-    ${fldHtml('Fazenda',`<select name="farm">${opts(FZ(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm">${opts(FZV(x.farm).map(b=>[b.id,b.name]),x.farm)}</select>`)}
     ${fldHtml('Localidade (Botijão)',`<select name="tank">${opts(S.tanks.map(b=>[b.id,b.name]),x.tank)}</select>`)}
     ${fldHtml('Quantidade',`<input name="qty" type="number" min="1" step="1" value="${x.qty}" required>`)}
     ${fldHtml('Observação',`<textarea name="note" rows="2">${esc(x.note)}</textarea>`,'wide')}</div>${footX('Salvar',`<button class="btn dng" type="button" data-a="delMov" data-v="${x.id}">Excluir</button>`)}</form>`}
@@ -1843,7 +1845,7 @@ function pEntradaFields(){
   const f=ui.f.pentrada;if(!f.rows||!f.rows.length)f.rows=[{}];
   return `<div class="form">
    ${fldHtml('Data da entrada',fi('pentrada','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('pentrada','farm',FZ().map(x=>[x.id,x.name]),'Selecione…'))}
+   ${fldHtml('Nome da fazenda',fs('pentrada','farm',FZV().map(x=>[x.id,x.name]),'Selecione…'))}
   </div>${f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="entrada" data-v="${i}">Remover</button>`:''}</div>
    <div class="form c4">
    ${fldHtml('Produto',`<select data-pf="entrada.${i}.product" data-r="1">${opts(az(S.products.filter(p=>!p.inativo||p.id===r.product).map(p=>[p.id,p.name])),r.product,S.products.length?'Selecione…':'Nenhum produto cadastrado')}</select>`)}
@@ -1857,7 +1859,7 @@ function pSaidaFields(){
   const its=f.farm?pItems(f.farm):[];
   return `<div class="form">
    ${fldHtml('Data da saída',fi('psaida','date','date'))}
-   ${fldHtml('Nome da fazenda',fs('psaida','farm',FZ().map(x=>[x.id,x.name]),'Selecione…',true))}
+   ${fldHtml('Nome da fazenda',fs('psaida','farm',FZV().map(x=>[x.id,x.name]),'Selecione…',true))}
   </div>${f.rows.map((r,i)=>{const it=its.find(o=>o.product===r.product);return `<div class="line"><div class="line-h"><b>Produto ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delPRow" data-k="saida" data-v="${i}">Remover</button>`:''}</div>
    <div class="form c4">
    ${fldHtml('Produto',`<select data-pf="saida.${i}.product" data-r="1"${f.farm?'':' disabled'}>${opts(az(its.map(o=>[o.product,o.p.name])),r.product,f.farm?(its.length?'Selecione…':'Sem produto com saldo'):'Escolha a fazenda')}</select>
