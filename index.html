@@ -655,7 +655,7 @@ function vFin(k){
 function vComis(){return `<div class="card"><div class="card-h"><h3>Comissões Vendedores</h3></div>${empty('Esta tela ainda será criada. Em breve.')}</div>`}
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const WDS=['dom','seg','ter','qua','qui','sex','sáb'],WDL=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-const TECCOL={'Flávio':'#3b6fd4','Hiago':'#0b8a8f','Erikson':'#c9561a','Joaquim':'#8e44ad'},ENTCOL='#1d8f5a';
+const TECCOL={'Flávio':'#1f2328','Hiago':'#3b6fd4','Erikson':'#7d8790','Joaquim':'#e8730c'},ENTCOL='#1d8f5a';
 const evCol=e=>(e.title==='Entourar'||!(e.tecs||[]).length)?(e.title==='Entourar'?ENTCOL:(evCol(e))):(TECCOL[e.tecs[0]]||evCol(e));
 const EVCOL=['#3b6fd4','#1d8f5a','#c9561a','#c0392b','#8e44ad','#0b8a8f','#a8741a','#546e7a'];
 const pad2=n=>String(n).padStart(2,'0');
@@ -2199,7 +2199,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 18:30</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 18:40</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
