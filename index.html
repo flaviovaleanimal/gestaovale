@@ -1344,7 +1344,7 @@ function modalHtml(){
   const tkSel=(v)=>`<select name="tank" required>${opts(S.tanks.map(t=>[t.id,t.name]),v,'Selecione…')}</select>`;
   let body='';
   if(m.type==='breeder'){const b=m.data||{};
-    body=`<h3>${b.id?'Editar reprodutor':'Novo reprodutor'}</h3>${err}<form data-form="breeder" data-id="${b.id||''}" novalidate><div class="form">
+    body=`<h3>${b.id?'Editar reprodutor':'Novo reprodutor'}</h3>${err}<form data-form="breeder" data-id="${b.id||''}" novalidate><div class="form c3">
     ${fldHtml('Nome do reprodutor',`<input name="name" value="${esc(b.name)}" required>`)}
     ${fldHtml('Raça',`<select name="breed" required>${opts(BREEDS.map(x=>[x,x]),b.breed,'Selecione…')}</select>`)}
     ${fldHtml('Unidade',`<select name="unit">${opts(['Dose','Palheta'].map(x=>[x,x]),b.unit||'Dose')}</select>`)}</div>${b.id?footX('Salvar',(b.inativo?`<button class="btn" type="button" data-a="ativBreeder" data-v="${b.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatBreeder" data-v="${b.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delBreeder" data-v="${b.id}">Excluir</button>`):foot('Salvar')}</form>`}
@@ -1533,7 +1533,7 @@ function modalHtml(){
   if(m.type==='itemtipo')body=`<h3>Novo item</h3><p class="muted" style="margin:0 0 14px">Qual tipo de item você quer cadastrar?</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="newProduct" style="flex:1;min-height:56px">Produto</button><button class="btn pri" data-a="newBreeder" style="flex:1;min-height:56px">Sêmen (reprodutor)</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='movtipo')body=`<h3>${m.pdf?'Imprimir PDF':m.k==='entrada'?'Nova entrada':'Nova saída'}</h3><p class="muted" style="margin:0 0 14px">${m.pdf?'Qual lista você quer imprimir?':'Entrada ou saída de qual tipo de item?'}</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="emGo" data-v="p" style="flex:1;min-height:56px">Produtos</button><button class="btn pri" data-a="emGo" data-v="s" style="flex:1;min-height:56px">Sêmen</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='product'){const p=m.data||{};
-    body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form">
+    body=`<h3>${p.id?'Editar produto':'Novo produto'}</h3>${err}<form data-form="product" data-id="${p.id||''}" novalidate><div class="form c3">
     ${fldHtml('Nome do produto',`<input name="name" value="${esc(p.name)}" required>`)}
     ${fldHtml('Categoria',`<select name="category" required>${opts(PCAT.map(x=>[x,x]),p.category,'Selecione…')}</select>`)}
     ${fldHtml('Unidade',`<select name="unit"${p.id?'':' required'}>${opts([...PUN,...(p.unit&&!PUN.includes(p.unit)?[p.unit]:[])].map(x=>[x,x]),p.unit,p.id?'Não informada':'Selecione…')}</select>`)}</div>${p.id?footX('Salvar',(p.inativo?`<button class="btn" type="button" data-a="ativProduct" data-v="${p.id}">Ativar</button>`:`<button class="btn" type="button" data-a="inatProduct" data-v="${p.id}">Inativar</button>`)+`<button class="btn dng" type="button" data-a="delProduct" data-v="${p.id}">Excluir</button>`):foot('Salvar')}</form>`}
