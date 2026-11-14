@@ -672,7 +672,7 @@ const AGTEC=['Flávio','Hiago','Erikson','Joaquim'],AGTECF=AGTEC;
 const evTec=(e,t)=>(e.tecs||[]).length?e.tecs.some(x=>nrm(x).includes(nrm(t))):nrm(e.team).includes(nrm(t));
 const agMatch=e=>{const f=ui.ag.f;return (!f.farm||e.farm===f.farm)&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
-const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tec&&'Profissional: '+ui.ag.tec,f.farm&&'Fazenda: '+farmShort(f.farm),f.title&&'Serviço: '+f.title,f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
+const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tec&&'Profissional: '+ui.ag.tec,f.farm&&'Fazenda: '+farmShort(f.farm),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
 const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tec||evTec(e,ui.ag.tec))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
 const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','Andrológico'];
 const AVCATS=['Novilhas Nelore','Novilhas Angus','Vacas Solteiras'];
@@ -1444,7 +1444,7 @@ function modalHtml(){
     ${fldHtml('Final EM',`<input name="end" type="date" value="${e.end||''}" required>`)}</div>${foot('Salvar')}</form>`}
   if(m.type==='ev'){const e=m.data||{},per=e.id||e.periodo||e.allday!==undefined?perOf(e):'Dia Inteiro',tits=[...EVTIT,...(e.title&&!EVTIT.includes(e.title)?[e.title]:[])];
     body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form c3">
-    ${fldHtml('Data Serviço',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`)}
+    ${fldHtml('Data do Procedimento',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
     ${e.lock?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(e.farm).map(f=>[f.id,farmLbl(f)]),e.farm,FZC().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     </div><div class="form c4" style="margin-top:12px">
@@ -1490,7 +1490,7 @@ function modalHtml(){
       ${Array.from({length:6},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
     body=`<h3>Calendário</h3>
     <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Calendário · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
-    <div class="paper-b" style="font-size:12px">${cal}${cal&&view==='month'?'<div style="break-before:page;page-break-before:always;height:0"></div><div style="font-weight:700;margin:0 0 8px">Detalhamento dos eventos</div>':''}${(!cal||view==='month')?(rows.length?`<table><thead><tr><th>Data</th><th>Serviço</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Fazenda</th></tr></thead><tbody>
+    <div class="paper-b" style="font-size:12px">${cal}${cal&&view==='month'?'<div style="break-before:page;page-break-before:always;height:0"></div><div style="font-weight:700;margin:0 0 8px">Detalhamento dos eventos</div>':''}${(!cal||view==='month')?(rows.length?`<table><thead><tr><th>Data</th><th>Procedimento</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Fazenda</th></tr></thead><tbody>
     ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(svn(e.title))}</td><td>${esc(e.lote||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(evFarm(e)||'—')}</td></tr>`).join('')}
     </tbody><tfoot><tr><td colspan="6">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>'):''}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês (sem domingo) + lista detalhada na 2ª página':view==='week'?'semana (sem domingo)':view==='day'?'lista do dia':'lista'}.</p>
@@ -1571,9 +1571,9 @@ function modalHtml(){
     body=`<h3>Ordem de Serviço</h3>
     <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span>Ordem de Serviço</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b">
-     <table><tbody><tr><td><b>Data do serviço:</b> ${o.date?dt(o.date):'—'}</td><td><b>Fazenda:</b> ${esc(farm)}</td></tr>
+     <table><tbody><tr><td><b>Data do procedimento:</b> ${o.date?dt(o.date):'—'}</td><td><b>Fazenda:</b> ${esc(farm)}</td></tr>
      <tr><td><b>Técnico:</b> ${esc(o.tech||'—')}</td><td><b>Cidade:</b> ${esc((o.farm&&F(o.farm).city)||o.city||'—')}</td></tr></tbody></table>
-     <h4 style="margin:16px 0 6px">Serviços</h4>
+     <h4 style="margin:16px 0 6px">Procedimentos</h4>
      ${sv.length?`<table><thead><tr><th class="num" style="width:90px">Quantidade</th><th>Descrição da atividade</th><th>Lote</th></tr></thead><tbody>${sv.map(r=>{return `<tr><td class="num">${r.qty===''||r.qty===undefined?'':fmt(Number(r.qty))}</td><td>${esc(r.desc||'')}</td><td>${esc(loteTxt(r.lote)||'—')}</td></tr>`}).join('')}</tbody></table>`:'<p>Nenhum serviço lançado.</p>'}
      <h4 style="margin:16px 0 6px">Viagem</h4>
      ${tr.length?`<table><thead><tr><th class="num" style="width:90px">Quantidade</th><th>Origem</th><th>Destino</th></tr></thead><tbody>${tr.map(r=>`<tr><td class="num">${r.qty===''||r.qty===undefined?'':fmt(Number(r.qty))}</td><td>${esc(r.from||'')}</td><td>${esc(r.to||'')}</td></tr>`).join('')}</tbody></table>`:'<p>Nenhuma viagem lançada.</p>'}
@@ -1758,7 +1758,7 @@ function modalHtml(){
     <div class="paper-b">
      <table><tbody><tr><td><b>Data inicial:</b> ${f.from?dt(f.from):'—'}</td><td><b>Data final:</b> ${f.to?dt(f.to):'—'}</td></tr>
      <tr><td><b>Fazenda:</b> ${esc(farm)}</td><td><b>Técnico responsável:</b> ${esc(f.tech||'—')}</td></tr></tbody></table>
-     <h4 style="margin:16px 0 6px">Serviços</h4>
+     <h4 style="margin:16px 0 6px">Procedimentos</h4>
      ${rows.length?`<table><thead><tr><th>Data</th><th>Procedimento</th><th>Lote</th><th>Etapa</th><th class="num">Total animais</th></tr></thead><tbody>
      ${rows.map(r=>{const l=S.lotes.find(x=>x.id===r.lote);return `<tr><td>${dt(r.date)}</td><td>${esc(r.proc||'')}</td><td>${l?esc(l.name):''}</td><td>${esc(r.etapa||'')}</td><td class="num">${r.total?fmt(r.total):''}</td></tr>`}).join('')}</tbody></table>`:'<p>Nenhum serviço lançado.</p>'}
      <h4 style="margin:16px 0 6px">Materiais utilizados</h4>
@@ -2055,11 +2055,11 @@ function vLotes(){
 const TECNICOS=['Flávio Alves','Hiago Miguel','Erikson Caetano','Célio Gregócio','Joaquim Gomes','José Danilo'];
 function vOrdens(){
   const o=ui.os;
-  const sv=o.svcs.map((r,i)=>`<div class="line"><div class="line-h"><b>Serviço ${i+1}</b>${o.svcs.length>1?`<button type="button" class="btn sm dng" data-a="delSS" data-v="${i}">Remover</button>`:''}</div><div class="form svc3">
+  const sv=o.svcs.map((r,i)=>`<div class="line"><div class="line-h"><b>Procedimento ${i+1}</b>${o.svcs.length>1?`<button type="button" class="btn sm dng" data-a="delSS" data-v="${i}">Remover</button>`:''}</div><div class="form svc3">
     ${fldHtml('Quantidade',`<input type="number" min="0" step="any" inputmode="decimal" data-ss="${i}.qty" value="${esc(r.qty??'')}">`)}
     ${fldHtml('Descrição da atividade',`<select data-ss="${i}.desc">${opts([...ATIVS,...(r.desc&&!ATIVS.includes(r.desc)?[r.desc]:[])].map(x=>[x,x]),r.desc,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<input data-ss="${i}.lote" value="${esc(r.lote||'')}" autocomplete="off" style="text-transform:uppercase" placeholder="EX.: LOTE 1">`)}
-   </div><button type="button" class="btn sm" data-a="addSS" data-v="${i}">+ Adicionar serviço</button></div>`).join('');
+   </div><button type="button" class="btn sm" data-a="addSS" data-v="${i}">+ Adicionar procedimento</button></div>`).join('');
   const tr=o.trips.map((r,i)=>`<div class="line"><div class="line-h"><b>Viagem ${i+1}</b>${o.trips.length>1?`<button type="button" class="btn sm dng" data-a="delOT" data-v="${i}">Remover</button>`:''}</div><div class="form">
     ${fldHtml('Quantidade',`<input type="number" min="0" step="any" inputmode="decimal" data-ot="${i}.qty" value="${esc(r.qty??'')}">`)}
     ${fldHtml('Origem',`<input data-ot="${i}.from" value="${esc(r.from||'')}" list="dl-places" autocomplete="off" placeholder="Selecione a empresa ou a cidade">`)}
@@ -2070,16 +2070,16 @@ function vOrdens(){
   const hist=[...S.ordens].sort((a,b)=>b.date.localeCompare(a.date));
   return `<div class="card"><div class="card-h"><h3>${o.id?'Editando ordem de serviço':'Ordem de Serviço'}</h3><div class="acts">${o.id?'<button class="btn" data-a="cancelOs">Cancelar edição</button>':'<button class="btn" data-a="osClear">Limpar</button>'}<button class="btn" data-a="osPdf">Imprimir ordem</button><button class="btn pri" data-a="saveOs">${o.id?'Salvar alterações':'Salvar ordem'}</button></div></div>
   <div class="form" style="margin-bottom:16px">
-   ${fldHtml('Data do serviço',`<input type="date" data-os="date" value="${esc(o.date)}">`)}
+   ${fldHtml('Data do procedimento',`<input type="date" data-os="date" value="${esc(o.date)}">`)}
    ${fldHtml('Nome da fazenda',`<select data-os="farm">${opts(FZ(o.farm).map(x=>[x.id,x.name]),o.farm,'Selecione…')}</select>`)}
    ${fldHtml('Técnico',`<select data-os="tech">${opts([...tecFicha(),...(o.tech&&!tecFicha().includes(o.tech)?[o.tech]:[])].map(x=>[x,x]),o.tech,tecFicha().length?'Selecione…':'Nenhum contato com cargo Veterinário ou Técnico Vale Animal')}</select>`)}
    ${fldHtml('Cidade (da fazenda)',`<input value="${esc(o.farm?(F(o.farm).city||''):'')}" placeholder="${o.farm?'Fazenda sem cidade cadastrada':'Escolha a fazenda'}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
   </div>
-  <h3 style="margin:0 0 8px">Serviços</h3>${sv}
+  <h3 style="margin:0 0 8px">Procedimentos</h3>${sv}
   <h3 style="margin:16px 0 8px">Viagem</h3>${tr}${places}
   <h3 style="margin:16px 0 8px">Observações</h3>${fldHtml('Anotações (opcional)',`<textarea data-os="obs" rows="3" placeholder="Anote aqui o que for preciso">${esc(o.obs||'')}</textarea>`,'wide')}</div>
   <div class="card" style="margin-top:16px"><div class="card-h"><h3>Histórico Ordens de Serviços</h3></div>
-  <div class="tw">${hist.length?`<table><thead><tr><th>Data do Serviço</th><th>Fazenda</th><th>Cidade</th><th>Técnico</th><th>Ações</th></tr></thead><tbody>
+  <div class="tw">${hist.length?`<table><thead><tr><th>Data do Procedimento</th><th>Fazenda</th><th>Cidade</th><th>Técnico</th><th>Ações</th></tr></thead><tbody>
   ${hist.map(x=>`<tr><td>${dt(x.date)}</td><td>${esc(F(x.farm).name)}</td><td>${esc(F(x.farm).city||x.city||'—')}</td><td>${esc(x.tech)}</td>
    <td><div class="acts"><button class="btn sm" data-a="printOs" data-v="${x.id}">Imprimir</button><button class="btn sm" data-a="editOs" data-v="${x.id}">Editar</button><button class="btn sm dng" data-a="delOs" data-v="${x.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty('Nenhuma ordem de serviço salva ainda.')}</div></div>`;
@@ -2101,13 +2101,13 @@ function ficMats(mats=ui.fi.mats){
 function vFicha(){
   const f=ui.fi,lots=S.lotes.filter(l=>l.farm===f.farm).sort((a,b)=>a.name.localeCompare(b.name));
   const o=ficOptions(),mm=ficMats();
-  const svc=f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Serviço ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delFS" data-v="${i}">Remover</button>`:''}</div><div class="form svc5">
+  const svc=f.rows.map((r,i)=>`<div class="line"><div class="line-h"><b>Procedimento ${i+1}</b>${f.rows.length>1?`<button type="button" class="btn sm dng" data-a="delFS" data-v="${i}">Remover</button>`:''}</div><div class="form svc5">
     ${fldHtml('Data',`<input type="date" data-fs="${i}.date" value="${esc(r.date||'')}">`)}
     ${fldHtml('Procedimento',`<select data-fs="${i}.proc">${opts(PROCS.map(x=>[x,x]),r.proc,'Selecione…')}</select>`)}
     ${fldHtml('Lote',`<select data-fs="${i}.lote" data-r="1"${f.farm?'':' disabled'}>${opts(lots.map(l=>[l.id,l.name+' ('+l.category+')']),r.lote,f.farm?(lots.length?'Selecione…':'Sem lotes agendados'):'Escolha a fazenda')}</select>`)}
     ${fldHtml('Etapa',`<select data-fs="${i}.etapa">${opts(ETAPAS.map(x=>[x,x]),r.etapa,'Selecione…')}</select>`)}
     ${fldHtml('Total animais',`<input type="number" min="0" step="1" inputmode="numeric" data-fs="${i}.total" value="${esc(r.total??'')}">`)}
-   </div><button type="button" class="btn sm" data-a="addFS" data-v="${i}">+ Adicionar serviço</button></div>`).join('');
+   </div><button type="button" class="btn sm" data-a="addFS" data-v="${i}">+ Adicionar procedimento</button></div>`).join('');
   const mat=f.mats.map((m,i)=>{const x=mm[i];
     return `<div class="line"><div class="line-h"><b>Material ${i+1}</b>${f.mats.length>1?`<button type="button" class="btn sm dng" data-a="delFM" data-v="${i}">Remover</button>`:''}</div><div class="form">
     ${fldHtml('Produto',`<select data-fm="${i}.item" data-r="1"><option value="">Selecione…</option>
@@ -2124,7 +2124,7 @@ function vFicha(){
    ${fldHtml('Nome da fazenda',`<select data-fi="farm">${opts(FZ(f.farm).map(x=>[x.id,x.name]),f.farm,'Selecione…')}</select>`)}
    ${fldHtml('Técnico responsável',`<select data-fi="tech">${opts([...tecFicha(),...(f.tech&&!tecFicha().includes(f.tech)?[f.tech]:[])].map(x=>[x,x]),f.tech,tecFicha().length?'Selecione…':'Nenhum contato com cargo Veterinário ou Técnico Vale Animal')}</select>`)}
   </div>
-  <h3 style="margin:0 0 8px">Serviços</h3>${svc}
+  <h3 style="margin:0 0 8px">Procedimentos</h3>${svc}
   <h3 style="margin:16px 0 8px">Materiais utilizados</h3>${mat}
   <p class="muted" style="font-size:13px">Quantidade, Saída e Saldo são digitados na ficha; nada é lido nem lançado no estoque.</p></div>
   <div class="card" style="margin-top:16px"><div class="card-h"><h3>Histórico Ficha Saída</h3></div>
@@ -2217,7 +2217,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 23:00</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 23:15</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2338,11 +2338,11 @@ document.addEventListener('click',e=>{
    case 'editOs':{const x=S.ordens.find(q=>q.id===v);ui.os=JSON.parse(JSON.stringify({id:x.id,date:x.date,farm:x.farm,tech:x.tech,city:x.city,obs:x.obs||'',svcs:x.svcs.length?x.svcs.map(r=>({...r,lote:loteTxt(r.lote)})):[{}],trips:x.trips.length?x.trips:[{}]}));render();window.scrollTo(0,0);const m=document.querySelector('main,#app');if(m)m.scrollTop=0;break}
    case 'delOs':{const x=S.ordens.find(q=>q.id===v);ask(`Excluir a ordem de serviço de ${F(x.farm).name} (${dt(x.date)})?`,()=>{S.ordens=S.ordens.filter(q=>q.id!==v);if(ui.os.id===v)ui.os=newOs();done('Ordem excluída.')});break}
    case 'saveOs':{const o=ui.os;
-     if(!o.date||!o.farm||!o.tech){toast('Preencha a data do serviço, a fazenda e o técnico.');break}
+     if(!o.date||!o.farm||!o.tech){toast('Preencha a data do procedimento, a fazenda e o técnico.');break}
      const used=(r,ks)=>ks.some(k=>String(r[k]??'').trim()!=='');
      const sv=o.svcs.filter(r=>used(r,['qty','desc','lote'])),tr=o.trips.filter(r=>used(r,['qty','from','to']));
-     if(!sv.length&&!tr.length){toast('Lance ao menos um serviço ou uma viagem.');break}
-     if(sv.some(r=>!(Number(r.qty)>0)||!String(r.desc||'').trim())){toast('Em cada serviço, informe a quantidade e escolha a descrição da atividade.');break}
+     if(!sv.length&&!tr.length){toast('Lance ao menos um procedimento ou uma viagem.');break}
+     if(sv.some(r=>!(Number(r.qty)>0)||!String(r.desc||'').trim())){toast('Em cada procedimento, informe a quantidade e escolha a descrição da atividade.');break}
      if(tr.some(r=>!(Number(r.qty)>0)||!String(r.from||'').trim()||!String(r.to||'').trim())){toast('Em cada viagem, informe a quantidade, a origem e o destino.');break}
      const rec={date:o.date,farm:o.farm,tech:o.tech,city:(F(o.farm).city||'').trim(),
        obs:(o.obs||'').trim(),svcs:sv.map(r=>({qty:Number(r.qty),desc:r.desc.trim(),lote:String(r.lote||'').trim().toUpperCase()})),trips:tr.map(r=>({qty:Number(r.qty),from:r.from.trim(),to:r.to.trim()}))};
@@ -2727,8 +2727,8 @@ document.addEventListener('submit',e=>{
     const id=form.dataset.id,tecs=(fd.title||'').trim()==='Entourar'?[]:[...form.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),err=m=>{ui.modal.data={...fd,tecs,id:id||undefined};ui.modal.err=m;render()};
     const title=(fd.title||'').trim(),per=PERIODOS.includes(fd.periodo)?fd.periodo:'Dia Inteiro',all=per==='Dia Inteiro';
     if(!fd.farm)return err('Selecione a fazenda.');
-    if(!title)return err('Selecione a descrição do serviço.');
-    if(!fd.date)return err('Informe a data do serviço.');
+    if(!title)return err('Selecione o procedimento.');
+    if(!fd.date)return err('Informe a data do procedimento.');
     {const old=id?S.eventos.find(x=>x.id===id):null;if(isDom(fd.date)&&(!old||old.date!==fd.date))return err('Não é permitido agendar evento no domingo. Escolha outra data.')}
     if(fd.total!==''&&fd.total!==undefined&&!(Number.isInteger(Number(fd.total))&&Number(fd.total)>=0))return err('O total deve ser um número inteiro.');
     const [start,etime]=all?['','']:PERH[per];
@@ -2736,8 +2736,8 @@ document.addEventListener('submit',e=>{
     rec.color=evCol(rec);
     let ajuste='';
     if(rec.title==='Andrológico'){if(rec.cat!=='Touros'){rec.cat='Touros';ajuste=' Categoria ajustada para Touros.'}}
-    else if(rec.title==='IM'&&AVCATS.includes(rec.cat)){rec.title='AV + IM';ajuste=' Serviço ajustado para AV + IM ('+rec.cat+').'}
-    else if(rec.title==='AV + IM'&&LPAR.includes(rec.cat)){rec.title='IM';ajuste=' Serviço ajustado para IM ('+rec.cat+').'}
+    else if(rec.title==='IM'&&AVCATS.includes(rec.cat)){rec.title='AV + IM';ajuste=' Procedimento ajustado para AV + IM ('+rec.cat+').'}
+    else if(rec.title==='AV + IM'&&LPAR.includes(rec.cat)){rec.title='IM';ajuste=' Procedimento ajustado para IM ('+rec.cat+').'}
     ui.ag.date=fd.date;
     const lt=rec.lote?S.lotes.find(l=>l.farm===rec.farm&&l.status!=='Agendado'&&nrm(l.name)===nrm(rec.lote)):null;
     if(lt)lt.status='Agendado';
