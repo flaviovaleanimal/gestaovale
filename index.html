@@ -1767,9 +1767,9 @@ function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;r
 function pChart(){
   const va=S.farms.find(f=>f.name.trim().toLowerCase()==='vale animal');
   const rows=S.products.filter(p=>!p.inativo).map(p=>({p,v:va?pBal(va.id,p.id):0})).filter(o=>o.v>0).sort(pSort);
-  if(!rows.length)return `<div class="card"><div class="card-h"><h3>Estoque atual por produto</h3></div>${empty(va?'Nenhum produto com estoque na Vale Animal no momento.':'Cadastre a fazenda Vale Animal em CRM › Empresas para ver o gráfico.')}</div>`;
+  if(!rows.length)return `<div class="card"><div class="card-h"><h3>Estoque atual por produto IATF (Vale Animal)</h3></div>${empty(va?'Nenhum produto com estoque na Vale Animal no momento.':'Cadastre a fazenda Vale Animal em CRM › Empresas para ver o gráfico.')}</div>`;
   const max=niceMax(Math.max(...rows.map(o=>o.v)));
-  return `<div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Somente Vale Animal</span></div>
+  return `<div class="card"><div class="card-h"><h3>Estoque atual por produto IATF (Vale Animal)</h3><span class="muted">Somente Vale Animal</span></div>
    <div class="bars" role="img" aria-label="Gráfico de barras com o estoque atual de cada produto">
    ${rows.map(o=>`<div class="bar-row" title="${esc(o.p.name)}: ${fmt(o.v)}"><span class="bar-name">${esc(o.p.name)}</span><div class="bar-track"><div class="bar" style="width:${(o.v/max*100).toFixed(2)}%"></div></div><span class="bar-val">${fmt(o.v)}</span></div>`).join('')}
    <div class="bar-row axis"><span></span><div class="ticks">${[0,1,2,3,4].map(i=>`<span style="left:${i*25}%">${fmt(r3(max*i/4))}</span>`).join('')}</div><span></span></div></div></div>`;
@@ -1803,7 +1803,7 @@ function vEPainel(){
     <h3 style="margin:16px 0 8px;font-size:14px">Histórico de nitrogênio baixo</h3>
     <div class="tw small">${medRows?`<table><thead><tr><th>Data</th><th>Botijão</th><th class="num">Nível</th><th>Situação</th><th>Resolução</th></tr></thead><tbody>${medRows}</tbody></table>`:empty('Nenhuma medição abaixo de '+LOW+' cm.')}</div></div>
   ${lowCard}
-  <div class="card"><div class="card-h"><h3>Estoque atual por produto</h3><span class="muted">Somente Vale Animal</span></div>${chart}</div>
+  <div class="card"><div class="card-h"><h3>Estoque atual por produto IATF (Vale Animal)</h3><span class="muted">Somente Vale Animal</span></div>${chart}</div>
   <div class="card"><div class="card-h"><h3>Últimas movimentações · Sêmen</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="s">Ver histórico</button></div><div class="tw small">${lastS}</div></div>
   <div class="card"><div class="card-h"><h3>Últimas movimentações · Produtos</h3><button class="btn sm" data-a="tab" data-v="e-mov" data-s="p">Ver histórico</button></div><div class="tw small">${lastP}</div></div>`;
 }
