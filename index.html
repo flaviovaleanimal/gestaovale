@@ -399,30 +399,13 @@ const loadLocal=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r
 function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários.',
   conectando:'Conectando ao banco de dados…',lento:'Não foi possível alcançar o banco de dados agora. Os dados podem estar desatualizados.',
   erro:'O banco de dados recusou o acesso. Saia e entre de novo.',local:'Sem conexão com a nuvem: os dados ficam salvos só neste navegador. Confira o arquivo config.js.'}[dbState]}
-// Diárias automáticas: quem estiver na Equipe de um evento (e na lista de diaristas) ganha 1 diária por dia.
-// Só mexe de hoje em diante; datas passadas, diárias lançadas à mão e diárias pagas ficam como estão.
-function diaWant(soFuturo){
-  const hoje=today(),want={};
-  [...S.eventos].filter(e=>e.date&&(!soFuturo||e.date>=hoje)&&e.title!=='Entourar').sort((a,b)=>(a.date+a.id).localeCompare(b.date+b.id)).forEach(e=>{
-    const nomes=String(e.team||'').split(/\s*(?:,|;|\/|\+)\s*|\s+e\s+/i).map(x=>nrm(x.trim().split(/\s+/)[0])).filter(Boolean);
-    (S.diaristas||[]).forEach(d=>{const n=nrm(String(d.name||'').trim().split(/\s+/)[0]);if(!n||!nomes.includes(n))return;
-      const key=d.id+'|'+e.date;if(!want[key])want[key]={key,date:e.date,prest:d.name,farm:e.farm,unit:Number(d.valor)||0}})});
-  return want}
-// Só INCLUI diárias (de hoje em diante). Nunca altera nem apaga: se o técnico sair do evento, a diária fica com um aviso.
-function syncDiarias(){
-  if(!S.diaristas||!S.diaristas.length)return false;
-  let ch=false;
-  Object.values(diaWant(true)).forEach(w=>{
-    if(S.diarias.some(r=>(r.auto&&r.key===w.key)||(!r.auto&&r.prest===w.prest&&r.date===w.date)))return;
-    S.diarias.push({id:'da_'+w.key.replace('|','_'),date:w.date,sit:'Aberta',prest:w.prest,farm:w.farm,qty:1,unit:w.unit,total:r2(w.unit),auto:true,key:w.key});ch=true});
-  return ch}
+// Lista de diaristas (opção "Vai junto" da Equipe do evento). As diárias são lançadas à mão.
 const diaRead=()=>{const f=document.querySelector('form[data-form=diaristas]');if(!f)return[];const n=[...f.querySelectorAll('input[name=dn]')],v=[...f.querySelectorAll('input[name=dv]')],old=(ui.modal&&ui.modal.rows)||[];return n.map((x,i)=>({...(old[i]||{}),name:x.value,valor:v[i].value}))};
 function save(){
   if(!DB){
     if(dbState==='conectando'){toast('Aguarde: conectando ao banco de dados…');return}
     try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
     return}
-  try{if(dbState==='ok')syncDiarias()}catch(e){}
   for(const c in synced){
     const cur={};S[c].forEach(x=>{cur[x.id]=JSON.stringify(x)});
     for(const id in cur)if(synced[c][id]!==cur[id])q.push({op:'set',c,id,data:JSON.parse(cur[id])});
@@ -448,13 +431,10 @@ async function pump(){
   if(fail||hk.length)softRender();
 }
 function applyCol(c,arr){S[c]=arr;synced[c]={};arr.forEach(x=>{synced[c][x.id]=JSON.stringify(x)})}
-let autoT=0;
-const autoDia=()=>{clearTimeout(autoT);autoT=setTimeout(()=>{try{if(dbState==='ok'&&!busy&&!q.length&&syncDiarias()){save();if(ui.tab==='f-diarias')softRender()}}catch(e){}},600)};
 function onSnap(c,snap){
   const arr=snap.docs.map(x=>JSON.parse(JSON.stringify(x.data())));
   lastSnap[c]=arr;
   if(!snap.metadata.fromCache){got[c]=1;if(Object.keys(got).length===Object.keys(synced).length){dbState='ok';clearTimeout(slowT)}}
-  autoDia();
   if(busy||q.length){held[c]=arr;return}
   const cn=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((r,x)=>(r[x]=v[x],r),{}):v);
   const cur={};(S[c]||[]).forEach(x=>{cur[x.id]=cn(x)});const nw={};arr.forEach(x=>{nw[x.id]=cn(x)});
@@ -645,7 +625,7 @@ function finTable(k){
   const sum=`<p style="margin:0 0 10px"><b>${list.length}</b> ${list.length===1?'lançamento':'lançamentos'} · ${arq?'Total pago':'Total a pagar'} <b class="${arq?'in-t':'out-t'}">${brl(tot)}</b></p>`;
   if(!list.length)return sum+empty(S[c.col].some(r=>(r.sit==='Paga')===arq)?'Nenhum lançamento com esses filtros.':(arq?'Nenhuma diária arquivada ainda. Ao marcar como paga, ela vem para cá.':'Nenhum lançamento em aberto. Clique em '+c.btn+'.').replace('Nenhuma diária',k==='kms'?'Nenhum km':'Nenhuma diária'));
   return sum+`<div class="tw"><table><thead><tr><th>${c.dl}</th><th>Situação</th>${arq?'<th>Data Pagamento</th>':''}<th>Prestador</th><th>Fazenda</th><th class="num">${c.ql}</th><th class="num">Valor Unitário</th><th class="num">Valor Total</th><th>Ações</th></tr></thead><tbody>
-  ${list.map(r=>`<tr><td>${dt(r.date)}</td><td><span class="pill ${r.sit==='Paga'?'in':'warn'}">${esc(r.sit||'Aberta')}</span></td>${arq?`<td>${r.paidAt?dt(r.paidAt):'—'}</td>`:''}<td>${esc(r.prest||'—')}${r.auto?' <span class="pill" title="Lançada automaticamente pela Equipe do evento" style="font-size:10px">auto</span>':''}${r.auto&&r.sit!=='Paga'&&!diaWant(false)[r.key]?' <span class="pill warn" title="O técnico saiu deste evento, ou o evento mudou de data ou foi excluído. Confira e, se não for mais devida, exclua esta diária." style="font-size:10px">⚠ sem evento</span>':''}</td><td>${esc(F(r.farm).name)}</td><td class="num">${fnum(r.qty)}</td><td class="num">${brl(r.unit)}</td><td class="num"><b>${brl(finTot(r))}</b></td>
+  ${list.map(r=>`<tr><td>${dt(r.date)}</td><td><span class="pill ${r.sit==='Paga'?'in':'warn'}">${esc(r.sit||'Aberta')}</span></td>${arq?`<td>${r.paidAt?dt(r.paidAt):'—'}</td>`:''}<td>${esc(r.prest||'—')}</td><td>${esc(F(r.farm).name)}</td><td class="num">${fnum(r.qty)}</td><td class="num">${brl(r.unit)}</td><td class="num"><b>${brl(finTot(r))}</b></td>
    <td><div class="acts"><button class="btn sm" data-a="finPay" data-v="${k}:${r.id}">${r.sit==='Paga'?'Reabrir':'Marcar paga'}</button><button class="btn sm" data-a="finEdit" data-v="${k}:${r.id}">Editar</button><button class="btn sm dng" data-a="finDel" data-v="${k}:${r.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody><tfoot><tr><td colspan="${arq?7:6}">Total</td><td class="num">${brl(tot)}</td><td></td></tr></tfoot></table></div>`}
 function vFin(k){
@@ -1500,7 +1480,7 @@ function modalHtml(){
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês':view==='week'?'semana':view==='day'?'lista do dia':'lista'}.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
   if(m.type==='diaristas'){const rows=m.rows||[];
-    body=`<h3>Diaristas e valores</h3>${err}<p class="muted" style="margin:0 0 10px;font-size:13px">Quem estiver na <b>Equipe</b> de um evento e constar nesta lista ganha 1 diária por dia, automaticamente, de hoje em diante. O sistema só inclui: nunca apaga nem altera diárias. Se o técnico sair do evento, a diária fica com o aviso “sem evento” para você excluir. Quem não está na lista (contratados) não gera diária.</p>
+    body=`<h3>Diaristas e valores</h3>${err}<p class="muted" style="margin:0 0 10px;font-size:13px">Quem constar nesta lista aparece na opção “Vai junto” da Equipe do evento. As diárias são lançadas à mão, em Lançar diária.</p>
     <form data-form="diaristas" novalidate><div style="display:flex;flex-direction:column;gap:8px">
     ${rows.map((r,i)=>`<div style="display:flex;gap:8px;align-items:center"><input name="dn" value="${esc(r.name||'')}" placeholder="Primeiro nome (ex.: Danilo)" style="flex:1;min-width:0"><input name="dv" value="${esc(r.valor??'')}" inputmode="decimal" placeholder="Valor da diária" style="width:130px"><button type="button" class="btn sm dng" data-a="diaDel" data-v="${i}">Remover</button></div>`).join('')||'<div class="muted">Nenhum diarista cadastrado.</div>'}
     </div><div style="margin-top:10px"><button type="button" class="btn sm" data-a="diaAdd">+ Adicionar diarista</button></div>
@@ -2199,7 +2179,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 16:10</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 14/11/2026 16:20</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2716,7 +2696,7 @@ document.addEventListener('submit',e=>{
     const rows=diaRead().map(r=>({...r,name:tc(String(r.name||'').trim()),valor:Number(String(r.valor).replace(',','.'))})).filter(r=>r.name);
     for(const r of rows)if(!(r.valor>=0))return modalErr('Informe o valor da diária de '+r.name+'.');
     S.diaristas=rows.map(r=>({id:r.id||nid('di'),name:r.name,valor:r.valor}));
-    return done('Diaristas salvos. Vale para as próximas diárias lançadas.')}
+    return done('Diaristas salvos.')}
   if(k==='fin'){
     const kind=form.dataset.kind,c=FIN[kind],id=form.dataset.id,rows=finRead(form);
     ui.modal.rows=rows;
