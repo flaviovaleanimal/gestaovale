@@ -377,6 +377,19 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .agc .ag-sl input{accent-color:#1a73e8;width:16px;height:16px}
 .agc .ag-sl i{display:none}
 .ag-sr{display:flex;align-items:center;gap:2px}.ag-sr .ag-sl{flex:1;min-width:0}.ag-sm{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;width:28px;height:28px;border-radius:50%;cursor:pointer;visibility:hidden}.ag-sr:hover .ag-sm,.ag-sm:focus{visibility:visible}.ag-sm:hover{background:var(--navy-soft)}@media(hover:none){.ag-sm{visibility:visible}}
+.ag-plus{background:#fff;border:1px solid var(--line);color:#5f6368;font-size:18px;line-height:20px}
+.ag-dov{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:16px}
+.ag-dlg{width:min(412px,100%);background:#edf1f9;color:#1f1f1f;border-radius:28px;padding:24px 24px 20px;box-shadow:0 8px 30px rgba(0,0,0,.35);font-family:'Google Sans',Roboto,Arial,sans-serif}
+.ag-dlg h3{margin:0 0 14px;font-size:22px;font-weight:400;text-transform:none;letter-spacing:0;color:#1f1f1f}.ag-dlg p{margin:0 0 18px;font-size:14px;color:#444746;line-height:1.4}
+.ag-dl-row{display:flex;gap:14px;align-items:flex-start}.ag-dl-l{display:flex;flex-direction:column;gap:12px;align-items:center}
+.ag-dl-circ{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px}
+.ag-dl-eye{width:48px;height:48px;border-radius:50%;border:0;background:#fff;color:#444;font-size:22px;cursor:pointer}
+.ag-dl-sv{position:relative;flex:1;height:104px;border-radius:12px;cursor:crosshair;touch-action:none;background-image:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,transparent);background-blend-mode:normal}
+.ag-dl-sv i,.ag-dl-hue i{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5);transform:translate(-50%,-50%);pointer-events:none}
+.ag-dl-hue{position:relative;height:12px;margin:18px 0 20px;border-radius:6px;cursor:pointer;touch-action:none;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}.ag-dl-hue i{top:50%}
+.ag-dl-hex{display:block;position:relative;border:1px solid #747775;border-radius:6px;padding:14px 12px 6px}.ag-dl-hex span{position:absolute;top:-8px;left:10px;background:#edf1f9;padding:0 4px;font-size:12px;color:#444746}
+.ag-dl-hex input{width:100%;border:0;background:transparent;font:inherit;font-size:16px;color:#1f1f1f;outline:none;padding:0}
+.ag-dl-f{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}.ag-dl-f button{border:0;border-radius:20px;padding:10px 20px;font:inherit;font-size:14px;font-weight:500;cursor:pointer}.ag-dl-c{background:transparent;color:#0b57d0}.ag-dl-c:hover{background:#dde3ee}.ag-dl-s{background:#c2e7ff;color:#001d35}.ag-dl-s:hover{background:#b0d9f5}
 .ag-cor{padding:6px 0 10px}.ag-mi{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 16px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}.ag-mi:hover{background:var(--navy-soft)}
 .ag-pal{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 14px 2px;border-top:1px solid var(--line);margin-top:4px}.ag-sw{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}.ag-sw.on{border-color:#fff;box-shadow:0 0 0 2px #202124}
 .agc .ag-fs{border-radius:20px;border:1px solid var(--line);padding:7px 14px}
@@ -829,9 +842,32 @@ const agFarmList=()=>{const q=nrm(ui.ag.fs||''),L=agFarms().filter(([id,n])=>!q|
 function agCorPop(){const m=ui.agCor;if(!m||ui.ag.view==='trash')return '';
   const W=230,r=m.r,left=Math.max(8,Math.min(innerWidth-W-8,r.l+r.w+4)),top=Math.max(8,Math.min(r.t-4,innerHeight-250)),cur=tecCol(m.t);
   return `<div class="ag-pop ag-cor" role="menu" style="left:${left}px;top:${top}px;width:${W}px">
-   <button type="button" class="ag-mi" data-a="agOnly" data-v="${m.t}">Exibir apenas esta</button>
-   <button type="button" class="ag-mi" data-a="agCorReset" data-v="${m.t}">Voltar à cor padrão</button>
-   <div class="ag-pal">${AGPAL.map(c=>`<button type="button" class="ag-sw${c.toLowerCase()===String(cur).toLowerCase()?' on':''}" style="background:${c}" data-a="agCorSet" data-v="${m.t}|${c}" aria-label="Cor ${c}"></button>`).join('')}</div></div>`}
+   <div class="ag-pal" style="border-top:0;margin-top:0">${[...AGPAL,...(AGPAL.some(c=>c.toLowerCase()===String(cur).toLowerCase())?[]:[cur])].map(c=>`<button type="button" class="ag-sw${c.toLowerCase()===String(cur).toLowerCase()?' on':''}" style="background:${c}" data-a="agCorSet" data-v="${m.t}|${c}" aria-label="Cor ${c}"></button>`).join('')}<button type="button" class="ag-sw ag-plus" data-a="agDlgOpen" data-v="${m.t}" aria-label="Cor personalizada" title="Cor personalizada">+</button></div></div>`}
+const agHex2rgb=h=>{h=String(h).replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16))};
+const agRgb2hex=(r,g,b)=>'#'+[r,g,b].map(x=>Math.round(x).toString(16).padStart(2,'0')).join('');
+const agHsv2hex=(h,s,v)=>{const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1))};return agRgb2hex(f(5)*255,f(3)*255,f(1)*255)};
+const agHex2hsv=hex=>{const [r,g,b]=agHex2rgb(hex).map(x=>x/255),mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}return {h,s:mx?d/mx:0,v:mx}};
+const agTxt=hex=>{const [r,g,b]=agHex2rgb(hex);return (0.299*r+0.587*g+0.114*b)>160?'#202124':'#fff'};
+function agCorDlg(){const d=ui.agDlg;if(!d)return '';const hex=agHsv2hex(d.h,d.s,d.v);
+  return `<div class="ag-dov"><div class="ag-dlg" role="dialog" aria-label="Escolher cor personalizada">
+   <h3>Escolher cor personalizada</h3>
+   <p>Escolha uma cor de plano de fundo para esta agenda. A cor do texto será ajustada automaticamente.</p>
+   <div class="ag-dl-row"><div class="ag-dl-l"><span id="dl-prev" class="ag-dl-circ" style="background:${hex};color:${agTxt(hex)}">A</span>${window.EyeDropper?'<button type="button" class="ag-dl-eye" data-a="agDlgEye" aria-label="Conta-gotas">⌖</button>':''}</div>
+    <div id="dl-sv" class="ag-dl-sv" style="background-color:hsl(${d.h},100%,50%)"><i id="dl-svk" style="left:${d.s*100}%;top:${(1-d.v)*100}%"></i></div></div>
+   <div id="dl-hue" class="ag-dl-hue"><i id="dl-hk" style="left:${d.h/360*100}%;background:hsl(${d.h},100%,50%)"></i></div>
+   <label class="ag-dl-hex"><span>Hexadecimal</span><input id="dl-hex" maxlength="7" value="${hex}" autocomplete="off" spellcheck="false"></label>
+   <div class="ag-dl-f"><button type="button" class="ag-dl-c" data-a="agDlgX">Cancelar</button><button type="button" class="ag-dl-s" data-a="agDlgSave">Salvar</button></div></div></div>`}
+function agDlgSync(skipHex){const d=ui.agDlg;if(!d)return;const hex=agHsv2hex(d.h,d.s,d.v),$=i=>document.getElementById(i);
+  $('dl-prev').style.background=hex;$('dl-prev').style.color=agTxt(hex);$('dl-sv').style.backgroundColor='hsl('+d.h+',100%,50%)';
+  $('dl-svk').style.left=d.s*100+'%';$('dl-svk').style.top=(1-d.v)*100+'%';$('dl-hk').style.left=d.h/360*100+'%';$('dl-hk').style.background='hsl('+d.h+',100%,50%)';
+  if(!skipHex)$('dl-hex').value=hex}
+let agDrag=null;
+document.addEventListener('pointerdown',e=>{const t=e.target.closest&&e.target.closest('#dl-sv,#dl-hue');if(!t||!ui.agDlg)return;agDrag=t.id;e.preventDefault();agDlgMove(e)});
+document.addEventListener('pointermove',e=>{if(agDrag)agDlgMove(e)});
+document.addEventListener('pointerup',()=>{agDrag=null});
+function agDlgMove(e){const el=document.getElementById(agDrag);if(!el||!ui.agDlg)return;const r=el.getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));
+  if(agDrag==='dl-sv'){ui.agDlg.s=x;ui.agDlg.v=1-y}else ui.agDlg.h=x*359.99;agDlgSync()}
+document.addEventListener('input',e=>{if(e.target.id==='dl-hex'&&ui.agDlg){let v=e.target.value.trim();if(v&&v[0]!=='#')v='#'+v;if(/^#[0-9a-fA-F]{6}$/.test(v)){Object.assign(ui.agDlg,agHex2hsv(v));agDlgSync(true)}}});
 function agSide(){const T=ui.ag.tecs,dis=ui.ag.farms.length>0;
   return `<aside class="ag-side" aria-label="Agendas e fazendas">
    <div class="ag-sh"><b>Agenda Profissional</b></div>
@@ -848,7 +884,7 @@ function vAgenda(){
   const FS=!!ui.agFull;
   return `<div class="card agc${FS?' ag-fullc':''}"><div class="ag-bar">${view==='trash'?'':`<button class="btn ag-ham${ui.ag.side?' pri':''}" data-a="agSideT" aria-label="Mostrar ou esconder profissionais e fazendas" title="Profissionais e fazendas">☰</button>`}<button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
    <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}${vb('trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':''))}</span><button class="btn" data-a="tab" data-v="i-lotes">← Agendamentos</button>${FS?'':'<button class="btn" data-a="agPrint">Imprimir</button>'}<button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button><button class="btn" data-a="agFull" title="${FS?'Sair da tela cheia (Esc)':'Esconder o cabeçalho e as barras para ver o calendário maior'}">${FS?'✕ Sair da tela cheia':'⛶ Tela cheia'}</button></div>
-   ${!FS&&view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${view!=='trash'&&ui.ag.side?`<div class="ag-lay">${agSide()}<div class="ag-main">${body}</div></div>`:body}${agCorPop()}</div>`}
+   ${!FS&&view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${view!=='trash'&&ui.ag.side?`<div class="ag-lay">${agSide()}<div class="ag-main">${body}</div></div>`:body}${agCorPop()}${agCorDlg()}</div>`}
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8);agFit()}
 function agFit(){const m=document.querySelector('.ag-month');if(!m)return;
   const days=[...m.querySelectorAll('.ag-day')],rows=days.length/7,mob=innerWidth<=640;
@@ -2355,7 +2391,7 @@ const ask=(msg,ok,o={})=>{ui.confirm={msg,okFn:ok,...o};render()};
 document.addEventListener('click',e=>{if(ui.umenu&&!(e.target.closest&&e.target.closest('.um'))){ui.umenu=false;render()}});
 document.addEventListener('click',e=>{if(ui.agCor&&!(e.target.closest&&e.target.closest('.ag-cor,[data-a="agCorMenu"]'))){ui.agCor=null;render()}});
 document.addEventListener('click',e=>{if(ui.agMore&&!(e.target.closest&&e.target.closest('.ag-pop,[data-a="agMore"]'))){ui.agMore=null;render()}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(ui.agCor){ui.agCor=null;render()}else if(ui.agMore){ui.agMore=null;render()}else if(ui.agFull&&!ui.modal){ui.agFull=false;render()}}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(ui.agDlg){ui.agDlg=null;render()}else if(ui.agCor){ui.agCor=null;render()}else if(ui.agMore){ui.agMore=null;render()}else if(ui.agFull&&!ui.modal){ui.agFull=false;render()}}});
 window.addEventListener('scroll',e=>{if(ui.agCor&&!(e.target&&e.target.closest&&e.target.closest('.ag-cor'))){ui.agCor=null;render();return}if(ui.agMore&&!(e.target&&e.target.closest&&e.target.closest('.ag-pop'))){ui.agMore=null;render()}},true);
 window.addEventListener('resize',()=>{if(ui.agMore){ui.agMore=null;render()}else agFit()});
 document.addEventListener('click',e=>{
@@ -2369,7 +2405,10 @@ document.addEventListener('click',e=>{
    case 'agMore':{const r=b.getBoundingClientRect();ui.agMore={day:v,r:{l:r.left,t:r.top,w:r.width,h:r.height}};render();break}
    case 'agMoreX':render();break;
    case 'agCorMenu':{const r=b.getBoundingClientRect();ui.agCor={t:v,r:{l:r.left,t:r.top,w:r.width,h:r.height}};render();break}
-   case 'agOnly':ui.ag.farms=[];ui.ag.tecs=[v];render();break;
+   case 'agDlgOpen':ui.agDlg={t:v,...agHex2hsv(tecCol(v))};render();break;
+   case 'agDlgX':ui.agDlg=null;render();break;
+   case 'agDlgSave':{const d=ui.agDlg;if(d){const hex=agHsv2hex(d.h,d.s,d.v);S.agcores=(S.agcores||[]).filter(x=>x.id!==d.t);S.agcores.push({id:d.t,cor:hex});save()}ui.agDlg=null;render();break}
+   case 'agDlgEye':{if(window.EyeDropper)new EyeDropper().open().then(r=>{if(ui.agDlg){Object.assign(ui.agDlg,agHex2hsv(r.sRGB||r.sRGBHex));agDlgSync()}}).catch(()=>{});break}
    case 'agCorSet':{const [t,c]=String(v).split('|');S.agcores=(S.agcores||[]).filter(x=>x.id!==t);S.agcores.push({id:t,cor:c});save();render();break}
    case 'agCorReset':S.agcores=(S.agcores||[]).filter(x=>x.id!==v);save();render();break;
    case 'agFull':ui.agFull=!ui.agFull;render();break;
