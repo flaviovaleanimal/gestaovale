@@ -871,7 +871,6 @@ document.addEventListener('input',e=>{if(e.target.id==='dl-hex'&&ui.agDlg){let v
 function agSide(){const T=ui.ag.tecs,dis=ui.ag.farms.length>0;
   return `<aside class="ag-side" aria-label="Agendas e fazendas">
    <div class="ag-sh"><b>Agenda Profissional</b></div>
-   <label class="ag-sl"><input type="checkbox" data-a="agTecAll"${T.length?'':' checked'}${dis?' disabled':''}><span>Todos</span></label>
    ${AGTEC.map(t=>`<div class="ag-sr"><label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''} style="accent-color:${tecCol(t)}"><span>${t}</span></label><button type="button" class="ag-sm" data-a="agCorMenu" data-v="${t}" aria-label="Opções da agenda de ${t}" title="Cor e opções">⋮</button></div>`).join('')}
    ${dis?'<div class="muted" style="font-size:11px;margin:2px 0 0">Com fazenda marcada, todos os profissionais aparecem. Desmarque as fazendas para escolher o profissional.</div>':''}
    <div class="ag-sh" style="margin-top:14px"><b>Fazendas</b>${ui.ag.farms.length?`<button type="button" class="ag-sx" data-a="agFarmClear">Limpar (${ui.ag.farms.length})</button>`:''}</div>
