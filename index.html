@@ -679,7 +679,8 @@ const evTec=(e,t)=>(e.tecs||[]).length?e.tecs.some(x=>nrm(x).includes(nrm(t))):n
 const agMatch=e=>{const f=ui.ag.f;return (!ui.ag.farms.length||ui.ag.farms.includes(e.farm))&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
 const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tecs.length&&'Profissional: '+ui.ag.tecs.join(', '),ui.ag.farms.length&&'Fazenda: '+ui.ag.farms.map(farmShort).join(', '),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
-const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tecs.length||ui.ag.tecs.some(t=>evTec(e,t)))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
+const evTecIx=e=>{const i=AGTEC.findIndex(t=>(e.tecs||[]).length?e.tecs[0]===t:evTec(e,t));return i<0?99:i};
+const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tecs.length||ui.ag.tecs.some(t=>evTec(e,t)))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||evTecIx(a)-evTecIx(b)||(a.start||'').localeCompare(b.start||'')||farmShort(a.farm).localeCompare(farmShort(b.farm))||a.title.localeCompare(b.title));
 const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','Andrológico'];
 const AVCATS=['Novilhas Nelore','Novilhas Angus','Vacas Solteiras'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Vacas Primíparas','Vacas Secundíparas','Vacas Multíparas','Vacas Solteiras'];
