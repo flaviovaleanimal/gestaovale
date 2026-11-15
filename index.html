@@ -211,7 +211,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-seg{display:inline-flex;gap:0}.ag-seg .btn{border-radius:0;margin-left:-1px}.ag-seg .btn:first-child{border-radius:8px 0 0 8px;margin-left:0}.ag-seg .btn:last-child{border-radius:0 8px 8px 0}
 .ag-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
 .ag-wd{padding:6px 2px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-transform:uppercase}
-.ag-day{min-height:0;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;overflow:hidden;min-width:0}
+.ag-day{min-height:108px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;overflow:hidden;min-width:0}
 .ag-chip[draggable],.ag-ev[draggable]{cursor:grab}.tk-sp{flex:1}.tk-c.conc{background:#eefaf0;border-color:#bfe3c7}.tk-row.conc td{background:#eefaf0}@media(prefers-color-scheme:dark){.tk-c.conc,.tk-row.conc td{background:#183a22}.tk-c.conc{border-color:#2f6b40}}.tk-fb .tk-search{flex:0 0 260px;min-height:44px;border-radius:12px}.tk-fb .tk-search input{width:100%}.tk-ir{cursor:pointer}.tk-ir:hover{background:var(--bg)}.tk-fb{gap:8px}.tk-fb .tk-pill{flex:0 1 180px;min-width:150px}.tk-fb .tk-pill select{padding:8px 4px 8px 36px;font-size:14px}.tk-fb .tk-pill>svg{left:11px;width:17px;height:17px}.tk-fb{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}.tk-pill{position:relative;display:inline-flex;align-items:center;flex:0 1 220px;min-width:150px}.tk-pill svg,.tk-fbtn svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.tk-pill>svg{position:absolute;left:14px;pointer-events:none;color:var(--navy)}
 .tk-pill select{width:100%;min-height:44px;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:8px 12px 8px 42px;font:inherit}.tk-pill.on select{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy-soft)}.tk-pill.dis select{background:var(--bg);color:var(--muted)}.tk-pill.dis>svg{color:var(--muted)}
 .tk-fbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid var(--navy-soft);background:var(--navy-soft);color:var(--navy);font:inherit;font-weight:600;cursor:pointer}.tk-fbtn.open{background:var(--navy);color:var(--navy-ink)}
@@ -278,7 +278,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-pop-h{align-self:center;display:flex;flex-direction:column;align-items:center;border:0;background:none;color:var(--ink);cursor:pointer;font-family:inherit;padding:2px 8px;border-radius:8px}.ag-pop-h:hover{background:var(--navy-soft)}
 .ag-pop-h span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.ag-pop-h b{font-size:20px;line-height:1.2;font-weight:500}
 .ag-pop-l{overflow-y:auto;scrollbar-width:none;margin-top:2px;min-height:0}.ag-pop-l::-webkit-scrollbar{display:none}.ag-pop-l .ag-chip{font-size:11px;line-height:1.4;padding:2px 6px;margin-top:2px}
-.ag-chip[hidden],.ag-more[hidden]{display:none!important}.ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
+.ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
 .ag-wrap{overflow-x:auto}.ag-wrap>div{min-width:620px}
 .ag-gridrow{display:grid;grid-template-columns:52px repeat(var(--n),minmax(0,1fr))}
 .ag-hd{text-align:center;padding:6px 2px;border-left:1px solid var(--line);font-size:12px;color:var(--muted);text-transform:uppercase}
@@ -736,7 +736,7 @@ function agMonth(){
   let h=WDM.map(w=>`<div class="ag-wd">${w}</div>`).join('');
   for(let i=0;i<n;i++){const x=addDays(st,i),dd=Dt(x),ev=evOn(x),out=dd.getMonth()!==d.getMonth();
     h+=`<div class="ag-day${out?' out':''}" data-a="agNew" data-v="${x}" data-drop="${x}"><button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}" aria-label="Ver dia ${dt(x)}">${dd.getDate()===1?dd.getDate()+' '+MESES[dd.getMonth()].slice(0,3):dd.getDate()}</button>
-    ${ev.map(e=>evChip(e,false)).join('')}<button type="button" class="ag-more" data-a="agMore" data-v="${x}" hidden></button></div>`}
+    ${ev.slice(0,3).map(e=>evChip(e,false)).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agMore" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
   return `<div class="ag-month">${h}</div>${agMorePop()}`}
 function agMorePop(){const m=ui.agMore;if(!m||ui.ag.view!=='month')return '';
   const L=evOn(m.day),dd=Dt(m.day),r=m.r,W=Math.min(230,innerWidth-16),
@@ -789,14 +789,7 @@ function vAgenda(){
    <div class="ag-bar" style="margin-top:-2px">${view==='trash'?'':`<b style="font-size:13px">Agenda Profissional</b><span class="ag-seg"><button class="btn sm ${ui.ag.tec?'':'pri'}" data-a="agTec" data-v=""${ui.ag.f.farm?' disabled':''}>Todos</button>${AGTEC.map(t=>`<button class="btn sm ${ui.ag.tec===t?'pri':''}" data-a="agTec" data-v="${t}"${ui.ag.f.farm?' disabled title="Tire o filtro de fazenda para escolher o profissional"':''}>${t}</button>`).join('')}</span>
    <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select>`}<button class="btn sm" data-a="tab" data-v="i-lotes" style="margin-left:auto">← Agendamentos</button></div>
    ${view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
-function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8);agFit()}
-function agFit(){const m=document.querySelector('.ag-month');if(!m)return;
-  const days=[...m.querySelectorAll('.ag-day')],rows=days.length/7,mob=innerWidth<=640;
-  if(!mob){m.style.height=Math.max(380,innerHeight-m.getBoundingClientRect().top-10)+'px';m.style.gridTemplateRows='auto repeat('+rows+',minmax(0,1fr))'}
-  else{m.style.height='';m.style.gridTemplateRows=''}
-  days.forEach(d=>{const ch=[...d.querySelectorAll('.ag-chip')],mb=d.querySelector('.ag-more');ch.forEach(c=>c.hidden=false);mb.hidden=true;
-    let cap=3;if(!mob){const h=d.clientHeight-(d.querySelector('.ag-num').offsetHeight+10),ch1=ch[0]?ch[0].offsetHeight+2:19;cap=Math.max(1,Math.floor(h/ch1))}
-    if(ch.length>cap){const k=Math.max(0,cap-1);ch.forEach((c,i)=>c.hidden=i>=k);mb.textContent='+'+(ch.length-k)+' mais';mb.hidden=false}})}
+function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8)}
 /* ===== TAREFAS (quadro estilo Trello) ===== */
 const TK_TEAM=['Flávio Alves','Bina Alves','Isabella Galdioli'],TK_OLD={'Flávio':'Flávio Alves','Bina':'Bina Alves','Isabella':'Isabella Galdioli'};
 const tkA=()=>ui.tab==='f-fatur'?'fat':'';
@@ -2289,7 +2282,7 @@ document.addEventListener('click',e=>{if(ui.umenu&&!(e.target.closest&&e.target.
 document.addEventListener('click',e=>{if(ui.agMore&&!(e.target.closest&&e.target.closest('.ag-pop,[data-a="agMore"]'))){ui.agMore=null;render()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.agMore){ui.agMore=null;render()}});
 window.addEventListener('scroll',e=>{if(ui.agMore&&!(e.target&&e.target.closest&&e.target.closest('.ag-pop'))){ui.agMore=null;render()}},true);
-window.addEventListener('resize',()=>{if(ui.agMore){ui.agMore=null;render()}else agFit()});
+window.addEventListener('resize',()=>{if(ui.agMore){ui.agMore=null;render()}});
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
   if(!isAdm()&&ADM_ACTS.includes(b.dataset.a)){toast('Somente o administrador pode fazer isso.');return}
