@@ -390,6 +390,12 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-dl-hex{display:block;position:relative;border:1px solid #747775;border-radius:6px;padding:14px 12px 6px}.ag-dl-hex span{position:absolute;top:-8px;left:10px;background:#edf1f9;padding:0 4px;font-size:12px;color:#444746}
 .ag-dl-hex input{width:100%;border:0;background:transparent;font:inherit;font-size:16px;color:#1f1f1f;outline:none;padding:0}
 .ag-dl-f{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}.ag-dl-f button{border:0;border-radius:20px;padding:10px 20px;font:inherit;font-size:14px;font-weight:500;cursor:pointer}.ag-dl-c{background:transparent;color:#0b57d0}.ag-dl-c:hover{background:#dde3ee}.ag-dl-s{background:#c2e7ff;color:#001d35}.ag-dl-s:hover{background:#b0d9f5}
+.ag-tip{position:fixed;z-index:80;width:290px;max-width:calc(100vw - 16px);background:#fff;color:#202124;border-radius:8px;box-shadow:0 2px 6px 2px rgba(60,64,67,.15),0 1px 2px rgba(60,64,67,.3);padding:12px 14px;font-family:Roboto,'Segoe UI',Arial,sans-serif;font-size:13px;pointer-events:none}
+.ag-tt{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}.ag-tt>i{width:14px;height:14px;border-radius:4px;flex:none;margin-top:4px}
+.ag-tn{font-size:16px;line-height:1.3;font-weight:500}.ag-td{color:#5f6368;font-size:13px;margin-top:2px}
+.ag-tr{display:flex;gap:8px;padding:2px 0 2px 24px;line-height:1.4}.ag-tr span{flex:0 0 66px;color:#5f6368}.ag-tr b{font-weight:400;min-width:0}
+.ag-tdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.ag-tdesc{margin:6px 0 0 24px;padding-top:6px;border-top:1px solid #dadce0;color:#3c4043;white-space:pre-wrap;max-height:90px;overflow:hidden}
 .ag-cor{padding:6px 0 10px}.ag-mi{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 16px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}.ag-mi:hover{background:var(--navy-soft)}
 .ag-pal{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 14px 2px;border-top:1px solid var(--line);margin-top:4px}.ag-sw{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}.ag-sw.on{border-color:#fff;box-shadow:0 0 0 2px #202124}
 .agc .ag-fs{border-radius:20px;border:1px solid var(--line);padding:7px 14px}
@@ -786,7 +792,7 @@ const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='trash')return 'Lixeira';
   if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
   return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
-const evChip=(e,full)=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e,full))}${e.allday?'':' ('+esc(perOf(e))+')'}">${esc(evLabel(e,full))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
+const evChip=(e,full)=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${evCol(e)}" data-a="agEdit" data-v="${e.id}">${esc(evLabel(e,full))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
 function agMonth(){
   const d=Dt(ui.ag.date),first=isoD(new Date(d.getFullYear(),d.getMonth(),1)),st=weekStart(first),td=today();
   const n=Math.ceil((wdi(first)+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
@@ -795,6 +801,22 @@ function agMonth(){
     h+=`<div class="ag-day${out?' out':''}" data-a="agNew" data-v="${x}" data-drop="${x}"><button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}" aria-label="Ver dia ${dt(x)}">${dd.getDate()===1?dd.getDate()+' '+MESES[dd.getMonth()].slice(0,3):dd.getDate()}</button>
     ${ev.map(e=>evChip(e,false)).join('')+`<button type="button" class="ag-more" data-a="agMore" data-v="${x}" hidden></button>`}</div>`}
   return `<div class="ag-month">${h}</div>${agMorePop()}`}
+/* ---- cartão de detalhes ao passar o mouse (estilo Google Agenda) ---- */
+let agTipT=null;const cap1=t=>t.charAt(0).toUpperCase()+t.slice(1);
+function agTipHide(){clearTimeout(agTipT);const t=document.getElementById('ag-tip');if(t)t.remove()}
+function agTipHtml(e){const dd=Dt(e.date),de=Dt(e.end||e.date),same=(e.end||e.date)===e.date,fm=x=>`${WDL[x.getDay()]}, ${x.getDate()} de ${MESES[x.getMonth()]}`;
+  const tec=(e.tecs||[])[0],row=(k,v)=>v?`<div class="ag-tr"><span>${k}</span><b>${esc(v)}</b></div>`:'';
+  return `<div class="ag-tt"><i style="background:${evCol(e)}"></i><div><div class="ag-tn">${esc(svn(e.title||''))}${e.lote?' · '+esc(e.lote+(e.suf||'')):''}</div><div class="ag-td">${esc(cap1(same?fm(dd):fm(dd)+' – '+fm(de)))} · ${esc(evTime(e))}</div></div></div>
+   ${row('Fazenda',evFarm(e))}${row('Categoria',e.cat)}${row('Total',e.total?String(e.total)+' animais':'')}${row('Equipe',e.team)}${tec?`<div class="ag-tr"><span>Agenda</span><b><i class="ag-tdot" style="background:${tecCol(tec)}"></i>${esc(tec)}</b></div>`:''}${e.desc?`<div class="ag-tdesc">${esc(e.desc)}</div>`:''}`}
+document.addEventListener('mouseover',ev=>{const el=ev.target.closest&&ev.target.closest('.ag-chip,.ag-ev,.ag-li');
+  if(!el){if(!(ev.target.closest&&ev.target.closest('#ag-tip')))agTipHide();return}
+  const id=el.dataset.ev||el.dataset.v,e=S.eventos.find(x=>x.id===id);if(!e||el.dataset.a!=='agEdit')return;
+  if(el._tip===id&&document.getElementById('ag-tip'))return;
+  agTipHide();agTipT=setTimeout(()=>{const r=el.getBoundingClientRect(),d=document.createElement('div');d.id='ag-tip';d.className='ag-tip';d.innerHTML=agTipHtml(e);document.body.appendChild(d);
+    const w=d.offsetWidth,h=d.offsetHeight;let x=r.left+r.width/2-w/2,y=r.bottom+6;if(y+h>innerHeight-8)y=Math.max(8,r.top-h-6);x=Math.max(8,Math.min(innerWidth-w-8,x));d.style.left=x+'px';d.style.top=y+'px'},350)});
+document.addEventListener('mouseout',ev=>{if(!ev.relatedTarget||!(ev.relatedTarget.closest&&ev.relatedTarget.closest('.ag-chip,.ag-ev,.ag-li,#ag-tip')))agTipHide()});
+document.addEventListener('click',agTipHide,true);
+window.addEventListener('scroll',agTipHide,true);
 function agMorePop(){const m=ui.agMore;if(!m||ui.ag.view!=='month')return '';
   const L=evOn(m.day),dd=Dt(m.day),r=m.r,W=Math.min(230,innerWidth-16),
     left=Math.max(8,Math.min(innerWidth-W-8,r.l+r.w/2-W/2)),ph=62+L.length*25,top=Math.max(8,Math.min(r.t-6,innerHeight-ph-8)),
@@ -819,7 +841,7 @@ function agWeek(days){
     const now=new Date(),nowLine=x===td?`<div class="ag-now" style="top:${(now.getHours()*60+now.getMinutes())*48/60}px"></div>`:'';
     return `<div class="ag-col">${hrs.map(h=>`<div class="ag-slot" data-a="agNew" data-v="${x}|${h}" data-drop="${x}|${h}"></div>`).join('')}${nowLine}
     ${ev.map(e=>{const l=L[e.id],top=l.s*48/60,ht=Math.max(20,(l.e-l.s)*48/60),w=100/l.n;
-      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${evCol(e)}" data-a="agEdit" data-v="${e.id}" title="${esc(evLabel(e,true))}"><b>${esc(evLabel(e,true))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
+      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${evCol(e)}" data-a="agEdit" data-v="${e.id}"><b>${esc(evLabel(e,true))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
   return `<div class="ag-wrap"><div style="--n:${n}">
    <div class="ag-gridrow"><div></div>${head}</div>
    <div class="ag-gridrow"><div class="ag-hr" style="height:auto;font-size:10px;padding-top:8px">dia todo</div>${ad}</div>
