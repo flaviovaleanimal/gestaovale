@@ -1653,18 +1653,12 @@ function modalHtml(){
     <button type="button" class="btn sm" data-a="loteAddRow" style="margin-top:12px">+ Adicionar outro lote</button>
     ${foot('Salvar')}</form>`}
   else if(m.type==='lote'){const l=m.data||{};
-    body=`<h3>${l.id?'Editar lote':'Agendar lote'}</h3>${err}<form data-form="lote" data-id="${l.id||''}" novalidate><div class="form">
-    ${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(l.farm).map(f=>[f.id,farmLbl(f)]),l.farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
-    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),l.proc,'Selecione…')}</select>`)}
-    ${fldHtml('Lote',`<input name="name" value="${esc(l.name)}" placeholder="Ex.: Lote 1" required>`)}
-    ${fldHtml('Total de animais',`<input name="total" type="number" min="1" step="1" inputmode="numeric" value="${l.total??''}" required>`)}
-    ${fldHtml('Categoria',`<select name="category" required>${opts(catOpts(l.category),l.category,'Selecione…')}</select>`)}
-    <div class="lote-dates" style="display:${!l.category||LPAR.includes(l.category)?'contents':'none'}">
-    ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
-    ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div>
-    ${fldHtml('Carimbo',`<select name="carimbo">${carOpts(l.carimbo)}</select>`)}
-    ${fldHtml('Observação',`<input name="obs" value="${esc(l.obs||'')}" autocomplete="off">`)}
-    ${fldHtml('Status',`<select name="status">${opts(['Aberto','Agendado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>${foot('Salvar')}</form>`}
+    body=`<h3>Editar lote</h3>${err}<form data-form="lote" data-id="${l.id||''}" novalidate>
+    <div class="form c2">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(l.farm).map(f=>[f.id,farmLbl(f)]),l.farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
+    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),l.proc,'Selecione…')}</select>`)}</div>
+    <div id="lrows">${loteRowHtml(l,false)}</div>
+    <div class="form c2" style="margin-top:12px">${fldHtml('Status',`<select name="status">${opts(['Aberto','Agendado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>
+    ${foot('Salvar')}</form>`}
   const pfoot=(k,w)=>{const n=(ui.f[k].rows||[]).length;return `<div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">${n>1?'Registrar '+n+' '+w+'s':'Registrar '+w}</button></div>`};
   if(m.type==='itemtipo')body=`<h3>Novo item</h3><p class="muted" style="margin:0 0 14px">Qual tipo de item você quer cadastrar?</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="newProduct" style="flex:1;min-height:56px">Produto</button><button class="btn pri" data-a="newBreeder" style="flex:1;min-height:56px">Sêmen (reprodutor)</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
   if(m.type==='movtipo')body=`<h3>${m.pdf||m.est?'Imprimir PDF':m.k==='entrada'?'Nova entrada':'Nova saída'}</h3><p class="muted" style="margin:0 0 14px">${m.pdf||m.est?'Qual estoque você quer imprimir?':'Entrada ou saída de qual tipo de item?'}</p><div class="acts" style="gap:10px"><button class="btn pri" data-a="emGo" data-v="p" style="flex:1;min-height:56px">Produtos</button><button class="btn pri" data-a="emGo" data-v="s" style="flex:1;min-height:56px">Sêmen</button></div><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button></div>`;
@@ -2065,7 +2059,7 @@ function vLotes(){
   </div>
   <div class="tw">${list.length?`<table><thead><tr><th>Fazenda / Lote</th><th>Procedimento</th><th class="num">Total</th><th>Categoria</th><th>Início Parição</th><th>Final Parição</th><th>Status</th><th>Ações</th></tr></thead><tbody>
   ${list.map(l=>`<tr${qHide('lt',[farmLbl(F(l.farm)),l.name,l.category,l.status,svn(l.proc||''),l.obs,l.total].join(' '))}><td><b>${esc(farmLbl(F(l.farm)))}</b> / ${esc(l.name)}</td><td>${esc(svn(l.proc||'')||'—')}</td><td class="num">${fmt(l.total)}</td><td>${esc(l.category)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td>
-   <td><span class="pill ${l.status==='Aberto'?'in':'ok'}">${esc(l.status)}</span></td>
+   <td><span class="pill ${l.status==='Aberto'?'warn':'in'}">${esc(l.status)}</span></td>
    <td><div class="acts">${l.status==='Aberto'?`<button class="btn sm pri" data-a="iniAgendar" data-v="${l.id}">Agendar</button>`:''}<button class="btn sm" data-a="editLote" data-v="${l.id}">Editar</button><button class="btn sm dng" data-a="delLote" data-v="${l.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty(S.lotes.length?'Nenhum lote com esses filtros.':'Nenhum lote agendado. Clique em Agendar lote para começar.')}</div></div>`;
 }
@@ -2237,7 +2231,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 09:00</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 09:20</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
