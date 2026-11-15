@@ -390,10 +390,10 @@ function seed(){
       {id:'n4',tank:'t3',kind:'medicao',date:'2026-11-01',level:31,liters:0,total:0,note:''}]};
 }
 /* ---------- armazenamento: banco compartilhado (db) ou, sem ele, este navegador ---------- */
-const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],diaristas:[],tarefas:[],tcols:[]});
+const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],diaristas:[],tarefas:[],tcols:[],recorrencias:[]});
 let S=emptyS();
 let DB=null,dbState='conectando',slowT=null,busy=false,q=[],needRender=false;
-const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},diaristas:{},tarefas:{},tcols:{}},lastSnap={},held={},got={};
+const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},diaristas:{},tarefas:{},tcols:{},recorrencias:{}},lastSnap={},held={},got={};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const loadLocal=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}};
 function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários.',
@@ -858,6 +858,7 @@ const tkCal=(t,u)=>{const base=u.calM||(t.prazo||today()).slice(0,7),Y=+base.sli
 const tkSetPrazo=(c,iso)=>{c.prazo=iso;if(iso){if(!c.hora)c.hora='07:00';if(c.lemb===''||c.lemb==null)c.lemb='15'}};
 const TK_DSEM=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 const tkRecOpts=(d,r)=>{const o={'':'Nunca',diaria:'Diariamente',semanal:'Semanal'};if(d){const x=new Date(d+'T12:00:00');o.mensal='Mensalmente no '+x.getDate()+'º';if(r==='mensalw')o.mensalw='Mensalmente na '+Math.ceil(x.getDate()/7)+'º '+TK_DSEM[x.getDay()]}else{o.mensal='Mensalmente no dia da data';if(r==='mensalw')o.mensalw='Mensalmente no mesmo dia da semana'}if(r==='util')o.util='Segunda a sexta';if(r==='semanal')o.semanal='Semanal';return o};
+const recTxt=r=>(r.freq==='diaria'?'Todos os dias (menos domingo)':r.freq==='semanal'?'Toda '+TK_DSEM[r.dsem||1]:'Todo dia '+r.dmes+' (domingo passa para segunda)')+' · '+(r.hora||'07:00');
 const TK_REC={...tkRecOpts('','util'),...tkRecOpts('','semanal')};
 function tkHoras(h){const l=[];for(let m=360;m<=1440;m+=30){const x=m%1440;l.push(String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0'))}if(h&&!l.includes(h)){l.push(h);l.sort()}return '<option value=""'+(h?'':' selected')+'>--:--</option>'+l.map(v=>'<option value="'+v+'"'+(v===h?' selected':'')+'>'+v+'</option>').join('')}
 const TK_LEMB={'':'Sem lembrete',0:'Na hora',15:'15 minutos antes',60:'1 hora antes',1440:'1 dia antes'};
@@ -887,7 +888,7 @@ function vTarefas(){
   if(u.q)chips.push(['q','🔎 '+esc(u.q)]);
   if(u.semResp)chips.push(['semResp',I.u+'Sem responsável']);
   if(u.anx)chips.push(['anx',I.l.replace('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h6"/>',TKI.clip)+'Com anexos']);
-  const tkSearch=`<label class="tk-search"><button type="button" class="tk-sbtn" data-tk="busca" aria-label="Pesquisar" title="Pesquisar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button><input type="text" data-tkf="fqtop" value="${esc(u.q)}" placeholder="Pesquisar tarefas…" autocomplete="off" aria-label="Pesquisar tarefas">${u.q?'<button type="button" class="tk-sx" data-tk="buscaX" aria-label="Limpar pesquisa">✕</button>':''}</label>`,tkSeg=`<span class="ag-seg"><button class="btn sm ${u.modo==='quadro'?'pri':''}" data-tk="modo" data-v="quadro">Quadro</button><button class="btn sm ${u.modo==='lista'?'pri':''}" data-tk="modo" data-v="lista">Lista</button></span>`;
+  const tkSearch=`<label class="tk-search"><button type="button" class="tk-sbtn" data-tk="busca" aria-label="Pesquisar" title="Pesquisar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button><input type="text" data-tkf="fqtop" value="${esc(u.q)}" placeholder="Pesquisar tarefas…" autocomplete="off" aria-label="Pesquisar tarefas">${u.q?'<button type="button" class="tk-sx" data-tk="buscaX" aria-label="Limpar pesquisa">✕</button>':''}</label>`,tkSeg=`<span class="ag-seg"><button class="btn sm ${u.modo==='quadro'?'pri':''}" data-tk="modo" data-v="quadro">Quadro</button><button class="btn sm ${u.modo==='lista'?'pri':''}" data-tk="modo" data-v="lista">Lista</button></span>${tkA()?'':`<button class="btn sm" data-a="recs" title="Tarefas que se criam sozinhas">↻ Recorrências (${(S.recorrencias||[]).filter(r=>r.ativo!==false).length})</button>`}`;
   const tkTotH=tkA()&&u.modo!=='arq'?tkTotFat(all):'';
   const filt=`<div class="tk-fb${tkTotH?' hastot':''}">
    ${tkTotH}${tkSearch}
@@ -936,7 +937,7 @@ function tkModal(){
    </div>
    ${u.pop==='memb'?`<div class="tk-pop"><b>Membros</b>${TK_TEAM.map(n=>`<label class="tk-chk"><input type="checkbox" data-tkf="memb" data-v="${n}"${(t.membros||[]).includes(n)?' checked':''}> ${tkAv(n)} ${n}</label>`).join('')}</div>`:''}
    ${u.pop==='datas'?`<div class="tk-pop"><b>Datas</b><div class="form c2"><div class="tk-calw"><label class="fld"><span>Data de entrega</span><input type="text" readonly placeholder="D/M/AAAA" data-tk="calopen" value="${esc(dt(t.prazo||''))}" style="cursor:pointer"></label>${u.calOpen?tkCal(t,u):''}</div><label class="fld"><span>Horário</span><select data-tkf="hora">${tkHoras(t.hora)}</select></label>
-     <label class="fld"><span>Recorrente</span><select data-tkf="rec">${Object.entries(tkRecOpts(t.prazo,t.rec)).map(([k,v])=>`<option value="${k}"${(t.rec||'')===k?' selected':''}>${v}</option>`).join('')}</select></label>
+     
      <label class="fld"><span>Definir lembrete</span><select data-tkf="lemb">${Object.entries(TK_LEMB).map(([k,v])=>`<option value="${k}"${String(t.lemb??'')===k?' selected':''}>${v}</option>`).join('')}</select></label></div><button type="button" class="btn sm" data-tk="dclear">Remover data</button></div>`:''}
    ${tkA()?`<div class="tk-vb"><small>Valor da Proposta</small><div class="tk-vbox"><span>R$</span><input type="text" inputmode="decimal" data-tkf="valor" aria-label="Valor da Proposta" placeholder="0,00" value="${+t.valor>0?(+t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):''}"></div></div>`:''}
    ${(t.membros||[]).length||t.prazo?`<div class="tk-info">${t.prazo?`<div class="tk-de"><small class="muted">Data de entrega</small><button type="button" class="tk-dbox" data-tk="pdatas" aria-label="Alterar data de entrega"><span>${esc(tkDData(t))}</span><em class="tk-st ${tkSt(t)[1]}">${tkSt(t)[0]}</em><span class="tk-chv">▾</span></button>${t.rec||(t.lemb!==undefined&&t.lemb!=='')?`<small class="muted">${t.rec?'↻ '+TK_REC[t.rec]:''}${t.rec&&t.lemb!==undefined&&t.lemb!==''?' · ':''}${t.lemb!==undefined&&t.lemb!==''?'🔔 '+TK_LEMB[t.lemb]:''}</small>`:''}</div>`:''}${(t.membros||[]).length?`<div><small class="muted">Membros</small><div class="tk-avs2">${t.membros.map(n=>tkAv(n)).join('')}</div></div>`:''}</div>`:''}
@@ -1023,7 +1024,7 @@ document.addEventListener('click',e=>{if(tkU().colMenu&&!(e.target.closest&&e.ta
    if(v==='dash'||v==='dot'){const pf=v==='dash'?'- ':'• ';const ls=(sel||'').split('\n').map(l=>/^(- |• )/.test(l)?l:pf+l).join('\n');ins=ls;c0=sel?a:a+ls.length;c1=a+ls.length}
    else{const m=v==='b'?'**':'_';ins=m+sel+m;c0=a+m.length;c1=c0+sel.length}
    ta.value=v0.slice(0,a)+ins+v0.slice(z);ta.focus();ta.setSelectionRange(c0,c1);ta.dispatchEvent(new Event('input',{bubbles:true}));return}
-  case 'cardDone':{const c=S.tarefas.find(x=>x.id===v);if(!c)return;c.feito=true;c.concluidaEm=today();tkLog(c,'concluiu e arquivou este cartão');if(c.rec&&c.prazo)S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});save();toast('Tarefa concluída e arquivada.');break}
+  case 'cardDone':{const c=S.tarefas.find(x=>x.id===v);if(!c)return;c.feito=true;c.concluidaEm=today();tkLog(c,'concluiu e arquivou este cartão');save();toast('Tarefa concluída e arquivada.');break}
   case 'cmenu':u.colMenu=u.colMenu===v?null:v;break;
   case 'delcol':{u.colMenu=null;const col=S.tcols.find(x=>x.id===v);if(!col)break;const outras=tkCols().filter(x=>x.id!==v),n=S.tarefas.filter(t=>t.col===v).length;if(!outras.length&&(!tkA()||n)){toast(tkA()?'Mova ou exclua os cartões desta coluna antes.':'Mantenha pelo menos uma coluna.');break}const dest=outras[0]||{};
    return ask(`Excluir a coluna "${col.nome}"?${n?` Os ${n} ${n===1?'cartão será movido':'cartões serão movidos'} para "${dest.nome}" (nada é apagado).`:' Ela está vazia.'}`,()=>{S.tarefas.forEach(t=>{if(t.col===v)t.col=dest.id});S.tcols=S.tcols.filter(x=>x.id!==v);if(u.col===v)u.col='';done('Coluna excluída.')})}
@@ -1047,10 +1048,10 @@ document.addEventListener('click',e=>{if(tkU().colMenu&&!(e.target.closest&&e.ta
   case 'atbtn':{const i=document.querySelector('[data-tkform=msg] input');if(!i)return;const p=i.selectionStart??i.value.length;i.value=i.value.slice(0,p)+(p&&!/\s$/.test(i.value.slice(0,p))?' ':'')+'@'+i.value.slice(p);i.focus();const q=i.value.indexOf('@',Math.max(0,p-1))+1;i.setSelectionRange(q,q);tkSug(i);return}
   case 'concl':{const c=tkCur(),ac=tkArqCol(),isD=u.draft&&u.draft.id===c.id;
    if(ac&&!c.feito){
-    if(c.col!==ac.id){const ant=S.tcols.find(x=>x.id===c.col),colAnt=c.col;c.colAnt=colAnt;c.col=ac.id;c.concluidaEm=today();tkLog(c,'concluiu e moveu este cartão de '+(ant?ant.nome:'')+' para '+ac.nome);if(c.rec&&c.prazo&&!isD)S.tarefas.push({...c,id:nid('t'),col:colAnt,colAnt:undefined,feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});if(!isD)save();ui.modal=null;u.sel=null;toast('Tarefa movida para Concluído.')}
+    if(c.col!==ac.id){const ant=S.tcols.find(x=>x.id===c.col),colAnt=c.col;c.colAnt=colAnt;c.col=ac.id;c.concluidaEm=today();tkLog(c,'concluiu e moveu este cartão de '+(ant?ant.nome:'')+' para '+ac.nome);if(!isD)save();ui.modal=null;u.sel=null;toast('Tarefa movida para Concluído.')}
     else{const back=tkCols().find(x=>x.id===c.colAnt&&x.id!==ac.id)||tkCols().find(x=>x.id!==ac.id);if(back)c.col=back.id;delete c.colAnt;c.concluidaEm='';tkLog(c,'reabriu este cartão');if(!isD)save();toast('Tarefa reaberta.')}
     break}
-   c.feito=!c.feito;c.concluidaEm=c.feito?today():'';tkLog(c,c.feito?'marcou este cartão como concluído':'reabriu este cartão');if(c.feito&&c.rec&&c.prazo&&!isD)S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[],log:[]});if(!isD)save();if(c.feito){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}break}
+   c.feito=!c.feito;c.concluidaEm=c.feito?today():'';tkLog(c,c.feito?'marcou este cartão como concluído':'reabriu este cartão');if(!isD)save();if(c.feito){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}break}
   case 'salvar':{const t=tkCur();if(!t.titulo.trim()){toast('Digite o nome da tarefa.');return}if(u.draft&&u.draft.id===t.id){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);u.draft=null}save();u.sel=null;ui.modal=null;toast('Tarefa salva.');break}
   case 'fclear':Object.assign(u,{resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false});break;
   case 'fpanel':u.fp=!u.fp;break;
@@ -1078,7 +1079,7 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
   else if(k==='prazotxt'){const m=t.value.trim().match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(!m){t.value=dt(c.prazo||'');return}const d=new Date(+m[3],+m[2]-1,+m[1],12);if(d.getDate()!==+m[1]){t.value=dt(c.prazo||'');return}tkSetPrazo(c,_iso(d));u.calM=_iso(d).slice(0,7);if(!(u.draft&&u.draft.id===c.id)){clearTimeout(window.__dtT);window.__dtT=setTimeout(save,800)}setTimeout(render,0);return}
   else if(k==='hora'||k==='prazo'){c[k]=t.value;if(k==='prazo'&&t.value){const pp=t.closest('.tk-pop');const rs=pp&&pp.querySelector('[data-tkf="rec"]');if(rs){const ro=tkRecOpts(t.value);[...rs.options].forEach(o=>{if(ro[o.value])o.textContent=ro[o.value]})}if(!c.hora){c.hora='07:00';const hi=pp&&pp.querySelector('[data-tkf="hora"]');if(hi)hi.value='07:00'}if(c.lemb===''||c.lemb==null){c.lemb='15';const li=pp&&pp.querySelector('[data-tkf="lemb"]');if(li)li.value='15'}}if(!(u.draft&&u.draft.id===c.id)){clearTimeout(window.__dtT);window.__dtT=setTimeout(save,800)}return}
   else if(k==='rec'||k==='lemb'){c[k]=t.value;if(!(u.draft&&u.draft.id===c.id)){clearTimeout(window.__dtT);window.__dtT=setTimeout(save,800)}return}
-  else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';if(t.checked&&c.rec&&c.prazo&&!(u.draft&&u.draft.id===c.id)){S.tarefas.push({...c,id:nid('t'),feito:false,concluidaEm:'',prazo:tkNext(c.prazo,c.rec),check:(c.check||[]).map(x=>({...x,ok:false})),msgs:[]})}
+  else if(k==='feito'){c.feito=t.checked;c.concluidaEm=t.checked?today():'';
   if(!(u.draft&&u.draft.id===c.id))save();if(t.checked){ui.modal=null;u.sel=null;toast('Tarefa concluída e arquivada.')}return render()}
   else if(k==='desc'){c.desc=t.value;if(!(u.draft&&u.draft.id===c.id))save();return}
   else if(k==='chk'){c.check[+t.dataset.v].ok=t.checked}
@@ -1090,6 +1091,8 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
     else{const r=new FileReader();r.onload=()=>{res[fi]={n:f.name,s:f.size,d:r.result,m:f.lastModified||Date.now()};fin()};r.onerror=fin;r.readAsDataURL(f)}});return}
   if(!(u.draft&&u.draft.id===c.id))save()}
  render()});
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.recf||!ui.modal||ui.modal.type!=='rec')return;
+  const f=t.form,r=ui.modal.r||{};ui.modal.r={...r,freq:t.value,titulo:f.titulo.value,desc:f.desc.value,hora:f.hora.value,col:f.col.value,membros:[...f.querySelectorAll('input[name=mb]:checked')].map(x=>x.value)};ui.modal.data={check:f.check.value};render()});
 document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.tkform;if(!k)return;e.preventDefault();const u=tkU(),val=(f.elements[k==='col'?'n':'t'].value||'').trim();if(!val)return;
  if(k==='card'){{const nc={id:nid('t'),...(tkA()?{area:tkA()}:{}),col:f.dataset.col,titulo:val,desc:'',membros:[],prazo:'',check:[],anexos:[],msgs:[]};const cc=S.tcols.find(x=>x.id===nc.col),r=tkColResp(cc);if(r)nc.membros=[r];tkLog(nc,'adicionou este cartão a '+cc.nome);S.tarefas.push(nc)}}
  else if(k==='col'){S.tcols.push({id:nid('tc'),...(tkA()?{area:tkA()}:{}),nome:val,ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1})}
@@ -1500,6 +1503,23 @@ function modalHtml(){
     ${!m.tec?empty('Escolha o técnico para ver os dias em que ele foi.'):L.length?`<div style="display:flex;gap:10px;align-items:center;margin:0 0 8px"><label style="display:flex;gap:8px;align-items:center;font-weight:600;color:var(--ink);cursor:pointer"><input type="checkbox" data-a="diaPickAll"${all?' checked':''}${novas.length?'':' disabled'} style="width:auto"> Selecionar todas as novas</label><span class="muted" style="font-size:13px">${sel.length} selecionada(s) · ${brl(tot)}</span></div>
     <div class="tw" style="max-height:340px;overflow:auto"><table><thead><tr><th></th><th>Data</th><th>Prestador</th><th>Fazenda(s)</th><th class="num">Valor</th><th></th></tr></thead><tbody>${L.map(x=>`<tr${x.exists?' style="opacity:.55"':''}><td><input type="checkbox" data-a="diaPick" data-v="${x.key}"${sel.includes(x.key)?' checked':''}${x.exists?' disabled':''} style="width:auto"></td><td>${dt(x.date)}</td><td>${esc(x.prest)}</td><td>${esc(x.farms.map(f=>F(f).name).join(' / ')||'—')}</td><td class="num">${brl(x.unit)}</td><td>${x.exists?'<span class="pill in">já lançada</span>':''}</td></tr>`).join('')}</tbody></table></div>`:empty('Este técnico não aparece na Equipe de nenhum evento neste período.')}
     <form data-form="diaimp" novalidate><div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit"${sel.length?'':' disabled'}>Lançar ${sel.length||''} diária(s)</button></div></form>`}
+  if(m.type==='recs'){const L=(S.recorrencias||[]).slice().sort((a,b)=>String(a.titulo).localeCompare(b.titulo));
+    body=`<h3>Recorrências de tarefas</h3>${err}<p class="muted" style="margin:0 0 10px;font-size:13px">O sistema cria o cartão sozinho no dia certo (nunca aos domingos). Se o cartão anterior ainda estiver aberto, não cria outro. O cartão novo nasce limpo, sem histórico.</p>
+    ${L.length?`<div class="tw"><table><thead><tr><th>Tarefa</th><th>Quando</th><th>Responsáveis</th><th>Ativa</th><th></th></tr></thead><tbody>${L.map(r=>`<tr><td><b>${esc(r.titulo)}</b></td><td>${esc(recTxt(r))}</td><td>${esc((r.membros||[]).join(', ')||'—')}</td><td><label class="tk-chk"><input type="checkbox" data-a="recTog" data-v="${r.id}"${r.ativo!==false?' checked':''}> ${r.ativo!==false?'Sim':'Não'}</label></td><td style="white-space:nowrap"><button class="btn sm" data-a="recEdit" data-v="${r.id}">Editar</button> <button class="btn sm dng" data-a="recDel" data-v="${r.id}">Excluir</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="muted">Nenhuma recorrência cadastrada.</div>'}
+    <div class="mf"><button class="btn pri" type="button" data-a="recNew">+ Nova recorrência</button><button class="btn" type="button" data-a="close">Fechar</button></div>`}
+  if(m.type==='rec'){const r=m.r||{},fq=r.freq||'mensal',dd=m.data||{};
+    body=`<h3>${r.id?'Editar':'Nova'} recorrência</h3>${err}
+    <form data-form="rec" data-id="${r.id||''}" novalidate>
+    <div class="form c2">${fldHtml('Título da tarefa',`<input name="titulo" value="${esc(dd.titulo??r.titulo??'')}" autocomplete="off">`,'span2')}
+    ${fldHtml('Repetir',`<select name="freq" data-recf="1"><option value="diaria"${fq==='diaria'?' selected':''}>Todos os dias (exceto domingo)</option><option value="semanal"${fq==='semanal'?' selected':''}>Toda semana</option><option value="mensal"${fq==='mensal'?' selected':''}>Todo mês</option></select>`)}
+    ${fq==='semanal'?fldHtml('Dia da semana',`<select name="dsem">${[1,2,3,4,5,6].map(i=>`<option value="${i}"${+(r.dsem||1)===i?' selected':''}>${TK_DSEM[i]}</option>`).join('')}</select>`):''}
+    ${fq==='mensal'?fldHtml('Dia do mês',`<input name="dmes" type="number" min="1" max="31" value="${esc(r.dmes||'')}">`):''}
+    ${fldHtml('Horário',`<select name="hora">${tkHoras(r.hora||'07:00')}</select>`)}
+    ${fldHtml('Coluna',`<select name="col">${tkCols().map(c=>`<option value="${c.id}"${(r.col||'')===c.id?' selected':''}>${esc(c.nome)}</option>`).join('')}</select>`)}
+    ${fldHtml('Responsáveis',`<div style="display:flex;gap:14px;flex-wrap:wrap">${TK_TEAM.map(n=>`<label class="tk-chk"><input type="checkbox" name="mb" value="${esc(n)}"${(r.membros||[]).includes(n)?' checked':''}> ${esc(n)}</label>`).join('')}</div>`,'span2')}
+    ${fldHtml('Descrição',`<textarea name="desc" rows="2">${esc(r.desc||'')}</textarea>`,'span2')}
+    ${fldHtml('Checklist (um item por linha)',`<textarea name="check" rows="4">${esc(dd.check??(r.check||[]).map(x=>x.t).join('\n'))}</textarea>`,'span2')}</div>
+    <div class="mf"><button class="btn" type="button" data-a="recs">Voltar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='diaristas'){const rows=m.rows||[];
     body=`<h3>Diaristas e valores</h3>${err}<p class="muted" style="margin:0 0 10px;font-size:13px">Quem constar nesta lista aparece na opção “Vai junto” da Equipe do evento. As diárias são lançadas à mão, em Lançar diária.</p>
     <form data-form="diaristas" novalidate><div style="display:flex;flex-direction:column;gap:8px">
@@ -2217,7 +2237,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 08:40</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 09:00</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2400,6 +2420,11 @@ document.addEventListener('click',e=>{
    case 'diaImp':{const [a,b]=monthRange();ui.modal={type:'diaimp',from:a,to:b,tec:'',sel:[]};render();break}
    case 'diaPick':{const s=new Set(ui.modal.sel||[]);s.has(v)?s.delete(v):s.add(v);ui.modal.sel=[...s];render();break}
    case 'diaPickAll':{const nv=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec).filter(x=>!x.exists).map(x=>x.key),all=nv.length&&nv.every(k=>(ui.modal.sel||[]).includes(k));ui.modal.sel=all?[]:nv;render();break}
+   case 'recs':ui.modal={type:'recs'};render();break
+   case 'recNew':ui.modal={type:'rec',r:{freq:'mensal',hora:'07:00',col:(tkCols().find(c=>/FL[ÁA]VIO/i.test(c.nome))||tkCols()[0]||{}).id,membros:[]}};render();break
+   case 'recEdit':{const r=S.recorrencias.find(x=>x.id===v);if(r){ui.modal={type:'rec',r:{...r}};render()}break}
+   case 'recTog':{const r=S.recorrencias.find(x=>x.id===v);if(r){r.ativo=r.ativo===false;save();render()}break}
+   case 'recDel':ui.confirm={title:'Excluir recorrência',msg:'Os cartões já criados continuam. Nenhum novo será criado.',ok:'Excluir',okFn:()=>{S.recorrencias=S.recorrencias.filter(x=>x.id!==v);save();ui.modal={type:'recs'};render()}};render();break
    case 'diaristas':ui.modal={type:'diaristas',rows:S.diaristas.map(d=>({...d}))};render();break
    case 'diaAdd':{const r=diaRead();r.push({name:'',valor:''});ui.modal.rows=r;render();break}
    case 'diaDel':{const r=diaRead();r.splice(+v,1);ui.modal.rows=r;render();break}
@@ -2771,6 +2796,15 @@ document.addEventListener('submit',e=>{
     if(!L.length)return done();
     L.forEach(x=>S.diarias.push({id:nid('d'),date:x.date,sit:'Aberta',prest:x.prest,farm:x.farms[0]||'',qty:1,unit:x.unit,total:r2(x.unit)}));
     return done(L.length+' diária(s) lançada(s).')}
+  if(k==='rec'){
+    const old=form.dataset.id?S.recorrencias.find(x=>x.id===form.dataset.id):null,fq=fd.freq,tt=String(fd.titulo||'').trim();
+    if(!tt)return modalErr('Informe o título da tarefa.');
+    if(fq==='mensal'&&!(+fd.dmes>=1&&+fd.dmes<=31))return modalErr('Informe o dia do mês (1 a 31).');
+    const rec={id:old?old.id:nid('rc'),titulo:tt,desc:String(fd.desc||''),freq:fq,hora:fd.hora||'07:00',col:fd.col,membros:[...form.querySelectorAll('input[name=mb]:checked')].map(x=>x.value),
+      check:String(fd.check||'').split('\n').map(x=>x.trim()).filter(Boolean).map(t=>({t,ok:false})),ativo:old?old.ativo!==false:true,ultima:old?old.ultima||'':''};
+    if(fq==='semanal')rec.dsem=+fd.dsem||1;if(fq==='mensal')rec.dmes=+fd.dmes;
+    if(old)Object.assign(old,rec);else S.recorrencias.push(rec);
+    save();ui.modal={type:'recs'};render();toast('Recorrência salva.');return}
   if(k==='diaristas'){
     const rows=diaRead().map(r=>({...r,name:tc(String(r.name||'').trim()),valor:Number(String(r.valor).replace(',','.'))})).filter(r=>r.name);
     for(const r of rows)if(!(r.valor>=0))return modalErr('Informe o valor da diária de '+r.name+'.');
