@@ -273,6 +273,11 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-chip{position:relative;display:block;width:100%;text-align:left;border:0;border-radius:4px;padding:1px 6px;margin-top:2px;font-size:10.5px;line-height:1.5;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;font-family:inherit}
 .ag-chip.t{background:none;color:var(--ink)}.ag-chip.t:hover{background:var(--navy-soft)}
 .ag-chip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.ag-pop{position:fixed;z-index:60;background:var(--card,#fff);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 10px 12px;display:flex;flex-direction:column;overflow:hidden}
+.ag-pop-x{position:absolute;top:6px;right:6px;width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:15px;cursor:pointer}.ag-pop-x:hover{background:var(--line)}
+.ag-pop-h{align-self:center;display:flex;flex-direction:column;align-items:center;border:0;background:none;color:var(--ink);cursor:pointer;font-family:inherit;padding:2px 8px;border-radius:8px}.ag-pop-h:hover{background:var(--navy-soft)}
+.ag-pop-h span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.ag-pop-h b{font-size:24px;line-height:1.2;font-weight:500}
+.ag-pop-l{overflow-y:auto;margin-top:6px;min-height:0}.ag-pop-l .ag-chip{font-size:12px;padding:3px 8px;margin-top:3px}
 .ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
 .ag-wrap{overflow-x:auto}.ag-wrap>div{min-width:620px}
 .ag-gridrow{display:grid;grid-template-columns:52px repeat(var(--n),minmax(0,1fr))}
@@ -731,8 +736,16 @@ function agMonth(){
   let h=WDM.map(w=>`<div class="ag-wd">${w}</div>`).join('');
   for(let i=0;i<n;i++){const x=addDays(st,i),dd=Dt(x),ev=evOn(x),out=dd.getMonth()!==d.getMonth();
     h+=`<div class="ag-day${out?' out':''}" data-a="agNew" data-v="${x}" data-drop="${x}"><button type="button" class="ag-num${x===td?' today':''}" data-a="agGoDay" data-v="${x}" aria-label="Ver dia ${dt(x)}">${dd.getDate()===1?dd.getDate()+' '+MESES[dd.getMonth()].slice(0,3):dd.getDate()}</button>
-    ${ev.slice(0,3).map(e=>evChip(e,false)).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agGoDay" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
-  return `<div class="ag-month">${h}</div>`}
+    ${ev.slice(0,3).map(e=>evChip(e,false)).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agMore" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
+  return `<div class="ag-month">${h}</div>${agMorePop()}`}
+function agMorePop(){const m=ui.agMore;if(!m||ui.ag.view!=='month')return '';
+  const L=evOn(m.day),dd=Dt(m.day),r=m.r,W=Math.max(260,Math.min(320,innerWidth-16)),
+    left=Math.max(8,Math.min(innerWidth-W-8,r.l+r.w/2-W/2)),top=Math.max(8,Math.min(innerHeight-120,r.t-6)),
+    mh=Math.max(140,innerHeight-top-12);
+  return `<div class="ag-pop" role="dialog" aria-label="Eventos de ${dt(m.day)}" style="left:${left}px;top:${top}px;width:${W}px;max-height:${mh}px">
+   <button type="button" class="ag-pop-x" data-a="agMoreX" aria-label="Fechar">✕</button>
+   <button type="button" class="ag-pop-h" data-a="agGoDay" data-v="${m.day}" title="Ver a semana deste dia"><span>${WDS[dd.getDay()]}</span><b>${dd.getDate()}</b></button>
+   <div class="ag-pop-l">${L.map(e=>evChip(e,false)).join('')}</div></div>`}
 function agLanes(list){const out={};let cl=[],cend=-1;
   const flush=()=>{const L=cl.reduce((m,e)=>Math.max(m,out[e.id].lane+1),1);cl.forEach(e=>out[e.id].n=L);cl=[]};
   const lanes=[];
@@ -2266,12 +2279,19 @@ const ask=(msg,ok,o={})=>{ui.confirm={msg,okFn:ok,...o};render()};
 
 /* ---------- ações ---------- */
 document.addEventListener('click',e=>{if(ui.umenu&&!(e.target.closest&&e.target.closest('.um'))){ui.umenu=false;render()}});
+document.addEventListener('click',e=>{if(ui.agMore&&!(e.target.closest&&e.target.closest('.ag-pop,[data-a="agMore"]'))){ui.agMore=null;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.agMore){ui.agMore=null;render()}});
+window.addEventListener('scroll',e=>{if(ui.agMore&&!(e.target&&e.target.closest&&e.target.closest('.ag-pop'))){ui.agMore=null;render()}},true);
+window.addEventListener('resize',()=>{if(ui.agMore){ui.agMore=null;render()}});
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
   if(!isAdm()&&ADM_ACTS.includes(b.dataset.a)){toast('Somente o administrador pode fazer isso.');return}
   const a=b.dataset.a,v=b.dataset.v;
   if(a!=='umenu')ui.umenu=false;
+  if(a!=='agMore')ui.agMore=null;
   switch(a){
+   case 'agMore':{const r=b.getBoundingClientRect();ui.agMore={day:v,r:{l:r.left,t:r.top,w:r.width,h:r.height}};render();break}
+   case 'agMoreX':render();break;
    case 'umenu':ui.umenu=!ui.umenu;render();break;
    case 'tab':ui.tab=v;if(v==='e-mov'&&b.dataset.s)ui.emT=b.dataset.s;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
    case 'go':ui.tab=v;ui.rv=null;if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
