@@ -882,9 +882,14 @@ function recBody(){
     ${fq==='mensal'?fldHtml('Dia do mês',`<input name="dmes" type="number" min="1" max="31" value="${esc(r.dmes||'')}">`):''}
     ${fldHtml('Horário',`<select name="hora">${tkHoras(r.hora||'07:00')}</select>`)}
     ${fldHtml('Coluna',`<select name="col">${tkCols().map(c=>`<option value="${c.id}"${(r.col||'')===c.id?' selected':''}>${esc(c.nome)}</option>`).join('')}</select>`)}
-    ${fldHtml('Responsáveis',`<div style="display:flex;gap:14px;flex-wrap:wrap">${TK_TEAM.map(n=>`<label class="tk-chk"><input type="checkbox" name="mb" value="${esc(n)}"${(r.membros||[]).includes(n)?' checked':''}> ${esc(n)}</label>`).join('')}</div>`,'span2')}
-    ${fldHtml('Descrição',`<textarea name="desc" rows="2">${esc(r.desc||'')}</textarea>`,'span2')}
-    ${fldHtml('Checklist (um item por linha)',`<textarea name="check" rows="4">${esc(dd.check??(r.check||[]).map(x=>x.t).join('\n'))}</textarea>`,'span2')}</div>
+    ${fldHtml('Responsáveis',`<div style="display:flex;gap:14px;flex-wrap:wrap">${TK_TEAM.map(n=>`<label class="tk-chk" style="white-space:nowrap;display:inline-flex;gap:6px;align-items:center"><input type="checkbox" name="mb" value="${esc(n)}"${(r.membros||[]).includes(n)?' checked':''}> <span style="flex:none;display:inline-flex">${tkAv(n)}</span> ${esc(n)}</label>`).join('')}</div>`,'span2')}
+    </div>
+    <h4 class="tk-h">Descrição</h4>
+    <div class="tk-ed tk-edd"><div class="tk-tbar"><button type="button" data-tk="fmt" data-v="b" title="Negrito" aria-label="Negrito"><b>B</b></button><button type="button" data-tk="fmt" data-v="i" title="Itálico" aria-label="Itálico"><i>I</i></button><button type="button" data-tk="fmt" data-v="dash" title="Lista com traço" aria-label="Lista com traço">–≡</button><button type="button" data-tk="fmt" data-v="dot" title="Lista com bolinha" aria-label="Lista com bolinha">•≡</button></div><textarea class="tk-desc" name="desc" rows="2" placeholder="Adicione uma descrição mais detalhada…">${esc(r.desc||'')}</textarea></div>
+    <h4 class="tk-h">Checklist</h4>
+    ${(r.check||[]).map((x,i)=>`<div class="tk-ci"><label class="tk-chk"><input type="checkbox" disabled> <span>${esc(x.t)}</span></label><button type="button" class="tk-x" data-a="recChkDel" data-v="${i}" aria-label="Remover item">✕</button></div>`).join('')}
+    <input name="newchk" placeholder="+ Adicionar item (Enter)" autocomplete="off" style="width:100%;margin-top:6px">
+    
     <div class="mf"><button class="btn" type="button" data-a="recs">Voltar</button><button class="btn pri" type="submit">Salvar</button></div></form></div>`}
   {const L=(S.recorrencias||[]).slice().sort((a,b)=>String(a.titulo).localeCompare(b.titulo));
     return `<div class="tk-recb"><div style="margin-bottom:10px"><button class="btn pri" data-a="recNew">+ Nova recorrência</button></div><p class="muted" style="margin:0 0 10px;font-size:13px">O sistema cria o cartão sozinho no dia certo (nunca aos domingos). Se o cartão anterior ainda estiver aberto, não cria outro. O cartão novo nasce limpo, sem histórico.</p>
@@ -1113,8 +1118,11 @@ document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.t
     else{const r=new FileReader();r.onload=()=>{res[fi]={n:f.name,s:f.size,d:r.result,m:f.lastModified||Date.now()};fin()};r.onerror=fin;r.readAsDataURL(f)}});return}
   if(!(u.draft&&u.draft.id===c.id))save()}
  render()});
-document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.recf||!ui.rv)return;
-  const f=t.form,r=ui.rv.r||{};ui.rv.r={...r,freq:t.value,titulo:f.titulo.value,desc:f.desc.value,hora:f.hora.value,col:f.col.value,membros:[...f.querySelectorAll('input[name=mb]:checked')].map(x=>x.value)};ui.rv.data={check:f.check.value};render()});
+function recSync(){const f=document.querySelector('form[data-form=rec]');if(!f||!ui.rv)return null;const r=ui.rv.r||(ui.rv.r={});
+  r.titulo=f.titulo.value;r.desc=f.desc.value;r.freq=f.freq.value;r.hora=f.hora.value;r.col=f.col.value;if(f.dsem)r.dsem=+f.dsem.value;if(f.dmes)r.dmes=f.dmes.value;
+  r.membros=[...f.querySelectorAll('input[name=mb]:checked')].map(x=>x.value);r.check=r.check||[];return f}
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.recf||!ui.rv)return;recSync();render()});
+document.addEventListener('keydown',e=>{const t=e.target;if(e.key!=='Enter'||!t||t.name!=='newchk'||!ui.rv)return;e.preventDefault();const f=recSync(),v=t.value.trim();if(!f||!v)return;ui.rv.r.check.push({t:v,ok:false});render();const n=document.querySelector('form[data-form=rec] input[name=newchk]');if(n)n.focus()});
 document.addEventListener('submit',e=>{const f=e.target,k=f.dataset&&f.dataset.tkform;if(!k)return;e.preventDefault();const u=tkU(),val=(f.elements[k==='col'?'n':'t'].value||'').trim();if(!val)return;
  if(k==='card'){{const nc={id:nid('t'),...(tkA()?{area:tkA()}:{}),col:f.dataset.col,titulo:val,desc:'',membros:[],prazo:'',check:[],anexos:[],msgs:[]};const cc=S.tcols.find(x=>x.id===nc.col),r=tkColResp(cc);if(r)nc.membros=[r];tkLog(nc,'adicionou este cartão a '+cc.nome);S.tarefas.push(nc)}}
  else if(k==='col'){S.tcols.push({id:nid('tc'),...(tkA()?{area:tkA()}:{}),nome:val,ord:Math.max(0,...S.tcols.map(x=>x.ord||0))+1})}
@@ -2238,7 +2246,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 11:25</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 11:50</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2423,9 +2431,10 @@ document.addEventListener('click',e=>{
    case 'diaPick':{const s=new Set(ui.modal.sel||[]);s.has(v)?s.delete(v):s.add(v);ui.modal.sel=[...s];render();break}
    case 'diaPickAll':{const nv=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec).filter(x=>!x.exists).map(x=>x.key),all=nv.length&&nv.every(k=>(ui.modal.sel||[]).includes(k));ui.modal.sel=all?[]:nv;render();break}
    case 'recs':ui.rv={v:'list'};ui.modal=null;render();break
+   case 'recChkDel':{recSync();ui.rv.r.check.splice(+v,1);render();break}
    case 'recBack':ui.rv=null;render();break
    case 'recNew':ui.rv={v:'form',r:{freq:'mensal',hora:'07:00',col:(tkCols().find(c=>/FL[ÁA]VIO/i.test(c.nome))||tkCols()[0]||{}).id,membros:[]},data:{},err:''};render();break
-   case 'recEdit':{const r=S.recorrencias.find(x=>x.id===v);if(r){ui.rv={v:'form',r:{...r},data:{},err:''};render()}break}
+   case 'recEdit':{const r=S.recorrencias.find(x=>x.id===v);if(r){ui.rv={v:'form',r:{...r,check:(r.check||[]).map(x=>({...x}))},data:{},err:''};render()}break}
    case 'recTog':{const r=S.recorrencias.find(x=>x.id===v);if(r){r.ativo=r.ativo===false;save();render()}break}
    case 'recDel':ui.confirm={title:'Excluir recorrência',msg:'Os cartões já criados continuam. Nenhum novo será criado.',ok:'Excluir',okFn:()=>{S.recorrencias=S.recorrencias.filter(x=>x.id!==v);save();ui.confirm=null;render()}};render();break
    case 'diaristas':ui.modal={type:'diaristas',rows:S.diaristas.map(d=>({...d}))};render();break
@@ -2801,11 +2810,11 @@ document.addEventListener('submit',e=>{
     return done(L.length+' diária(s) lançada(s).')}
   if(k==='rec'){
     const old=form.dataset.id?S.recorrencias.find(x=>x.id===form.dataset.id):null,fq=fd.freq,tt=String(fd.titulo||'').trim();
-    const rerr=m=>{ui.rv.err=m;ui.rv.data={titulo:fd.titulo,check:fd.check};ui.rv.r={...(ui.rv.r||{}),freq:fq,desc:fd.desc,hora:fd.hora,col:fd.col,dsem:+fd.dsem||undefined,dmes:fd.dmes,membros:[...form.querySelectorAll('input[name=mb]:checked')].map(x=>x.value)};render()};
+    recSync();const rerr=m=>{ui.rv.err=m;render()};
     if(!tt)return rerr('Informe o título da tarefa.');
     if(fq==='mensal'&&!(+fd.dmes>=1&&+fd.dmes<=31))return rerr('Informe o dia do mês (1 a 31).');
     const rec={id:old?old.id:nid('rc'),titulo:tt,desc:String(fd.desc||''),freq:fq,hora:fd.hora||'07:00',col:fd.col,membros:[...form.querySelectorAll('input[name=mb]:checked')].map(x=>x.value),
-      check:String(fd.check||'').split('\n').map(x=>x.trim()).filter(Boolean).map(t=>({t,ok:false})),ativo:old?old.ativo!==false:true,ultima:old?old.ultima||'':''};
+      check:[...(ui.rv.r.check||[]),...(String(fd.newchk||'').trim()?[{t:String(fd.newchk).trim(),ok:false}]:[])].map(x=>({t:x.t,ok:false})),ativo:old?old.ativo!==false:true,ultima:old?old.ultima||'':''};
     if(fq==='semanal')rec.dsem=+fd.dsem||1;if(fq==='mensal')rec.dmes=+fd.dmes;
     if(old)Object.assign(old,rec);else S.recorrencias.push(rec);
     save();ui.rv={v:'list'};render();toast('Recorrência salva.');return}
