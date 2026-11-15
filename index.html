@@ -273,11 +273,11 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-chip{position:relative;display:block;width:100%;text-align:left;border:0;border-radius:4px;padding:1px 6px;margin-top:2px;font-size:10.5px;line-height:1.5;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;font-family:inherit}
 .ag-chip.t{background:none;color:var(--ink)}.ag-chip.t:hover{background:var(--navy-soft)}
 .ag-chip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
-.ag-pop{position:fixed;z-index:60;background:var(--card,#fff);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 10px 12px;display:flex;flex-direction:column;overflow:hidden}
-.ag-pop-x{position:absolute;top:6px;right:6px;width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:15px;cursor:pointer}.ag-pop-x:hover{background:var(--line)}
+.ag-pop{position:fixed;z-index:60;font-size:12px;background:var(--card,#fff);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:6px 8px 8px;display:flex;flex-direction:column;overflow:hidden}
+.ag-pop-x{position:absolute;top:4px;right:4px;width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:15px;cursor:pointer}.ag-pop-x:hover{background:var(--line)}
 .ag-pop-h{align-self:center;display:flex;flex-direction:column;align-items:center;border:0;background:none;color:var(--ink);cursor:pointer;font-family:inherit;padding:2px 8px;border-radius:8px}.ag-pop-h:hover{background:var(--navy-soft)}
-.ag-pop-h span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.ag-pop-h b{font-size:24px;line-height:1.2;font-weight:500}
-.ag-pop-l{overflow-y:auto;margin-top:6px;min-height:0}.ag-pop-l .ag-chip{font-size:12px;padding:3px 8px;margin-top:3px}
+.ag-pop-h span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.ag-pop-h b{font-size:20px;line-height:1.2;font-weight:500}
+.ag-pop-l{overflow-y:auto;scrollbar-width:none;margin-top:2px;min-height:0}.ag-pop-l::-webkit-scrollbar{display:none}.ag-pop-l .ag-chip{font-size:11px;line-height:1.4;padding:2px 6px;margin-top:2px}
 .ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
 .ag-wrap{overflow-x:auto}.ag-wrap>div{min-width:620px}
 .ag-gridrow{display:grid;grid-template-columns:52px repeat(var(--n),minmax(0,1fr))}
@@ -739,9 +739,9 @@ function agMonth(){
     ${ev.slice(0,3).map(e=>evChip(e,false)).join('')}${ev.length>3?`<button type="button" class="ag-more" data-a="agMore" data-v="${x}">+${ev.length-3} mais</button>`:''}</div>`}
   return `<div class="ag-month">${h}</div>${agMorePop()}`}
 function agMorePop(){const m=ui.agMore;if(!m||ui.ag.view!=='month')return '';
-  const L=evOn(m.day),dd=Dt(m.day),r=m.r,W=Math.max(260,Math.min(320,innerWidth-16)),
-    left=Math.max(8,Math.min(innerWidth-W-8,r.l+r.w/2-W/2)),top=Math.max(8,Math.min(innerHeight-120,r.t-6)),
-    mh=Math.max(140,innerHeight-top-12);
+  const L=evOn(m.day),dd=Dt(m.day),r=m.r,W=Math.min(230,innerWidth-16),
+    left=Math.max(8,Math.min(innerWidth-W-8,r.l+r.w/2-W/2)),ph=62+L.length*25,top=Math.max(8,Math.min(r.t-6,innerHeight-ph-8)),
+    mh=Math.max(140,innerHeight-top-8);
   return `<div class="ag-pop" role="dialog" aria-label="Eventos de ${dt(m.day)}" style="left:${left}px;top:${top}px;width:${W}px;max-height:${mh}px">
    <button type="button" class="ag-pop-x" data-a="agMoreX" aria-label="Fechar">✕</button>
    <button type="button" class="ag-pop-h" data-a="agGoDay" data-v="${m.day}" title="Ver a semana deste dia"><span>${WDS[dd.getDay()]}</span><b>${dd.getDate()}</b></button>
