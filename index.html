@@ -891,10 +891,10 @@ function agFit(){const m=document.querySelector('.ag-month');if(!m)return;
   const setH=()=>{m.style.height=Math.max(380,innerHeight-m.getBoundingClientRect().top-14)+'px';m.style.gridTemplateRows='auto repeat('+rows+',minmax(0,1fr))'};
   const capOf=d=>{const ch=[...d.querySelectorAll('.ag-chip')];ch.forEach(c=>c.hidden=false);const h=d.clientHeight-(d.querySelector('.ag-num').offsetHeight+10),c1=ch[0]?ch[0].offsetHeight+2:19;return Math.max(1,Math.floor(h/c1))};
   const apply=()=>days.forEach(d=>{const ch=[...d.querySelectorAll('.ag-chip')],mb=d.querySelector('.ag-more');if(!mb)return;ch.forEach(c=>c.hidden=false);mb.hidden=true;
-    const cap=mob?3:capOf(d);if(ch.length>cap){const k=Math.max(0,cap-1);ch.forEach((c,i)=>c.hidden=i>=k);mb.textContent='+'+(ch.length-k)+' mais';mb.hidden=false}});
+    const cap=mob?3:Math.min(4,capOf(d));if(ch.length>cap){const k=Math.max(0,cap-1);ch.forEach((c,i)=>c.hidden=i>=k);mb.textContent='+'+(ch.length-k)+' mais';mb.hidden=false}});
   if(mob){m.style.height='';m.style.gridTemplateRows='';apply();return}
   m.classList.remove('dense');m.style.minHeight='';setH();
-  const need=Math.min(5,Math.max(...days.map(d=>d.querySelectorAll('.ag-chip').length)));
+  const need=Math.min(4,Math.max(...days.map(d=>d.querySelectorAll('.ag-chip').length)));
   const minCap=()=>Math.min(...days.map(capOf));
   if(minCap()<need){m.classList.add('dense');setH();
     if(minCap()<need){const d0=days[0],ch=d0.querySelector('.ag-chip'),ch1=(ch?ch.offsetHeight:15)+2,H=d0.querySelector('.ag-num').offsetHeight+10+need*ch1+4;
