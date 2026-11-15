@@ -278,7 +278,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-pop-h{align-self:center;display:flex;flex-direction:column;align-items:center;border:0;background:none;color:var(--ink);cursor:pointer;font-family:inherit;padding:2px 8px;border-radius:8px}.ag-pop-h:hover{background:var(--navy-soft)}
 .ag-pop-h span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.ag-pop-h b{font-size:20px;line-height:1.2;font-weight:500}
 .ag-pop-l{overflow-y:auto;scrollbar-width:none;margin-top:2px;min-height:0}.ag-pop-l::-webkit-scrollbar{display:none}.ag-pop-l .ag-chip{font-size:11px;line-height:1.4;padding:2px 6px;margin-top:2px}
-.ag-chip[hidden],.ag-more[hidden]{display:none!important}body:has(.ag-fullc) #hdr{display:none}body:has(.ag-fullc) .content{padding-top:10px;padding-bottom:10px}.ag-fullc .ag-day{min-height:0}.ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
+.ag-lay{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}.ag-main{min-width:0}.ag-side{position:sticky;top:0;max-height:calc(100vh - 150px);overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}.ag-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:13px}.ag-sx{border:0;background:none;color:var(--navy);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.ag-sl{display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;min-width:0}.ag-sl input{width:auto;flex:none}.ag-sl i{width:10px;height:10px;border-radius:3px;flex:none}.ag-sl span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ag-sl.dis{opacity:.5}.ag-fs{width:100%;box-sizing:border-box;margin:4px 0 6px;padding:6px 8px;font-size:13px}.ag-fl{display:flex;flex-direction:column}@media(max-width:900px){.ag-lay{grid-template-columns:minmax(0,1fr)}.ag-side{position:static;max-height:260px}}.ag-chip[hidden],.ag-more[hidden]{display:none!important}body:has(.ag-fullc) #hdr{display:none}body:has(.ag-fullc) .content{padding-top:10px;padding-bottom:10px}.ag-fullc .ag-day{min-height:0}.ag-more{font-size:12px;color:var(--muted);border:0;background:none;padding:1px 6px;cursor:pointer;font-weight:600}
 .ag-wrap{overflow-x:auto}.ag-wrap>div{min-width:620px}
 .ag-gridrow{display:grid;grid-template-columns:52px repeat(var(--n),minmax(0,1fr))}
 .ag-hd{text-align:center;padding:6px 2px;border-left:1px solid var(--line);font-size:12px;color:var(--muted);text-transform:uppercase}
@@ -481,7 +481,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
-const ui={brInat:false,ecT:'',eft:'',efz:null,emT:'',emItem:'',ag:{view:'month',date:today(),tec:'',lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:'',lt:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
+const ui={brInat:false,ecT:'',eft:'',efz:null,emT:'',emItem:'',ag:{view:'month',date:today(),tec:'',tecs:[],farms:[],fs:'',side:innerWidth>900,lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:'',lt:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
 
@@ -665,7 +665,7 @@ function vComis(){return `<div class="card"><div class="card-h"><h3>Comissões V
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const WDS=['dom','seg','ter','qua','qui','sex','sáb'],WDL=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 const TECCOL={'Flávio':'#1f2328','Hiago':'#3b6fd4','Erikson':'#7d8790','Joaquim':'#e8730c','Célio':'#b5367a'},ENTCOL='#1d8f5a';
-const evCol=e=>(ui.ag&&ui.ag.f&&ui.ag.f.farm)?ENTCOL:evCol0(e),evCol0=e=>(e.title==='Entourar'||!(e.tecs||[]).length)?(e.title==='Entourar'?ENTCOL:(e.color||'#1f2328')):(TECCOL[e.tecs[0]]||e.color||'#1f2328');
+const evCol=e=>(ui.ag&&ui.ag.farms&&ui.ag.farms.length)?ENTCOL:evCol0(e),evCol0=e=>(e.title==='Entourar'||!(e.tecs||[]).length)?(e.title==='Entourar'?ENTCOL:(e.color||'#1f2328')):(TECCOL[e.tecs[0]]||e.color||'#1f2328');
 const EVCOL=['#3b6fd4','#1d8f5a','#c9561a','#c0392b','#8e44ad','#0b8a8f','#a8741a','#546e7a'];
 const pad2=n=>String(n).padStart(2,'0');
 const Dt=x=>new Date(x+'T12:00:00');
@@ -676,10 +676,10 @@ const tmin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[
 const evFarm=e=>(S.farms.find(f=>f.id===e.farm)||{}).name||'';
 const AGTEC=['Flávio','Hiago','Erikson','Célio','Joaquim'],AGTECF=AGTEC;
 const evTec=(e,t)=>(e.tecs||[]).length?e.tecs.some(x=>nrm(x).includes(nrm(t))):nrm(e.team).includes(nrm(t));
-const agMatch=e=>{const f=ui.ag.f;return (!f.farm||e.farm===f.farm)&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
+const agMatch=e=>{const f=ui.ag.f;return (!ui.ag.farms.length||ui.ag.farms.includes(e.farm))&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
-const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tec&&'Profissional: '+ui.ag.tec,f.farm&&'Fazenda: '+farmShort(f.farm),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
-const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tec||evTec(e,ui.ag.tec))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
+const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tecs.length&&'Profissional: '+ui.ag.tecs.join(', '),ui.ag.farms.length&&'Fazenda: '+ui.ag.farms.map(farmShort).join(', '),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
+const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tecs.length||ui.ag.tecs.some(t=>evTec(e,t)))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
 const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','Andrológico'];
 const AVCATS=['Novilhas Nelore','Novilhas Angus','Vacas Solteiras'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Vacas Primíparas','Vacas Secundíparas','Vacas Multíparas','Vacas Solteiras'];
@@ -780,6 +780,17 @@ function agTrash(){
   const sel=(ui.ag.sel||[]).filter(id=>L.some(e=>e.id===id)),all=sel.length===L.length;
   const bar=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px"><label style="display:flex;gap:8px;align-items:center;font-weight:600;color:var(--ink);cursor:pointer"><input type="checkbox" data-a="agSelAll"${all?' checked':''} style="width:auto"> Selecionar todos</label><span class="muted" style="font-size:13px">${sel.length?sel.length+' selecionado(s)':'Nenhum selecionado'}</span><span style="flex:1"></span><button type="button" class="btn sm" data-a="agRestoreSel"${sel.length?'':' disabled'}>Restaurar selecionados</button><button type="button" class="btn sm dng" data-a="agPurgeSel"${sel.length?'':' disabled'}>Excluir selecionados definitivamente</button></div>`;
   return note+bar+L.map(e=>{const dd=Dt(e.date);return `<div class="ag-list-d" style="align-items:center"><input type="checkbox" data-a="agSel" data-v="${e.id}"${sel.includes(e.id)?' checked':''} style="width:auto;flex:none"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0"><div class="ag-li" style="cursor:default;flex-wrap:wrap"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span style="flex:1;min-width:180px"><b>${esc(evLabel(e,true))}</b>${e.total?` · <span class="muted">Total: ${esc(e.total)}</span>`:''}<br><small class="muted">Excluído em ${e.deletedAt?new Date(e.deletedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—'}</small></span><button type="button" class="btn sm" data-a="agRestore" data-v="${e.id}">Restaurar</button></div></div></div>`}).join('')}
+const agFarmList=()=>{const q=nrm(ui.ag.fs||''),L=agFarms().filter(([id,n])=>!q||nrm(n).includes(q));
+  return L.length?L.map(([id,n])=>`<label class="ag-sl"><input type="checkbox" data-a="agFarmT" data-v="${id}"${ui.ag.farms.includes(id)?' checked':''}><span>${esc(n)}</span></label>`).join(''):'<div class="muted" style="font-size:12px;padding:6px 2px">Nenhuma fazenda.</div>'};
+function agSide(){const T=ui.ag.tecs,dis=ui.ag.farms.length>0;
+  return `<aside class="ag-side" aria-label="Agendas e fazendas">
+   <div class="ag-sh"><b>Agenda Profissional</b></div>
+   <label class="ag-sl"><input type="checkbox" data-a="agTecAll"${T.length?'':' checked'}${dis?' disabled':''}><span>Todos</span></label>
+   ${AGTEC.map(t=>`<label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''}><i style="background:${TECCOL[t]}"></i><span>${t}</span></label>`).join('')}
+   ${dis?'<div class="muted" style="font-size:11px;margin:2px 0 0">Com fazenda marcada, todos os profissionais aparecem. Desmarque as fazendas para escolher o profissional.</div>':''}
+   <div class="ag-sh" style="margin-top:14px"><b>Fazendas</b>${ui.ag.farms.length?`<button type="button" class="ag-sx" data-a="agFarmClear">Limpar (${ui.ag.farms.length})</button>`:''}</div>
+   <input type="search" class="ag-fs" data-agfs="1" value="${esc(ui.ag.fs||'')}" placeholder="Buscar fazenda…" autocomplete="off">
+   <div id="ag-farmlist" class="ag-fl">${agFarmList()}</div></aside>`}
 function vAgenda(){
   if(ui.ag.view==='day')ui.ag.view='week';
   const {view,date}=ui.ag,vb=(v,l)=>`<button class="btn ${view===v?'pri':''}" data-a="agView" data-v="${v}">${l}</button>`;
@@ -787,9 +798,8 @@ function vAgenda(){
   const FS=!!ui.agFull;
   return `<div class="card${FS?' ag-fullc':''}"><div class="ag-bar"><button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
    <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}${vb('trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':''))}</span>${FS?'':'<button class="btn" data-a="agPrint">Imprimir</button>'}<button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button><button class="btn" data-a="agFull" title="${FS?'Sair da tela cheia (Esc)':'Esconder o cabeçalho e as barras para ver o calendário maior'}">${FS?'✕ Sair da tela cheia':'⛶ Tela cheia'}</button></div>
-   ${FS?'':`<div class="ag-bar" style="margin-top:-2px">${view==='trash'?'':`<b style="font-size:13px">Agenda Profissional</b><span class="ag-seg"><button class="btn sm ${ui.ag.tec?'':'pri'}" data-a="agTec" data-v=""${ui.ag.f.farm?' disabled':''}>Todos</button>${AGTEC.map(t=>`<button class="btn sm ${ui.ag.tec===t?'pri':''}" data-a="agTec" data-v="${t}"${ui.ag.f.farm?' disabled title="Tire o filtro de fazenda para escolher o profissional"':''}>${t}</button>`).join('')}</span>
-   <select class="btn sm${ui.ag.f.farm?' pri':''}" data-agfarm="1" aria-label="Filtrar Fazendas" style="width:auto;max-width:240px"><option value="">Filtrar Fazendas</option>${agFarms().map(([id,n])=>`<option value="${id}"${ui.ag.f.farm===id?' selected':''}>${esc(n)}</option>`).join('')}</select>`}<button class="btn sm" data-a="tab" data-v="i-lotes" style="margin-left:auto">← Agendamentos</button></div>`}
-   ${!FS&&view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${body}</div>`}
+   ${FS?'':`<div class="ag-bar" style="margin-top:-2px">${view==='trash'?'':`<button class="btn sm${ui.ag.side?' pri':''}" data-a="agSideT" title="Mostrar ou esconder o painel de profissionais e fazendas">☰ Profissionais e fazendas</button>`}<button class="btn sm" data-a="tab" data-v="i-lotes" style="margin-left:auto">← Agendamentos</button></div>`}
+   ${!FS&&view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${view!=='trash'&&ui.ag.side?`<div class="ag-lay">${agSide()}<div class="ag-main">${body}</div></div>`:body}</div>`}
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8);agFit()}
 function agFit(){const m=document.querySelector('.ag-month');if(!m||!ui.agFull)return;
   const days=[...m.querySelectorAll('.ag-day')],rows=days.length/7,mob=innerWidth<=640;
@@ -1510,8 +1520,8 @@ function modalHtml(){
     </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}${e.id&&(e.title==='IM'||e.title==='AV + IM')?`<button class="btn" type="button" data-a="agProto" data-v="${e.id}">Criar protocolo IATF</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='agfil'){const f=ui.ag.f;
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
-    ${fldHtml('Profissional',`<select name="tec"${f.farm?' disabled':''}>${opts(AGTEC.map(x=>[x,x]),f.farm?'':ui.ag.tec,'Todos')}</select>`)}
-    ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms.filter(x=>!isVale(x)&&!x.nolote)].sort((a,b)=>farmLbl(a).localeCompare(farmLbl(b))).map(x=>[x.id,farmLbl(x)]),f.farm,'Todas')}</select>`)}
+    ${fldHtml('Profissional',`<select name="tec"${ui.ag.farms.length?' disabled':''}>${opts(AGTEC.map(x=>[x,x]),ui.ag.farms.length?'':(ui.ag.tecs[0]||''),'Todos')}</select>`)}
+    ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms.filter(x=>!isVale(x)&&!x.nolote)].sort((a,b)=>farmLbl(a).localeCompare(farmLbl(b))).map(x=>[x.id,farmLbl(x)]),ui.ag.farms[0]||'','Todas')}</select>`)}
     ${fldHtml('Procedimento',`<select name="title">${opts(EVTIT.map(x=>[x,svn(x)]),f.title,'Todos')}</select>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),f.periodo,'Todos')}</select>`)}
     ${fldHtml('Lote',`<input name="lote" value="${esc(f.lote)}" autocomplete="off" style="text-transform:uppercase">`)}
@@ -2441,15 +2451,20 @@ document.addEventListener('click',e=>{
    case 'agPrint':ui.modal={type:'agpdf'};render();break;
    case 'iniAgendar':{const l=S.lotes.find(x=>x.id===v);ui.modal={type:'ev',data:{lock:true,date:today(),periodo:'Dia Inteiro',farm:l.farm,lote:String(l.name||'').toUpperCase(),total:l.total,cat:NCATS.includes(l.category)?l.category:''}};render();break}
    case 'agFil':ui.modal={type:'agfil'};render();break;
-   case 'agFilClear':ui.ag.tec='';ui.ag.f={farm:'',title:'',cat:'',periodo:'',lote:'',q:''};ui.modal=null;render();break;
-   case 'agTec':ui.ag.tec=v;render();break;
+   case 'agFilClear':ui.ag.tecs=[];ui.ag.farms=[];ui.ag.f={farm:'',title:'',cat:'',periodo:'',lote:'',q:''};ui.modal=null;render();break;
+   case 'agTec':ui.ag.tecs=v?[v]:[];render();break;
+   case 'agSideT':ui.ag.side=!ui.ag.side;render();break;
+   case 'agTecAll':ui.ag.tecs=[];render();break;
+   case 'agTecT':{const s=new Set(ui.ag.tecs);s.has(v)?s.delete(v):s.add(v);ui.ag.tecs=AGTEC.filter(x=>s.has(x));render();break}
+   case 'agFarmT':{const s=new Set(ui.ag.farms);s.has(v)?s.delete(v):s.add(v);ui.ag.farms=[...s];if(ui.ag.farms.length)ui.ag.tecs=[];render();break}
+   case 'agFarmClear':ui.ag.farms=[];render();break;
    case 'agView':ui.ag.view=v;render();break;
    case 'agToday':ui.ag.date=today();render();break;
    case 'agPrev':case 'agNext':{const k=a==='agNext'?1:-1,vw=ui.ag.view;
      if(vw==='month'){const d=Dt(ui.ag.date);d.setDate(1);d.setMonth(d.getMonth()+k);ui.ag.date=isoD(d)}else if(vw==='list'&&(ui.ag.lf||ui.ag.lt)){const [a,n]=agRange();ui.ag.lf=addDays(a,k*n);ui.ag.lt=addDays(a,k*n+n-1)}else ui.ag.date=addDays(ui.ag.date,k*(vw==='day'?1:vw==='week'?7:vw==='list'?60:30));render();break}
    case 'agGoDay':ui.ag.date=v;ui.ag.view='week';render();break;
    case 'agNew':{const [d,h]=String(v).split('|');const H=h===undefined?null:+h;
-     ui.modal={type:'ev',data:{date:d,periodo:H===null?'Dia Inteiro':(H<12?'Manhã':'Tarde'),...(AGTEC.includes(ui.ag.tec)?{tecs:[ui.ag.tec]}:{})}};render();break}
+     ui.modal={type:'ev',data:{date:d,periodo:H===null?'Dia Inteiro':(H<12?'Manhã':'Tarde'),...(ui.ag.tecs.length===1?{tecs:[ui.ag.tecs[0]]}:{})}};render();break}
    case 'agProto':{const x=S.eventos.find(q=>q.id===v);if(!x)break;ui.modal={type:'evproto',ev:{...x},sel:{prot:'',niatf:''}};render();break}
    case 'agSel':{const s=new Set(ui.ag.sel||[]);s.has(v)?s.delete(v):s.add(v);ui.ag.sel=[...s];render();break}
    case 'agSelAll':{const n=(ui.ag.sel||[]).filter(id=>S.eventos_lixo.some(e=>e.id===id)).length;ui.ag.sel=n===S.eventos_lixo.length?[]:S.eventos_lixo.map(e=>e.id);render();break}
@@ -2523,6 +2538,7 @@ document.addEventListener('input',e=>{
   if(t.name==='lote'&&t.closest&&t.closest('form[data-form=ev]')){const p=t.selectionStart;t.value=t.value.toUpperCase();try{t.setSelectionRange(p,p)}catch(e){}}
   if(t.closest&&t.closest('form[data-form=evproto]')){const f=t.closest('form').elements,o=document.getElementById('evp-prev');if(o)o.innerHTML=evpPrev(t.closest('form').dataset.im,f.prot.value,f.niatf.value,t.closest('form').dataset.farm)}
   if(t.closest&&t.closest('form[data-form=ev]')){const en=t.closest('form').elements.end;if(t.name==='end')t.dataset.touched='1';if(t.name==='date'&&en&&(!en.dataset.touched||en.value<t.value))en.value=t.value}
+  if(t.dataset.agfs!==undefined){ui.ag.fs=t.value;const b=document.getElementById('ag-farmlist');if(b)b.innerHTML=agFarmList();return}
   if(t.dataset.agq){ui.ag.f.q=t.value;const b=document.getElementById('ag-list');if(b)b.innerHTML=agList();return}
   if(t.dataset.fq){const k=t.dataset.fq;ui.ff[k].q=t.value;const b=document.getElementById('fin-tbl');if(b)b.innerHTML=finTable(k);return}
   if(t.name&&/^(qty|unit)\.\d+$/.test(t.name)&&t.closest&&t.closest('form[data-form=fin]')){const i=t.name.split('.')[1],f=t.closest('form').elements,o=document.getElementById('fin-total-'+i);if(o)o.value=brl(r2(Number(f['qty.'+i].value||0)*Number(f['unit.'+i].value||0)))}
@@ -2816,7 +2832,7 @@ document.addEventListener('submit',e=>{
     const ne={id:nid('e'),...rec};S.eventos.push(ne);
     if(rec.title==='IM'||rec.title==='AV + IM'){save();ui.modal={type:'evproto',ev:ne,sel:{prot:'',niatf:''}};render();toast(msg);return}
     return done(msg)}
-  if(k==='agfil'){ui.ag.tec=fd.farm?'':(fd.tec||'');ui.ag.f={farm:fd.farm||'',title:fd.title||'',cat:fd.cat||'',periodo:fd.periodo||'',lote:(fd.lote||'').trim().toUpperCase(),q:(fd.q||'').trim()};ui.modal=null;render();return}
+  if(k==='agfil'){ui.ag.farms=fd.farm?[fd.farm]:[];ui.ag.tecs=fd.farm?[]:(fd.tec?[fd.tec]:[]);ui.ag.f={farm:'',title:fd.title||'',cat:fd.cat||'',periodo:fd.periodo||'',lote:(fd.lote||'').trim().toUpperCase(),q:(fd.q||'').trim()};ui.modal=null;render();return}
   if(k==='agdelm'){
     const id=form.dataset.id,ids=[id,...[...form.querySelectorAll('input[name=rel]:checked')].map(c=>c.value)];
     const mv=S.eventos.filter(q=>ids.includes(q.id));
