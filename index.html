@@ -390,7 +390,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ag-dl-hex{display:block;position:relative;border:1px solid #747775;border-radius:6px;padding:14px 12px 6px}.ag-dl-hex span{position:absolute;top:-8px;left:10px;background:#edf1f9;padding:0 4px;font-size:12px;color:#444746}
 .ag-dl-hex input{width:100%;border:0;background:transparent;font:inherit;font-size:16px;color:#1f1f1f;outline:none;padding:0}
 .ag-dl-f{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}.ag-dl-f button{border:0;border-radius:20px;padding:10px 20px;font:inherit;font-size:14px;font-weight:500;cursor:pointer}.ag-dl-c{background:transparent;color:#0b57d0}.ag-dl-c:hover{background:#dde3ee}.ag-dl-s{background:#c2e7ff;color:#001d35}.ag-dl-s:hover{background:#b0d9f5}
-.ag-tip{position:fixed;z-index:80;width:290px;max-width:calc(100vw - 16px);background:#edf1f9;color:#202124;border-radius:8px;box-shadow:0 2px 6px 2px rgba(60,64,67,.15),0 1px 2px rgba(60,64,67,.3);padding:12px 14px;font-family:Roboto,'Segoe UI',Arial,sans-serif;font-size:13px;pointer-events:none}
+.ag-tip{position:fixed;z-index:80;width:290px;max-width:calc(100vw - 16px);background:#edf1f9;color:#202124;border-radius:8px;box-shadow:0 2px 6px 2px rgba(60,64,67,.15),0 1px 2px rgba(60,64,67,.3);padding:12px 14px;font-family:Roboto,'Segoe UI',Arial,sans-serif;font-size:13px}
 .ag-tt{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}.ag-tt>i{width:14px;height:14px;border-radius:4px;flex:none;margin-top:4px}
 .ag-tn{font-size:16px;line-height:1.3;font-weight:500}.ag-td{color:#5f6368;font-size:13px;margin-top:2px}
 .ag-tr{display:flex;gap:8px;padding:2px 0 2px 24px;line-height:1.4}.ag-tr span{flex:0 0 66px;color:#5f6368}.ag-tr b{font-weight:400;min-width:0}
@@ -792,7 +792,7 @@ const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='trash')return 'Lixeira';
   if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
   return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
-const evChip=(e,full)=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${evCol(e)}" data-a="agEdit" data-v="${e.id}">${esc(evLabel(e,full))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
+const evChip=(e,full)=>`<button type="button" draggable="true" data-ev="${e.id}" class="ag-chip" style="background:${evCol(e)}" data-a="agTipE" data-v="${e.id}">${esc(evLabel(e,full))}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`;
 function agMonth(){
   const d=Dt(ui.ag.date),first=isoD(new Date(d.getFullYear(),d.getMonth(),1)),st=weekStart(first),td=today();
   const n=Math.ceil((wdi(first)+new Date(d.getFullYear(),d.getMonth()+1,0).getDate())/7)*7;
@@ -808,14 +808,14 @@ function agTipHtml(e){const dd=Dt(e.date),de=Dt(e.end||e.date),same=(e.end||e.da
   const tec=(e.tecs||[])[0],row=(k,v)=>v?`<div class="ag-tr"><span>${k}</span><b>${esc(v)}</b></div>`:'';
   return `<div class="ag-tt"><i style="background:${evCol(e)}"></i><div><div class="ag-tn">${esc(svn(e.title||''))}${e.lote?' · '+esc(e.lote+(e.suf||'')):''}</div><div class="ag-td">${esc(cap1(same?fm(dd):fm(dd)+' – '+fm(de)))} · ${esc(evTime(e))}</div></div></div>
    ${row('Fazenda',evFarm(e))}${row('Categoria',e.cat)}${row('Total',e.total?String(e.total)+' animais':'')}${row('Equipe',e.team)}${tec?`<div class="ag-tr"><span>Agenda</span><b><i class="ag-tdot" style="background:${tecCol(tec)}"></i>${esc(tec)}</b></div>`:''}${e.desc?`<div class="ag-tdesc">${esc(e.desc)}</div>`:''}`}
-document.addEventListener('mouseover',ev=>{const el=ev.target.closest&&ev.target.closest('.ag-chip,.ag-ev,.ag-li');
-  if(!el){if(!(ev.target.closest&&ev.target.closest('#ag-tip')))agTipHide();return}
-  const id=el.dataset.ev||el.dataset.v,e=S.eventos.find(x=>x.id===id);if(!e||el.dataset.a!=='agEdit')return;
-  if(el._tip===id&&document.getElementById('ag-tip'))return;
-  agTipHide();agTipT=setTimeout(()=>{const r=el.getBoundingClientRect(),d=document.createElement('div');d.id='ag-tip';d.className='ag-tip';d.innerHTML=agTipHtml(e);document.body.appendChild(d);
-    const w=d.offsetWidth,h=d.offsetHeight;let x=r.left+r.width/2-w/2,y=r.bottom+6;if(y+h>innerHeight-8)y=Math.max(8,r.top-h-6);x=Math.max(8,Math.min(innerWidth-w-8,x));d.style.left=x+'px';d.style.top=y+'px'},350)});
-document.addEventListener('mouseout',ev=>{if(!ev.relatedTarget||!(ev.relatedTarget.closest&&ev.relatedTarget.closest('.ag-chip,.ag-ev,.ag-li,#ag-tip')))agTipHide()});
-document.addEventListener('click',agTipHide,true);
+let agTipEl=null,agTipOut=null;
+function agTipShow(el,e){agTipHide();agTipEl=el;const r=el.getBoundingClientRect(),d=document.createElement('div');d.id='ag-tip';d.className='ag-tip';d.innerHTML=agTipHtml(e);document.body.appendChild(d);
+  const w=d.offsetWidth,h=d.offsetHeight;let x=r.left+r.width/2-w/2,y=r.bottom+2;if(y+h>innerHeight-8)y=Math.max(8,r.top-h-2);x=Math.max(8,Math.min(innerWidth-w-8,x));d.style.left=x+'px';d.style.top=y+'px'}
+const agTipIn=n=>!!(n&&n.closest&&(n.closest('#ag-tip')||(agTipEl&&agTipEl.contains(n))));
+document.addEventListener('mouseout',ev=>{if(!document.getElementById('ag-tip'))return;if(agTipIn(ev.relatedTarget))return;clearTimeout(agTipOut);agTipOut=setTimeout(agTipHide,250)});
+document.addEventListener('mouseover',ev=>{if(agTipIn(ev.target))clearTimeout(agTipOut)});
+document.addEventListener('click',ev=>{if(!(ev.target.closest&&ev.target.closest('#ag-tip')))agTipHide()},true);
+document.addEventListener('dblclick',ev=>{const el=ev.target.closest&&ev.target.closest('.ag-chip,.ag-ev,.ag-li');if(!el||el.dataset.a!=='agTipE')return;if(ev.target.closest('.ag-x'))return;const e=S.eventos.find(x=>x.id===(el.dataset.ev||el.dataset.v));if(!e)return;agTipHide();ui.modal={type:'ev',data:{...e}};render()});
 window.addEventListener('scroll',agTipHide,true);
 function agMorePop(){const m=ui.agMore;if(!m||ui.ag.view!=='month')return '';
   const L=evOn(m.day),dd=Dt(m.day),r=m.r,W=Math.min(230,innerWidth-16),
@@ -841,7 +841,7 @@ function agWeek(days){
     const now=new Date(),nowLine=x===td?`<div class="ag-now" style="top:${(now.getHours()*60+now.getMinutes())*48/60}px"></div>`:'';
     return `<div class="ag-col">${hrs.map(h=>`<div class="ag-slot" data-a="agNew" data-v="${x}|${h}" data-drop="${x}|${h}"></div>`).join('')}${nowLine}
     ${ev.map(e=>{const l=L[e.id],top=l.s*48/60,ht=Math.max(20,(l.e-l.s)*48/60),w=100/l.n;
-      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${evCol(e)}" data-a="agEdit" data-v="${e.id}"><b>${esc(evLabel(e,true))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
+      return `<button type="button" draggable="true" data-ev="${e.id}" class="ag-ev" style="top:${top}px;height:${ht}px;left:calc(${l.lane*w}% + 1px);width:calc(${w}% - 3px);background:${evCol(e)}" data-a="agTipE" data-v="${e.id}"><b>${esc(evLabel(e,true))}</b><span>${esc(evTime(e))}</span>${ht>46&&(e.total||e.cat)?`<span>${esc([e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</span>`:''}<span class="ag-x" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">🗑</span></button>`}).join('')}</div>`}).join('');
   return `<div class="ag-wrap"><div style="--n:${n}">
    <div class="ag-gridrow"><div></div>${head}</div>
    <div class="ag-gridrow"><div class="ag-hr" style="height:auto;font-size:10px;padding-top:8px">dia todo</div>${ad}</div>
@@ -850,7 +850,7 @@ function agRange(){const a=ui.ag.lf||ui.ag.date;let e=ui.ag.lt||addDays(a,59);if
 function agList(){
   let h='',any=false;const [a0,n0]=agRange();
   for(let i=0;i<n0;i++){const x=addDays(a0,i),ev=evOn(x);if(!ev.length)continue;any=true;const dd=Dt(x);
-    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<div class="ag-liw"><button type="button" class="ag-li" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e,true))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button><button type="button" class="btn sm dng ag-lix" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">Excluir</button></div>`).join('')}</div></div>`}
+    h+=`<div class="ag-list-d"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0">${ev.map(e=>`<div class="ag-liw"><button type="button" class="ag-li" data-a="agTipE" data-v="${e.id}"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span><b>${esc(evLabel(e,true))}</b>${e.total||e.desc||e.cat?` · <span class="muted">${esc([e.total?'Total: '+e.total:'',e.cat,e.desc].filter(Boolean).join(' · '))}</span>`:''}</span></button><button type="button" class="btn sm dng ag-lix" data-a="agDel" data-v="${e.id}" title="Mover para a Lixeira">Excluir</button></div>`).join('')}</div></div>`}
   return any?h:empty('Nenhum evento neste período.')}
 function agTrash(){
   const L=[...S.eventos_lixo].sort((a,b)=>(b.deletedAt||0)-(a.deletedAt||0));
@@ -2607,6 +2607,7 @@ document.addEventListener('click',e=>{
    case 'diaAdd':{const r=diaRead();r.push({name:'',valor:''});ui.modal.rows=r;render();break}
    case 'diaDel':{const r=diaRead();r.splice(+v,1);ui.modal.rows=r;render();break}
    case 'agDelAll':document.querySelectorAll('form[data-form=agdelm] input[name=rel]').forEach(c=>c.checked=true);break
+   case 'agTipE':{const e=S.eventos.find(x=>x.id===v);if(!e)break;if(matchMedia('(hover:none)').matches){ui.modal={type:'ev',data:{...e}};render()}else agTipShow(b,e);break}
    case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
    case 'agDel':{const x=S.eventos.find(q=>q.id===v);if(!x)break;
      if(evRel(x).length){ui.modal={type:'agdelm',id:v};render();break}
