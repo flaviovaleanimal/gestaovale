@@ -2062,10 +2062,10 @@ function vLotes(){
    ${searchBox('lt')}
   </div>
   <div class="tw">${list.length?`<table><thead><tr><th>Fazenda / Lote</th><th>Procedimento</th><th class="num">Total</th><th>Categoria</th><th>Início Parição</th><th>Final Parição</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-  ${list.map(l=>`<tr${qHide('lt',[farmLbl(F(l.farm)),l.name,l.category,l.status,svn(l.proc||''),l.obs,l.total].join(' '))}><td><b>${esc(farmLbl(F(l.farm)))}</b> / ${esc(l.name)}</td><td>${esc(svn(l.proc||'')||'—')}</td><td class="num">${fmt(l.total)}</td><td>${esc(l.category)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td>
+  ${list.map(l=>`<tr data-tot="${Number(l.total)||0}"${qHide('lt',[farmLbl(F(l.farm)),l.name,l.category,l.status,svn(l.proc||''),l.obs,l.total].join(' '))}><td><b>${esc(farmLbl(F(l.farm)))}</b> / ${esc(l.name)}</td><td>${esc(svn(l.proc||'')||'—')}</td><td class="num">${fmt(l.total)}</td><td>${esc(l.category)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td>
    <td><span class="pill ${l.status==='Aberto'?'in':'out'}">${esc(l.status)}</span></td>
    <td><div class="acts">${l.status==='Aberto'?`<button class="btn sm pri" data-a="iniAgendar" data-v="${l.id}">Agendar</button>`:''}<button class="btn sm" data-a="editLote" data-v="${l.id}">Editar</button></div></td></tr>`).join('')}
-  </tbody></table>`:empty(S.lotes.length?'Nenhum lote com esses filtros.':'Nenhum lote agendado. Clique em Agendar lote para começar.')}</div></div>`;
+  </tbody><tfoot data-ltot="1">${(()=>{const v=list.filter(l=>!ui.q.lt||nrm([farmLbl(F(l.farm)),l.name,l.category,l.status,svn(l.proc||''),l.obs,l.total].join(' ')).includes(nrm(ui.q.lt)));return `<tr><td><b>Total · <span data-n>${fmt(v.length)}</span> <span data-w>${v.length===1?'lote':'lotes'}</span></b></td><td></td><td class="num"><b data-t>${fmt(v.reduce((a,l)=>a+(Number(l.total)||0),0))}</b></td><td colspan="5"></td></tr>`})()}</tfoot></table>`:empty(S.lotes.length?'Nenhum lote com esses filtros.':'Nenhum lote agendado. Clique em Agendar lote para começar.')}</div></div>`;
 }
 
 const TECNICOS=['Flávio Alves','Hiago Miguel','Erikson Caetano','Célio Gregócio','Joaquim Gomes','José Danilo'];
@@ -2235,7 +2235,7 @@ function render(){
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 10:50</div>`;
+  sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 11:00</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div><div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -2485,7 +2485,7 @@ document.addEventListener('input',e=>{
   if(t.dataset.agq){ui.ag.f.q=t.value;const b=document.getElementById('ag-list');if(b)b.innerHTML=agList();return}
   if(t.dataset.fq){const k=t.dataset.fq;ui.ff[k].q=t.value;const b=document.getElementById('fin-tbl');if(b)b.innerHTML=finTable(k);return}
   if(t.name&&/^(qty|unit)\.\d+$/.test(t.name)&&t.closest&&t.closest('form[data-form=fin]')){const i=t.name.split('.')[1],f=t.closest('form').elements,o=document.getElementById('fin-total-'+i);if(o)o.value=brl(r2(Number(f['qty.'+i].value||0)*Number(f['unit.'+i].value||0)))}
-  if(t.dataset.q){ui.q[t.dataset.q]=t.value;const c=t.closest('.card');if(c)c.querySelectorAll('tbody tr').forEach(r=>{r.style.display=!t.value||nrm(r.textContent).includes(nrm(t.value))?'':'none'});return}
+  if(t.dataset.q){ui.q[t.dataset.q]=t.value;const c=t.closest('.card');if(c){c.querySelectorAll('tbody tr').forEach(r=>{r.style.display=!t.value||nrm(r.textContent).includes(nrm(t.value))?'':'none'});const ft=c.querySelector('tfoot[data-ltot]');if(ft){let n=0,tt=0;c.querySelectorAll('tbody tr').forEach(r=>{if(r.style.display!=='none'){n++;tt+=+r.dataset.tot||0}});ft.querySelector('[data-n]').textContent=fmt(n);ft.querySelector('[data-w]').textContent=n===1?'lote':'lotes';ft.querySelector('[data-t]').textContent=fmt(tt)}}return}
   if(t.dataset.f){const [f,n]=t.dataset.f.split('.');ui.f[f][n]=t.value}
   if(t.dataset.pf){const [kd,i,k]=t.dataset.pf.split('.');ui.f['p'+kd].rows[+i][k]=t.value}
   if(t.dataset.srow){const [i,k]=t.dataset.srow.split('.');ui.f.saida.rows[+i][k]=t.value}
