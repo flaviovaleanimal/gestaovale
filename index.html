@@ -339,6 +339,44 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
   .paper-h,.paper th,.paper tfoot td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .paper tr{break-inside:avoid}
 }
+
+/* ===== Agenda no estilo Google Agenda ===== */
+.card.agc{border:0;background:transparent;border-radius:0;padding:4px 6px;font-family:'Google Sans',Roboto,'Segoe UI',Arial,sans-serif}
+.agc .ag-bar{gap:6px;margin-bottom:6px}
+.agc .ag-bar .btn{border-radius:20px;font-weight:500;min-height:36px;padding:0 12px;font-size:13px;white-space:nowrap;background:transparent;border:1px solid var(--line);color:var(--ink)}
+.agc .ag-bar .btn:hover{background:var(--navy-soft)}
+.agc .ag-bar .btn.pri{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.agc .ag-bar .ag-seg .btn{border-radius:0;margin-left:-1px}.agc .ag-seg .btn:first-child{border-radius:20px 0 0 20px;margin-left:0}.agc .ag-seg .btn:last-child{border-radius:0 20px 20px 0}
+.agc .ag-seg .btn[aria-label]{width:36px;padding:0;font-size:20px;border-radius:50%!important;border:0;margin:0}
+.agc .ag-ham{border:0;border-radius:50%;width:40px;height:40px;padding:0;font-size:20px}
+.agc .ag-title{font-size:20px;font-weight:400;letter-spacing:0;flex:1 1 120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agc .ag-month{border-top:1px solid var(--line);border-left:0}
+.agc .ag-wd{border:0;border-bottom:0;font-size:11px;font-weight:500;letter-spacing:.8px;padding:8px 0 4px}
+.agc .ag-day{border-right:0;border-left:1px solid var(--line);border-bottom:1px solid var(--line);padding:2px 4px 0;text-align:center}
+.agc .ag-day:nth-child(7n+1){border-left:0}
+.agc .ag-day:hover{background:transparent}
+.agc .ag-num{min-width:24px;height:24px;border-radius:12px;font-size:12px;font-weight:500;margin:2px 0 1px}
+.agc .ag-num.today{background:#1a73e8;color:#fff}
+.agc .ag-day.out .ag-num{color:var(--muted)}
+.agc .ag-chip{border-radius:4px;padding:0 8px;margin:0 0 1px;font-size:11.5px;font-weight:500;line-height:18px;text-align:left}
+.agc .ag-more{display:block;width:100%;text-align:left;font-size:11.5px;font-weight:600;color:var(--ink);padding:0 8px;line-height:18px;border-radius:4px}.agc .ag-more:hover{background:var(--navy-soft)}
+.agc .ag-month.dense .ag-chip,.agc .ag-month.dense .ag-more{font-size:10.5px;line-height:14px}
+.agc .ag-hd{border-left:0;font-size:11px;font-weight:500;letter-spacing:.8px;padding-top:8px}
+.agc .ag-hd .ag-num{width:46px;height:46px;border-radius:23px;font-size:24px;font-weight:400;margin-top:2px}
+.agc .ag-hd .ag-num.today{background:#1a73e8;color:#fff}
+.agc .ag-ad{border-left:1px solid var(--line)}
+.agc .ag-scroll{border-top:1px solid var(--line)}
+.agc .ag-slot{border-bottom:1px solid var(--line)}.agc .ag-slot:hover{background:transparent}
+.agc .ag-col{border-left:1px solid var(--line)}
+.agc .ag-hr{font-size:10px;letter-spacing:.3px}
+.agc .ag-ev{border-radius:4px;border:1px solid var(--surface);font-size:11.5px;font-weight:500}
+.agc .ag-now{height:2px;background:#ea4335}.agc .ag-now::before{content:'';position:absolute;left:-6px;top:-5px;width:12px;height:12px;border-radius:50%;background:#ea4335}
+.agc .ag-side{border:0;background:transparent;padding:6px 4px}
+.agc .ag-sh b{font-size:13px;font-weight:500}
+.agc .ag-sl{font-size:13.5px;padding:5px 4px;border-radius:6px}.agc .ag-sl:hover{background:var(--navy-soft)}
+.agc .ag-sl input{accent-color:#1a73e8;width:16px;height:16px}
+.agc .ag-sl i{display:none}
+.agc .ag-fs{border-radius:20px;border:1px solid var(--line);padding:7px 14px}
 </style>
 </head><body>
 
@@ -726,7 +764,7 @@ const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – 
 const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='day')return `${WDL[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
   if(view==='week'){const a=Dt(weekStart(date)),b=Dt(addDays(weekStart(date),6));
-    return a.getMonth()===b.getMonth()?`${a.getDate()} – ${b.getDate()} de ${MESES[a.getMonth()]} de ${b.getFullYear()}`:`${a.getDate()} de ${MESES[a.getMonth()].slice(0,3)} – ${b.getDate()} de ${MESES[b.getMonth()].slice(0,3)} de ${b.getFullYear()}`}
+    return a.getMonth()===b.getMonth()?`${a.getDate()} – ${b.getDate()} de ${MESES[a.getMonth()].slice(0,3)} de ${b.getFullYear()}`:`${a.getDate()} de ${MESES[a.getMonth()].slice(0,3)} – ${b.getDate()} de ${MESES[b.getMonth()].slice(0,3)} de ${b.getFullYear()}`}
   if(view==='trash')return 'Lixeira';
   if(view==='list'){const [a,n]=agRange();return `${dt(a)} a ${dt(addDays(a,n-1))}`}
   return `${tc(MESES[d.getMonth()])} de ${d.getFullYear()}`};
@@ -787,7 +825,7 @@ function agSide(){const T=ui.ag.tecs,dis=ui.ag.farms.length>0;
   return `<aside class="ag-side" aria-label="Agendas e fazendas">
    <div class="ag-sh"><b>Agenda Profissional</b></div>
    <label class="ag-sl"><input type="checkbox" data-a="agTecAll"${T.length?'':' checked'}${dis?' disabled':''}><span>Todos</span></label>
-   ${AGTEC.map(t=>`<label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''}><i style="background:${TECCOL[t]}"></i><span>${t}</span></label>`).join('')}
+   ${AGTEC.map(t=>`<label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''} style="accent-color:${TECCOL[t]}"><span>${t}</span></label>`).join('')}
    ${dis?'<div class="muted" style="font-size:11px;margin:2px 0 0">Com fazenda marcada, todos os profissionais aparecem. Desmarque as fazendas para escolher o profissional.</div>':''}
    <div class="ag-sh" style="margin-top:14px"><b>Fazendas</b>${ui.ag.farms.length?`<button type="button" class="ag-sx" data-a="agFarmClear">Limpar (${ui.ag.farms.length})</button>`:''}</div>
    <input type="search" class="ag-fs" data-agfs="1" value="${esc(ui.ag.fs||'')}" placeholder="Buscar fazenda…" autocomplete="off">
