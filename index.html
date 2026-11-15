@@ -704,7 +704,7 @@ const evTeamCalc=(tecs,helpers,cur)=>{const ag=(tecs||[]).map(t=>tc(String(t).tr
   const ex=String(cur||'').split(/\s*(?:,|;|\/|\+)\s*|\s+e\s+/i).map(x=>tc(x.trim())).filter(x=>x&&!known.has(nrm(x.split(/\s+/)[0])));
   return evJoin([...new Set([...ag,...hp,...ex])])};
 const evTeamIni=e=>(e.id||e.team)?(e.team||''):evTeamCalc(e.tecs,[],'');
-const evHint=(farm,x)=>{if(!farm||!x)return '';const c=(S.farms.find(f=>f.id===farm)||{}).city;const L=S.eventos.filter(e=>e.date===x);if(!L.length)return 'Dia livre: nenhum evento marcado nesta data.';
+const evHint=(farm,x)=>{return '';if(!farm||!x)return '';const c=(S.farms.find(f=>f.id===farm)||{}).city;const L=S.eventos.filter(e=>e.date===x);if(!L.length)return 'Dia livre: nenhum evento marcado nesta data.';
   const nm=e=>{const f=S.farms.find(q=>q.id===e.farm)||{};return (f.name||'?')+(f.city?' ('+f.city+')':'')};
   const perto=L.filter(e=>vizinhas(c,(S.farms.find(f=>f.id===e.farm)||{}).city)),longe=L.filter(e=>!perto.includes(e));
   return (perto.length?'<span style="color:#1d6b52">✔ Já há evento próximo neste dia: '+esc([...new Set(perto.map(nm))].join(', '))+'.</span> ':'')+(longe.length?'<span style="color:#b45309">⚠ Outras cidades neste dia: '+esc([...new Set(longe.map(nm))].join(', '))+'.</span>':'')};
