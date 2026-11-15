@@ -376,6 +376,9 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .agc .ag-sl{font-size:13.5px;padding:5px 4px;border-radius:6px}.agc .ag-sl:hover{background:var(--navy-soft)}
 .agc .ag-sl input{accent-color:#1a73e8;width:16px;height:16px}
 .agc .ag-sl i{display:none}
+.ag-sr{display:flex;align-items:center;gap:2px}.ag-sr .ag-sl{flex:1;min-width:0}.ag-sm{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;width:28px;height:28px;border-radius:50%;cursor:pointer;visibility:hidden}.ag-sr:hover .ag-sm,.ag-sm:focus{visibility:visible}.ag-sm:hover{background:var(--navy-soft)}@media(hover:none){.ag-sm{visibility:visible}}
+.ag-cor{padding:6px 0 10px}.ag-mi{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 16px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}.ag-mi:hover{background:var(--navy-soft)}
+.ag-pal{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 14px 2px;border-top:1px solid var(--line);margin-top:4px}.ag-sw{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}.ag-sw.on{border-color:#fff;box-shadow:0 0 0 2px #202124}
 .agc .ag-fs{border-radius:20px;border:1px solid var(--line);padding:7px 14px}
 </style>
 </head><body>
@@ -434,10 +437,10 @@ function seed(){
       {id:'n4',tank:'t3',kind:'medicao',date:'2026-11-01',level:31,liters:0,total:0,note:''}]};
 }
 /* ---------- armazenamento: banco compartilhado (db) ou, sem ele, este navegador ---------- */
-const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],diaristas:[],tarefas:[],tcols:[],recorrencias:[]});
+const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],diaristas:[],tarefas:[],tcols:[],recorrencias:[],agcores:[]});
 let S=emptyS();
 let DB=null,dbState='conectando',slowT=null,busy=false,q=[],needRender=false;
-const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},diaristas:{},tarefas:{},tcols:{},recorrencias:{}},lastSnap={},held={},got={};
+const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},diaristas:{},tarefas:{},tcols:{},recorrencias:{},agcores:{}},lastSnap={},held={},got={};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const loadLocal=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}};
 function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários.',
@@ -703,7 +706,9 @@ function vComis(){return `<div class="card"><div class="card-h"><h3>Comissões V
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const WDS=['dom','seg','ter','qua','qui','sex','sáb'],WDL=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 const TECCOL={'Flávio':'#1f2328','Hiago':'#3b6fd4','Erikson':'#7d8790','Joaquim':'#e8730c','Célio':'#b5367a'},ENTCOL='#1d8f5a';
-const evCol=e=>(ui.ag&&ui.ag.farms&&ui.ag.farms.length)?ENTCOL:evCol0(e),evCol0=e=>(e.title==='Entourar'||!(e.tecs||[]).length)?(e.title==='Entourar'?ENTCOL:(e.color||'#1f2328')):(TECCOL[e.tecs[0]]||e.color||'#1f2328');
+const tecCol=t=>((S.agcores||[]).find(x=>x.id===t)||{}).cor||TECCOL[t];
+const AGPAL=['#ad1457','#d81b60','#d50000','#e67c73','#f4511e','#ef6c00','#f09300','#f6bf26','#e4c441','#c0ca33','#7cb342','#33b679','#0b8043','#009688','#039be5','#4285f4','#3f51b5','#7986cb','#8e24aa','#9e69af','#795548','#a79b8e','#616161','#1f2328'];
+const evCol=e=>(ui.ag&&ui.ag.farms&&ui.ag.farms.length)?ENTCOL:evCol0(e),evCol0=e=>(e.title==='Entourar'||!(e.tecs||[]).length)?(e.title==='Entourar'?ENTCOL:(e.color||'#1f2328')):(tecCol(e.tecs[0])||e.color||'#1f2328');
 const EVCOL=['#3b6fd4','#1d8f5a','#c9561a','#c0392b','#8e44ad','#0b8a8f','#a8741a','#546e7a'];
 const pad2=n=>String(n).padStart(2,'0');
 const Dt=x=>new Date(x+'T12:00:00');
@@ -821,11 +826,17 @@ function agTrash(){
   return note+bar+L.map(e=>{const dd=Dt(e.date);return `<div class="ag-list-d" style="align-items:center"><input type="checkbox" data-a="agSel" data-v="${e.id}"${sel.includes(e.id)?' checked':''} style="width:auto;flex:none"><div class="ag-list-h">${dd.getDate()} de ${MESES[dd.getMonth()].slice(0,3)}<small>${WDL[dd.getDay()]}</small></div><div style="flex:1;min-width:0"><div class="ag-li" style="cursor:default;flex-wrap:wrap"><i style="background:${evCol(e)}"></i><em>${esc(evTime(e))}</em><span style="flex:1;min-width:180px"><b>${esc(evLabel(e,true))}</b>${e.total?` · <span class="muted">Total: ${esc(e.total)}</span>`:''}<br><small class="muted">Excluído em ${e.deletedAt?new Date(e.deletedAt).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—'}</small></span><button type="button" class="btn sm" data-a="agRestore" data-v="${e.id}">Restaurar</button></div></div></div>`}).join('')}
 const agFarmList=()=>{const q=nrm(ui.ag.fs||''),L=agFarms().filter(([id,n])=>!q||nrm(n).includes(q));
   return L.length?L.map(([id,n])=>`<label class="ag-sl"><input type="checkbox" data-a="agFarmT" data-v="${id}"${ui.ag.farms.includes(id)?' checked':''}><span>${esc(n)}</span></label>`).join(''):'<div class="muted" style="font-size:12px;padding:6px 2px">Nenhuma fazenda.</div>'};
+function agCorPop(){const m=ui.agCor;if(!m||ui.ag.view==='trash')return '';
+  const W=230,r=m.r,left=Math.max(8,Math.min(innerWidth-W-8,r.l+r.w+4)),top=Math.max(8,Math.min(r.t-4,innerHeight-250)),cur=tecCol(m.t);
+  return `<div class="ag-pop ag-cor" role="menu" style="left:${left}px;top:${top}px;width:${W}px">
+   <button type="button" class="ag-mi" data-a="agOnly" data-v="${m.t}">Exibir apenas esta</button>
+   <button type="button" class="ag-mi" data-a="agCorReset" data-v="${m.t}">Voltar à cor padrão</button>
+   <div class="ag-pal">${AGPAL.map(c=>`<button type="button" class="ag-sw${c.toLowerCase()===String(cur).toLowerCase()?' on':''}" style="background:${c}" data-a="agCorSet" data-v="${m.t}|${c}" aria-label="Cor ${c}"></button>`).join('')}</div></div>`}
 function agSide(){const T=ui.ag.tecs,dis=ui.ag.farms.length>0;
   return `<aside class="ag-side" aria-label="Agendas e fazendas">
    <div class="ag-sh"><b>Agenda Profissional</b></div>
    <label class="ag-sl"><input type="checkbox" data-a="agTecAll"${T.length?'':' checked'}${dis?' disabled':''}><span>Todos</span></label>
-   ${AGTEC.map(t=>`<label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''} style="accent-color:${TECCOL[t]}"><span>${t}</span></label>`).join('')}
+   ${AGTEC.map(t=>`<div class="ag-sr"><label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''} style="accent-color:${tecCol(t)}"><span>${t}</span></label><button type="button" class="ag-sm" data-a="agCorMenu" data-v="${t}" aria-label="Opções da agenda de ${t}" title="Cor e opções">⋮</button></div>`).join('')}
    ${dis?'<div class="muted" style="font-size:11px;margin:2px 0 0">Com fazenda marcada, todos os profissionais aparecem. Desmarque as fazendas para escolher o profissional.</div>':''}
    <div class="ag-sh" style="margin-top:14px"><b>Fazendas</b>${ui.ag.farms.length?`<button type="button" class="ag-sx" data-a="agFarmClear">Limpar (${ui.ag.farms.length})</button>`:''}</div>
    <input type="search" class="ag-fs" data-agfs="1" value="${esc(ui.ag.fs||'')}" placeholder="Buscar fazenda…" autocomplete="off">
@@ -837,7 +848,7 @@ function vAgenda(){
   const FS=!!ui.agFull;
   return `<div class="card agc${FS?' ag-fullc':''}"><div class="ag-bar">${view==='trash'?'':`<button class="btn ag-ham${ui.ag.side?' pri':''}" data-a="agSideT" aria-label="Mostrar ou esconder profissionais e fazendas" title="Profissionais e fazendas">☰</button>`}<button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
    <h3 class="ag-title">${agTitle()}</h3><span class="ag-seg">${vb('week','Semana')}${vb('month','Mês')}${vb('list','Lista')}${vb('trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':''))}</span><button class="btn" data-a="tab" data-v="i-lotes">← Agendamentos</button>${FS?'':'<button class="btn" data-a="agPrint">Imprimir</button>'}<button class="btn pri" data-a="agNew" data-v="${date}">+ Criar</button><button class="btn" data-a="agFull" title="${FS?'Sair da tela cheia (Esc)':'Esconder o cabeçalho e as barras para ver o calendário maior'}">${FS?'✕ Sair da tela cheia':'⛶ Tela cheia'}</button></div>
-   ${!FS&&view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${view!=='trash'&&ui.ag.side?`<div class="ag-lay">${agSide()}<div class="ag-main">${body}</div></div>`:body}</div>`}
+   ${!FS&&view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${view!=='trash'&&ui.ag.side?`<div class="ag-lay">${agSide()}<div class="ag-main">${body}</div></div>`:body}${agCorPop()}</div>`}
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8);agFit()}
 function agFit(){const m=document.querySelector('.ag-month');if(!m)return;
   const days=[...m.querySelectorAll('.ag-day')],rows=days.length/7,mob=innerWidth<=640;
@@ -2342,9 +2353,10 @@ const ask=(msg,ok,o={})=>{ui.confirm={msg,okFn:ok,...o};render()};
 
 /* ---------- ações ---------- */
 document.addEventListener('click',e=>{if(ui.umenu&&!(e.target.closest&&e.target.closest('.um'))){ui.umenu=false;render()}});
+document.addEventListener('click',e=>{if(ui.agCor&&!(e.target.closest&&e.target.closest('.ag-cor,[data-a="agCorMenu"]'))){ui.agCor=null;render()}});
 document.addEventListener('click',e=>{if(ui.agMore&&!(e.target.closest&&e.target.closest('.ag-pop,[data-a="agMore"]'))){ui.agMore=null;render()}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(ui.agMore){ui.agMore=null;render()}else if(ui.agFull&&!ui.modal){ui.agFull=false;render()}}});
-window.addEventListener('scroll',e=>{if(ui.agMore&&!(e.target&&e.target.closest&&e.target.closest('.ag-pop'))){ui.agMore=null;render()}},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(ui.agCor){ui.agCor=null;render()}else if(ui.agMore){ui.agMore=null;render()}else if(ui.agFull&&!ui.modal){ui.agFull=false;render()}}});
+window.addEventListener('scroll',e=>{if(ui.agCor&&!(e.target&&e.target.closest&&e.target.closest('.ag-cor'))){ui.agCor=null;render();return}if(ui.agMore&&!(e.target&&e.target.closest&&e.target.closest('.ag-pop'))){ui.agMore=null;render()}},true);
 window.addEventListener('resize',()=>{if(ui.agMore){ui.agMore=null;render()}else agFit()});
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
@@ -2352,9 +2364,14 @@ document.addEventListener('click',e=>{
   const a=b.dataset.a,v=b.dataset.v;
   if(a!=='umenu')ui.umenu=false;
   if(a!=='agMore')ui.agMore=null;
+  if(a!=='agCorMenu')ui.agCor=null;
   switch(a){
    case 'agMore':{const r=b.getBoundingClientRect();ui.agMore={day:v,r:{l:r.left,t:r.top,w:r.width,h:r.height}};render();break}
    case 'agMoreX':render();break;
+   case 'agCorMenu':{const r=b.getBoundingClientRect();ui.agCor={t:v,r:{l:r.left,t:r.top,w:r.width,h:r.height}};render();break}
+   case 'agOnly':ui.ag.farms=[];ui.ag.tecs=[v];render();break;
+   case 'agCorSet':{const [t,c]=String(v).split('|');S.agcores=(S.agcores||[]).filter(x=>x.id!==t);S.agcores.push({id:t,cor:c});save();render();break}
+   case 'agCorReset':S.agcores=(S.agcores||[]).filter(x=>x.id!==v);save();render();break;
    case 'agFull':ui.agFull=!ui.agFull;render();break;
    case 'umenu':ui.umenu=!ui.umenu;render();break;
    case 'tab':if(v==='agenda'&&ui.tab!=='agenda'){ui.miniPrev=!!ui.mini;ui.mini=true}else if(v!=='agenda'&&ui.tab==='agenda'&&ui.miniPrev!==undefined){ui.mini=ui.miniPrev;ui.miniPrev=undefined}ui.tab=v;if(v==='e-mov'&&b.dataset.s)ui.emT=b.dataset.s;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
