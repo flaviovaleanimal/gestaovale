@@ -1381,7 +1381,7 @@ function vContatos(){
 function vEstoque(){
   if(!ui.farm){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
-    ${FZ().map(f=>`<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(farmTotal(f.id))} doses</div></div><button class="btn" data-a="farm" data-v="${f.id}">Ver estoque</button></div>`).join('')}
+    ${FZ().map(f=>`<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(farmTotal(f.id))} doses</div></div><button class="btn" data-a="farm" data-v="${f.id}">Ver estoque</button></div>`).join('')}<div class="farm-row" style="border-top:2px solid var(--line,#ddd);margin-top:4px;font-weight:700"><div><b>Total</b><div class="muted">${fmt(FZ().reduce((n,f)=>n+farmTotal(f.id),0))} doses · ${FZ().length} ${FZ().length===1?'fazenda':'fazendas'}</div></div></div>
     <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
   const f=F(ui.farm), flt={breed:ui.fBreed,ind:ui.fInd}, list=items(ui.farm,flt);
@@ -1535,7 +1535,7 @@ function vEEst(){
   if(!ui.efz||!FZV().some(f=>f.id===ui.efz)){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
     ${FZV().length?FZV().map(f=>{const ns=bItems(f.id).length,np=pItems(f.id).length,d=farmTotal(f.id),n=ns+np;
-      return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'item':'itens'} · ${fmt(d)} doses de sêmen</div></div><button class="btn" data-a="efz" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}
+      return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'item':'itens'} · ${fmt(d)} doses de sêmen</div></div><button class="btn" data-a="efz" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}${FZV().length?`<div class="farm-row" style="border-top:2px solid var(--line,#ddd);margin-top:4px;font-weight:700"><div><b>Total</b><div class="muted">${fmt(FZV().reduce((n,f)=>n+bItems(f.id).length+pItems(f.id).length,0))} itens · ${fmt(FZV().reduce((n,f)=>n+farmTotal(f.id),0))} doses de sêmen</div></div></div>`:''}
     <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
   const f=F(ui.efz);
@@ -2093,7 +2093,7 @@ function vPCadastro_(){
 function vPEstoque(){
   if(!ui.pfarm||!FZ().some(f=>f.id===ui.pfarm)){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
-    ${FZ().length?FZ().map(f=>{const n=pItems(f.id).length;return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'produto':'produtos'} em estoque</div></div><button class="btn" data-a="pfarm" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}
+    ${FZ().length?FZ().map(f=>{const n=pItems(f.id).length;return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'produto':'produtos'} em estoque</div></div><button class="btn" data-a="pfarm" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}${FZ().length?`<div class="farm-row" style="border-top:2px solid var(--line,#ddd);margin-top:4px;font-weight:700"><div><b>Total</b><div class="muted">${fmt(FZ().reduce((n,f)=>n+pItems(f.id).length,0))} produtos em estoque</div></div></div>`:''}
     <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
   const f=F(ui.pfarm),list=pItems(ui.pfarm,ui.pcat);
