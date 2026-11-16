@@ -956,6 +956,7 @@ const tkOk=t=>{const u=tkU();
  return true};
 const tkArqRows=()=>{const u=tkU(),A=tkA();const termo=nrm(u.aq||'').split(/\s+/).filter(Boolean);
  return S.tarefas.filter(t=>t.feito&&(A?t.area===A:!t.area)).filter(t=>{
+  if(isRestr()&&!(t.membros||[]).includes(tkMe()))return false;
   if(u.ade&&(!t.concluidaEm||t.concluidaEm<u.ade))return false;
   if(u.aate&&(!t.concluidaEm||t.concluidaEm>u.aate))return false;
   if(termo.length){const hay=nrm([t.titulo,t.desc,(t.membros||[]).join(' ')].join(' '));if(!termo.every(w=>hay.includes(w)))return false}
@@ -963,14 +964,13 @@ const tkArqRows=()=>{const u=tkU(),A=tkA();const termo=nrm(u.aq||'').split(/\s+/
 const tkArqBody=()=>{const u=tkU(),rows=tkArqRows(),PG=50,sg=rows.length+'|'+(rows[0]?rows[0].id:'')+'|'+(u.aq||'')+u.ade+u.aate;
  if(u.arqSig!==sg){u.arqSig=sg;u.arqPg=0}
  const np=Math.max(1,Math.ceil(rows.length/PG));if((u.arqPg||0)>=np)u.arqPg=np-1;const pg=u.arqPg||0,pr=rows.slice(pg*PG,pg*PG+PG);
- const selA=(u.selArq||[]).filter(id=>rows.some(r=>r.id===id)),allA=pr.length>0&&pr.every(r=>selA.includes(r.id));
+ const selA=isRestr()?[]:(u.selArq||[]).filter(id=>rows.some(r=>r.id===id)),allA=pr.length>0&&pr.every(r=>selA.includes(r.id));
  const nav=np>1?`<button class="btn sm" data-tk="arqpg" data-v="${pg-1}"${pg?'':' disabled'}>‹ Anterior</button><button class="btn sm" data-tk="arqpg" data-v="${pg+1}"${pg<np-1?'':' disabled'}>Próxima ›</button>`:'';
  return `${selA.length?`<div class="tk-bulk"><b>${selA.length} ${selA.length===1?'selecionada':'selecionadas'}</b>${selA.length<rows.length?`<button class="btn sm" data-tk="selarqfull">Selecionar todas as ${rows.length} arquivadas</button>`:''}<button class="btn sm" data-tk="bmemb" aria-expanded="${u.bmemb?'true':'false'}">Membros ▾</button><button class="btn sm dng" data-tk="arqdel">Excluir</button><button class="btn sm" data-tk="arqclr">Limpar seleção</button></div>${u.bmemb?tkBulkMemb(selA):''}`:''}
  <div class="tk-arl">${rows.length?`<div class="tk-ar tk-arh"><span class="tk-ck" data-tk="selarqall" data-ids="${pr.map(r=>r.id).join(',')}"><input type="checkbox"${allA?' checked':''} tabindex="-1" aria-label="Selecionar todas desta página"></span><span>Concluída</span><span>Tarefa</span><span>Responsável</span></div>${pr.map(t=>`<div class="tk-ar tk-row${selA.includes(t.id)?' sel':''}" data-tk="open" data-v="${t.id}"><span class="tk-ck" data-tk="selarq" data-v="${t.id}"><input type="checkbox"${selA.includes(t.id)?' checked':''} tabindex="-1" aria-label="Selecionar tarefa"></span><span class="muted">${t.concluidaEm?dt(t.concluidaEm):'—'}</span><b>${esc(t.titulo)}</b><span class="muted">${esc((t.membros||[]).join(', ')||'—')}</span></div>`).join('')}`:'<p class="muted" style="padding:20px">Nenhum cartão encontrado.</p>'}</div>
  <div class="tk-arf"><span>${rows.length} ${rows.length===1?'cartão':'cartões'}${np>1?' · mostrando '+(pg*PG+1)+'–'+(pg*PG+pr.length):''}</span>${nav}</div>`};
 const tkArqHtml=(total)=>{const u=tkU();if(!u.arqOpen)return '';
- if(isRestr())return `<div class="tk-dov" data-tk="arqClose"></div><aside class="tk-drw" role="dialog" aria-label="Arquivados"><div class="tk-drh">${tkIc('arq')}<div class="tk-drt"><b>Arquivados</b></div><button type="button" class="tk-x" data-tk="arqClose" aria-label="Fechar">✕</button></div><p class="muted" style="padding:20px"><b>Você não tem permissão</b> para ver os cartões arquivados.</p></aside>`;
- return `<div class="tk-dov" data-tk="arqClose"></div><aside class="tk-drw" role="dialog" aria-label="Arquivados"><div class="tk-drh">${tkIc('arq')}<div class="tk-drt"><b>Arquivados · ${tkA()?'Faturamento':'Tarefas'}</b><small>${total} ${total===1?'cartão arquivado':'cartões arquivados'}</small></div><button type="button" class="tk-x" data-tk="arqClose" aria-label="Fechar">✕</button></div>
+ return `<div class="tk-dov" data-tk="arqClose"></div><aside class="tk-drw" role="dialog" aria-label="Arquivados"><div class="tk-drh">${tkIc('arq')}<div class="tk-drt"><b>Arquivados · ${tkA()?'Faturamento':'Tarefas'}</b><small>${isRestr()?tkArqRows().length+' com o seu nome':total+' '+(total===1?'cartão arquivado':'cartões arquivados')}</small></div><button type="button" class="tk-x" data-tk="arqClose" aria-label="Fechar">✕</button></div>
  <div class="tk-drf"><label class="tk-search tk-drs"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="text" data-tkf="aq" value="${esc(u.aq||'')}" placeholder="Buscar por fazenda ou título…" autocomplete="off" aria-label="Buscar nos arquivados"></label>
  <div class="tk-drd"><label>Concluída de<input type="date" data-tkf="ade" value="${esc(u.ade||'')}"></label><label>até<input type="date" data-tkf="aate" value="${esc(u.aate||'')}"></label><button type="button" class="btn sm" data-tk="arqclrf">Limpar filtros</button></div></div>
  <div class="tk-drb" id="tk-arqbody">${tkArqBody()}</div></aside>`};
