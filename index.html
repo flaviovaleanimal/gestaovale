@@ -243,6 +243,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
+.modal.ng-m{padding:0;max-width:600px;overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 40px)}.ng-h{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line)}.ng-h h3{margin:0;font-size:20px;text-transform:none;letter-spacing:0}.ng-x{border:0;background:transparent;font-size:18px;color:var(--muted);cursor:pointer;width:36px;height:36px;border-radius:8px}.ng-x:hover{background:var(--navy-soft)}.ng-m form{display:flex;flex-direction:column;min-height:0;flex:1}.ng-b{padding:20px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:18px;flex:1}.ng-m .fld{gap:8px}.ng-m .fld label{font-size:15px;font-weight:700;color:var(--ink)}.ng-req{color:#d0021b}.ng-m .fld input,.ng-m .fld select,.ng-m .fld textarea{border-radius:10px;padding:12px;font-size:15px;min-height:46px;background:var(--surface)}.ng-f{display:flex;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--line);flex-wrap:wrap}.ng-f button{min-height:44px;padding:0 18px;border-radius:10px;border:0;font:inherit;font-weight:700;cursor:pointer}.ng-can,.ng-del{background:transparent;color:var(--navy)}.ng-del{color:#b42318!important}.ng-ot{background:var(--navy-soft);color:var(--navy)}.ng-ok{background:var(--navy);color:#fff}
 .ng-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:190px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(20,33,61,.18);padding:6px;display:flex;flex-direction:column}.ng-menu button{border:0;background:transparent;text-align:left;padding:10px 12px;border-radius:6px;font:inherit;color:var(--ink);cursor:pointer;min-height:40px}.ng-menu button:hover{background:var(--navy-soft)}
 .tk-board{display:flex;gap:12px;align-items:stretch;overflow-x:auto;padding-bottom:10px;min-height:420px;height:calc(100vh - 262px)}.tk-board .tk-col:not(.tk-new){min-height:0}.tk-board .tk-cl{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:2px}.tk-board .tk-vz{padding:6px 0}
 .tk-col{flex:0 0 calc((100% - 48px)/5);min-width:190px;max-width:360px;box-sizing:border-box;background:#eceef2;border:1px solid #dcdfe6;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}.tk-col.tk-over{outline:2px dashed var(--navy);outline-offset:-2px;background:var(--navy-soft)}.tk-new{flex:0 0 220px;width:220px;background:transparent;border-style:dashed;align-self:flex-start;height:auto}
@@ -1892,16 +1893,17 @@ function modalHtml(){
     ${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}
     </div>${foot('Salvar')}</form>`}
   if(m.type==='neg'){const n=m.data||{};
-    body=`<h3>${n.id?'Editar negociação':'Nova negociação'}</h3>${err}<form data-form="neg" data-id="${n.id||''}" novalidate><div class="form">
-    ${fldHtml('Nome da negociação',`<input name="titulo" value="${esc(n.titulo||'')}" required>`)}
+    body=`<div class="ng-h"><h3>${n.id?'Editar Negociação':'Criar Negociação'}</h3><button class="ng-x" type="button" data-a="close" aria-label="Fechar">✕</button></div>
+    <form data-form="neg" data-id="${n.id||''}" novalidate>${err?`<div style="padding:0 24px">${err}</div>`:''}<div class="ng-b">
+    ${fldHtml('Nome da negociação <span class="ng-req">*</span>',`<input name="titulo" value="${esc(n.titulo||'')}" placeholder="Digite o nome da negociação" required>`)}
     ${fldHtml('Etapa do funil de vendas',`<select name="st">${NEG_ST.map(x=>`<option${(n.st||NEG_ST[0])===x?' selected':''}>${esc(x)}</option>`).join('')}</select>`)}
-    ${fldHtml('Fazenda da negociação',`<select name="farm">${opts(S.farms.map(x=>[x.id,x.name]).sort((a,b)=>a[1].localeCompare(b[1])),n.farm,'Selecione…')}</select>`)}
-    ${fldHtml('Contato',`<select name="contact">${opts(S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name+(x.farm?' · '+(farmShort(x.farm)||F(x.farm).name):'')]),n.contact,'Selecione…')}</select>`)}
+    ${fldHtml('Fazenda da negociação',`<select name="farm">${opts(S.farms.map(x=>[x.id,x.name]).sort((a,b)=>a[1].localeCompare(b[1])),n.farm,'Selecionar')}</select>`)}
+    ${fldHtml('Contato',`<select name="contact">${opts(S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name+(x.farm?' · '+(farmShort(x.farm)||F(x.farm).name):'')]),n.contact,'Selecionar')}</select>`)}
     ${n.id?`${fldHtml('Valor (R$)',`<input name="valor" inputmode="decimal" value="${n.valor?String(n.valor).replace('.',','):''}" placeholder="0,00">`)}
     ${fldHtml('Responsável',`<select name="resp">${opts(TK_TEAM.map(x=>[x,x]),n.resp,'Sem responsável')}</select>`)}
     ${fldHtml('Próximo retorno',`<input name="retorno" type="date" value="${esc(n.retorno||'')}">`)}
     ${fldHtml('Observações',`<textarea name="obs" rows="3">${esc(n.obs||'')}</textarea>`)}`:''}
-    </div><div class="mf">${n.id?`<button class="btn dng" type="button" data-a="ngDel" data-v="${n.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
+    </div><div class="ng-f">${n.id?`<button class="ng-del" type="button" data-a="ngDel" data-v="${n.id}">Excluir</button>`:''}<span style="flex:1"></span><button class="ng-can" type="button" data-a="close">Cancelar</button>${n.id?'':'<button class="ng-ot" type="button" data-a="ngAgain">Salvar e criar outra</button>'}<button class="ng-ok" type="submit">${n.id?'Salvar':'Criar'}</button></div></form>`}
   if(m.type==='subfarms'){const e=F(m.farm),list=S.farms.filter(x=>x.parent===m.farm).sort((a,b)=>a.name.localeCompare(b.name));
     body=`<h3>Fazendas · ${esc(e.name)}</h3>
     ${list.length?`<div class="tw"><table><thead><tr><th>Fazenda</th><th>Cidade</th><th>Ações</th></tr></thead><tbody>${list.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.city||'—')}</td><td><div class="acts"><button class="btn sm" type="button" data-a="editFarm" data-v="${x.id}">Editar</button><button class="btn sm dng" type="button" data-a="delFarm" data-v="${x.id}">Excluir</button></div></td></tr>`).join('')}</tbody></table></div>`:empty('Nenhuma fazenda vinculada a esta empresa.')}
@@ -2012,7 +2014,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','ev','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','ev','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'?' ng-m':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -2660,6 +2662,7 @@ document.addEventListener('click',e=>{
    case 'finClear':ui.ff[v]={q:'',from:'',to:'',sit:'',prest:'',farm:''};render();break;
    case 'printLotes':ui.modal={type:'gpdf'};render();break;
    case 'printFarms':ui.modal={type:'epdf'};render();break;
+   case 'ngAgain':{ui.ngAgain=true;const f=b.closest('form');if(f)f.requestSubmit();break}
    case 'ngMenu':ui.ngMenu=!ui.ngMenu;render();break;
    case 'ngTask':{ui.ngMenu=false;const u=tkU();if(!tkCols().length){toast('Crie uma coluna em Tarefas primeiro.');render();break}u.cOpen=false;u.editDesc=false;const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};render();break}
    case 'ngNew':ui.ngMenu=false;ui.modal={type:'neg',data:{st:v,resp:tkMe(),novo:true}};render();break;
@@ -3050,6 +3053,7 @@ document.addEventListener('submit',e=>{
     const rec={titulo,st:fd.st||NEG_ST[0],farm:fd.farm||'',contact:fd.contact||'',valor:tkParseV(fd.valor)||0,resp:fd.resp===undefined?tkMe():(fd.resp||''),retorno:fd.retorno||'',obs:(fd.obs||'').trim()};
     S.negs=S.negs||[];const old=id&&S.negs.find(x=>x.id===id);
     if(old){if(old.st!==rec.st)rec.ord=Date.now();Object.assign(old,rec)}else S.negs.push({id:nid('ng'),ord:Date.now(),...rec});
+    if(ui.ngAgain&&!old){ui.ngAgain=false;save();ui.modal={type:'neg',data:{st:rec.st}};render();return toast('Negociação criada.')}
     return done('Negociação salva.')}
   if(k==='contact'){
     const name=(fd.name||'').trim(),id=form.dataset.id,email=(fd.email||'').trim();
