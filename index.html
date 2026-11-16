@@ -243,6 +243,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .tk-dbtn{min-height:44px;width:100%;box-sizing:border-box;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tk-dbtn.open{border-color:var(--navy)}.tk-dp{background:var(--bg);border-radius:10px;padding:12px;margin-bottom:10px}
 .tk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.tk-top h2{margin:0;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
 .tk-fil{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px}.tk-fil label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 170px}.tk-fil select,.tk-fil input{min-height:44px;box-sizing:border-box}.tk-fr{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px}
+.ng-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:190px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(20,33,61,.18);padding:6px;display:flex;flex-direction:column}.ng-menu button{border:0;background:transparent;text-align:left;padding:10px 12px;border-radius:6px;font:inherit;color:var(--ink);cursor:pointer;min-height:40px}.ng-menu button:hover{background:var(--navy-soft)}
 .tk-board{display:flex;gap:12px;align-items:stretch;overflow-x:auto;padding-bottom:10px;min-height:420px;height:calc(100vh - 262px)}.tk-board .tk-col:not(.tk-new){min-height:0}.tk-board .tk-cl{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:2px}.tk-board .tk-vz{padding:6px 0}
 .tk-col{flex:0 0 calc((100% - 48px)/5);min-width:190px;max-width:360px;box-sizing:border-box;background:#eceef2;border:1px solid #dcdfe6;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}.tk-col.tk-over{outline:2px dashed var(--navy);outline-offset:-2px;background:var(--navy-soft)}.tk-new{flex:0 0 220px;width:220px;background:transparent;border-style:dashed;align-self:flex-start;height:auto}
 .tk-ch{display:flex;align-items:center;gap:6px}.tk-grip{cursor:grab;color:var(--muted);padding:4px 2px;font-size:16px;line-height:1;user-select:none}.tk-grip:hover{color:var(--ink)}.tk-col.tk-colmv{opacity:.45}.tk-col.tk-colover{outline:2px dashed var(--navy);outline-offset:-2px}.tk-cn{flex:1;min-width:0;font-weight:600;border:1px solid transparent;background:transparent;padding:6px;border-radius:6px;color:var(--ink);font-family:inherit;font-size:14px}.textarea.tk-cn,textarea.tk-cn{resize:none;overflow:hidden;display:block;line-height:1.25;white-space:normal}.tk-cn:focus{border-color:var(--line);background:var(--bg)}.tk-n{font-size:12px;color:var(--muted)}.tk-plus{border:0;background:transparent;color:var(--muted);cursor:pointer;width:30px;height:30px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;padding:0}.tk-plus:hover{background:var(--surface);color:var(--ink)}.tk-addf{margin:0 0 8px}.tk-addf input{border-style:solid!important;background:var(--surface)!important}
@@ -1892,14 +1893,14 @@ function modalHtml(){
     </div>${foot('Salvar')}</form>`}
   if(m.type==='neg'){const n=m.data||{};
     body=`<h3>${n.id?'Editar negociação':'Nova negociação'}</h3>${err}<form data-form="neg" data-id="${n.id||''}" novalidate><div class="form">
-    ${fldHtml('Título / nome da negociação',`<input name="titulo" value="${esc(n.titulo||'')}" required>`)}
-    ${fldHtml('Etapa',`<select name="st">${NEG_ST.map(x=>`<option${(n.st||NEG_ST[0])===x?' selected':''}>${esc(x)}</option>`).join('')}</select>`)}
-    ${fldHtml('Empresa',`<select name="farm">${opts(S.farms.map(x=>[x.id,x.name]),n.farm,'Sem empresa')}</select>`)}
-    ${fldHtml('Contato',`<select name="contact">${opts(S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name+(x.farm?' · '+(farmShort(x.farm)||F(x.farm).name):'')]),n.contact,'Sem contato')}</select>`)}
-    ${fldHtml('Valor (R$)',`<input name="valor" inputmode="decimal" value="${n.valor?String(n.valor).replace('.',','):''}" placeholder="0,00">`)}
+    ${fldHtml('Nome da negociação',`<input name="titulo" value="${esc(n.titulo||'')}" required>`)}
+    ${fldHtml('Etapa do funil de vendas',`<select name="st">${NEG_ST.map(x=>`<option${(n.st||NEG_ST[0])===x?' selected':''}>${esc(x)}</option>`).join('')}</select>`)}
+    ${fldHtml('Fazenda da negociação',`<select name="farm">${opts(S.farms.map(x=>[x.id,x.name]).sort((a,b)=>a[1].localeCompare(b[1])),n.farm,'Selecione…')}</select>`)}
+    ${fldHtml('Contato',`<select name="contact">${opts(S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name+(x.farm?' · '+(farmShort(x.farm)||F(x.farm).name):'')]),n.contact,'Selecione…')}</select>`)}
+    ${n.id?`${fldHtml('Valor (R$)',`<input name="valor" inputmode="decimal" value="${n.valor?String(n.valor).replace('.',','):''}" placeholder="0,00">`)}
     ${fldHtml('Responsável',`<select name="resp">${opts(TK_TEAM.map(x=>[x,x]),n.resp,'Sem responsável')}</select>`)}
     ${fldHtml('Próximo retorno',`<input name="retorno" type="date" value="${esc(n.retorno||'')}">`)}
-    ${fldHtml('Observações',`<textarea name="obs" rows="3">${esc(n.obs||'')}</textarea>`)}
+    ${fldHtml('Observações',`<textarea name="obs" rows="3">${esc(n.obs||'')}</textarea>`)}`:''}
     </div><div class="mf">${n.id?`<button class="btn dng" type="button" data-a="ngDel" data-v="${n.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='subfarms'){const e=F(m.farm),list=S.farms.filter(x=>x.parent===m.farm).sort((a,b)=>a.name.localeCompare(b.name));
     body=`<h3>Fazendas · ${esc(e.name)}</h3>
@@ -2378,6 +2379,7 @@ function navHtml(list,d){
     return `<button class="ni ${isOn(n)?'cur':''}" style="--d:${d}" data-a="go" data-v="${n.tab}" data-sub="${n.msub||''}" title="${n.label}">${n.icon?ic(n.icon):'<span class="dot"></span>'}<span class="lbl">${n.label}</span></button>`;
   }).join('');
 }
+document.addEventListener('click',e=>{if(ui.ngMenu&&!(e.target.closest&&e.target.closest('.ng-menu,[data-a=ngMenu]'))){ui.ngMenu=false;render()}});
 const NEG_ST=['Sem contato','Contato feito','Qualificação','Proposta','Negociação'];
 const negU=()=>({resp:ui.ngResp||'Todos',q:ui.ngQ||''});
 const negOk=n=>{const u=negU();if(u.resp!=='Todos'&&n.resp!==u.resp)return false;const q=nrm(u.q||'');if(!q)return true;return nrm([n.titulo,n.obs,F(n.farm).name,(S.contacts.find(c=>c.id===n.contact)||{}).name,n.resp].join(' ')).includes(q)};
@@ -2389,7 +2391,7 @@ function vNegoc(){
     <div class="tk-cl">${cs.length?cs.map(n=>{const ct=S.contacts.find(c=>c.id===n.contact);return `<div class="tk-c" draggable="true" data-ng="${n.id}" data-a="ngEdit" data-v="${n.id}" role="button" tabindex="0"><div class="tk-ct1"><b>${esc(n.titulo)}</b></div>
       <div class="tk-meta tk-meta1">${n.farm?`<span class="tk-b">${esc(farmShort(n.farm)||F(n.farm).name)}</span>`:''}${ct?`<span class="tk-b">${esc(ct.name)}</span>`:''}</div>
       <div class="tk-meta">${+n.valor>0?`<span class="tk-b"><b>${brl(n.valor)}</b></span>`:''}${n.retorno?`<span class="tk-b ${negLate(n)?'tkst-late':''}">${negLate(n)?'Atrasado · ':'Retorno '}${dt(n.retorno)}</span>`:''}${n.resp?`<span class="tk-avs"><span class="tk-av" title="${esc(n.resp)}">${esc(n.resp.split(' ').map(x=>x[0]).slice(0,2).join(''))}</span></span>`:''}</div></div>`}).join(''):'<div class="tk-vz">Sem negociações</div>'}</div></div>`}).join('');
-  return `<div class="card"><div class="card-h"><h3>Negociações <small class="muted">(${vis.length}${vis.length!==all.length?' de '+all.length:''} · ${brl(tot(vis))} no funil)</small></h3><button class="btn pri" data-a="ngNew" data-v="${NEG_ST[0]}">Nova negociação</button></div>
+  return `<div class="card"><div class="card-h"><h3>Negociações <small class="muted">(${vis.length}${vis.length!==all.length?' de '+all.length:''} · ${brl(tot(vis))} no funil)</small></h3><div style="position:relative"><button class="btn pri" data-a="ngMenu" aria-haspopup="true" aria-expanded="${!!ui.ngMenu}">Criar ▾</button>${ui.ngMenu?`<div class="ng-menu" role="menu"><button type="button" role="menuitem" data-a="ngNew" data-v="${NEG_ST[0]}">Criar Negociação</button><button type="button" role="menuitem" data-a="newContact">Criar Contato</button><button type="button" role="menuitem" data-a="newFarm">Criar Empresa</button><button type="button" role="menuitem" data-a="ngTask">Criar Tarefas</button></div>`:''}</div></div>
    <div class="tk-fil"><label style="width:220px">Responsável<select data-s="ngResp">${['Todos',...TK_TEAM].map(x=>`<option${u.resp===x?' selected':''}>${esc(x)}</option>`).join('')}</select></label>
    <label style="width:300px;max-width:100%">Buscar<input data-ngq value="${esc(u.q||'')}" placeholder="Título, empresa, contato…"></label></div>
    <div class="tk-board">${cols}</div></div>`}
@@ -2600,7 +2602,7 @@ document.addEventListener('click',e=>{
        if(er){ui.confirm=null;render();toast(er);return}
        S.pmovs=rest;done('Movimentação excluída. Estoque atualizado.')});break;
    case 'wipe':ui.modal={type:'wipe'};render();break;
-   case 'newFarm':ui.modal={type:'farm'};render();break;
+   case 'newFarm':ui.ngMenu=false;ui.modal={type:'farm'};render();break;
    case 'subFarms':ui.modal={type:'subfarms',farm:v};render();break;
    case 'newSubFarm':ui.modal={type:'farm',data:{parent:v,tipo:tipoOf(F(v)),city:F(v).city,state:F(v).state}};render();break;
    case 'finPrint':ui.modal={type:'finpdf',kind:v};render();break;
@@ -2658,10 +2660,12 @@ document.addEventListener('click',e=>{
    case 'finClear':ui.ff[v]={q:'',from:'',to:'',sit:'',prest:'',farm:''};render();break;
    case 'printLotes':ui.modal={type:'gpdf'};render();break;
    case 'printFarms':ui.modal={type:'epdf'};render();break;
-   case 'ngNew':ui.modal={type:'neg',data:{st:v,resp:tkMe()}};render();break;
+   case 'ngMenu':ui.ngMenu=!ui.ngMenu;render();break;
+   case 'ngTask':{ui.ngMenu=false;const u=tkU();if(!tkCols().length){toast('Crie uma coluna em Tarefas primeiro.');render();break}u.cOpen=false;u.editDesc=false;const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};render();break}
+   case 'ngNew':ui.ngMenu=false;ui.modal={type:'neg',data:{st:v,resp:tkMe(),novo:true}};render();break;
    case 'ngEdit':ui.modal={type:'neg',data:{...(S.negs||[]).find(x=>x.id===v)}};render();break;
    case 'ngDel':{const n=(S.negs||[]).find(x=>x.id===v);ask(`Excluir a negociação "${n?n.titulo:''}"?`,()=>{S.negs=S.negs.filter(x=>x.id!==v);done('Negociação excluída.')});break}
-   case 'newContact':ui.modal={type:'contact',data:ui.cf.farm?{farm:ui.cf.farm,city:F(ui.cf.farm).city||'',state:F(ui.cf.farm).state||''}:{}};render();break;
+   case 'newContact':ui.ngMenu=false;ui.modal={type:'contact',data:ui.cf.farm?{farm:ui.cf.farm,city:F(ui.cf.farm).city||'',state:F(ui.cf.farm).state||''}:{}};render();break;
    case 'newContactFor':ui.modal={type:'contact',data:{farm:v,city:F(v).city||'',state:F(v).state||''}};render();break;
    case 'editContact':ui.modal={type:'contact',data:{...S.contacts.find(x=>x.id===v)}};render();break;
    case 'delContact':{const c=S.contacts.find(x=>x.id===v);ask(`Excluir o contato ${c.name}?`,()=>{S.contacts=S.contacts.filter(x=>x.id!==v);done('Contato excluído.')});break}
@@ -3043,7 +3047,7 @@ document.addEventListener('submit',e=>{
   if(k==='neg'){
     const titulo=(fd.titulo||'').trim(),id=form.dataset.id;
     if(!titulo)return modalErr('Informe o título da negociação.');
-    const rec={titulo,st:fd.st||NEG_ST[0],farm:fd.farm||'',contact:fd.contact||'',valor:tkParseV(fd.valor)||0,resp:fd.resp||'',retorno:fd.retorno||'',obs:(fd.obs||'').trim()};
+    const rec={titulo,st:fd.st||NEG_ST[0],farm:fd.farm||'',contact:fd.contact||'',valor:tkParseV(fd.valor)||0,resp:fd.resp===undefined?tkMe():(fd.resp||''),retorno:fd.retorno||'',obs:(fd.obs||'').trim()};
     S.negs=S.negs||[];const old=id&&S.negs.find(x=>x.id===id);
     if(old){if(old.st!==rec.st)rec.ord=Date.now();Object.assign(old,rec)}else S.negs.push({id:nid('ng'),ord:Date.now(),...rec});
     return done('Negociação salva.')}
