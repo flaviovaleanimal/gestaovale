@@ -2486,7 +2486,6 @@ function vNegOrc(n){
    ${fldHtml('Validade proposta',`<input type="date" data-ngof="orcVal" value="${esc(n.orcVal||addDays(today(),15))}">`)}
    ${fldHtml('Responsável',`<select data-ngof="orcResp">${opts(TK_TEAM.map(x=>[x,x]),n.orcResp||n.resp||tkMe(),'Selecione…')}</select>`)}
   </div>
-  <div class="seg" style="margin-bottom:12px;display:flex;gap:8px;align-items:center"><b>Tipo de proposta:</b><button type="button" class="btn sm ${sem?'':'pri'}" data-a="ngOrcTipo" data-v="servico">Serviço</button><button type="button" class="btn sm ${sem?'pri':''}" data-a="ngOrcTipo" data-v="semen">Sêmen</button></div>
   <h3 style="margin:0 0 8px">Itens da proposta</h3>${lines||empty('Nenhum item. Clique em + Adicionar item.')}
   <div style="margin-top:12px"><button type="button" class="btn" data-a="ngOrcAddL">+ Adicionar item</button></div>
   <div class="ngo-total"><span>Total da proposta<small style="display:block;opacity:.8;font-size:12px">Valor total sem oferta: ${brl(negTotOrc(n))}</small></span><b>${brl(negTotOf(n))}</b></div>
@@ -2871,7 +2870,6 @@ document.addEventListener('click',e=>{
    case 'ngOrcGo':ui.ngPg='';ui.ngV=v;ui.ngOrc=true;render();break
    case 'ngOrcPdfId':{const n=(S.negs||[]).find(x=>x.id===v);if(n){negOrcNum(n);save();ui.modal={type:'orcpdf',id:v}}render();break}
    case 'ngTc':ui.ngTc=!!v;render();break
-   case 'ngOrcTipo':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n&&negTipo(n)!==v){const go=()=>{n.orcTipo=v;n.orc=[{id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0}];n.valor=negTotOf(n);save();render()};if((n.orc||[]).some(l=>l.nome||+l.vu))ask('Trocar o tipo apaga os itens já lançados nesta proposta. Continuar?',go,{ok:'Trocar'});else go()}break}
    case 'ngOrcDel':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n)ask('Excluir esta proposta? Os itens serão apagados e não dá para desfazer.',()=>{n.orc=[];n.orcNum=0;n.orcData='';n.orcVal='';n.orcPag='';n.orcObs='';n.orcTipo='';n.valor=0;negLog(n,'excluiu a proposta');ui.ngOrc=false;save();render()},{ok:'Excluir'});break}
    case 'ngOrcDelId':{const n=(S.negs||[]).find(x=>x.id===v);if(n)ask('Excluir esta proposta? Os itens serão apagados e não dá para desfazer.',()=>{n.orc=[];n.orcNum=0;n.orcData='';n.orcVal='';n.orcPag='';n.orcObs='';n.orcTipo='';n.valor=0;negLog(n,'excluiu a proposta');save();render()},{ok:'Excluir'});break}
    case 'ngOrcOpen':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n){if(v==='servico'||v==='semen')n.orcTipo=v;negOrcNum(n);if(!n.orcData)n.orcData=today();if(!n.orcVal)n.orcVal=addDays(today(),15);if(!(n.orc||[]).length){n.orc=[{id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0}]}save();ui.ngOrc=true}render();break}
