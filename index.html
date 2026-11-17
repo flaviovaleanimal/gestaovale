@@ -1328,7 +1328,7 @@ document.addEventListener('change',e=>{const t=e.target,id=t.dataset&&t.dataset.
   else{const r=new FileReader();r.onload=()=>{res[fi]={n:f.name,s:f.size,d:r.result,m:f.lastModified||Date.now()};fin()};r.onerror=fin;r.readAsDataURL(f)}})});
 document.addEventListener('submit',e=>{const f=e.target;if(!f.dataset||!f.dataset.ngnota)return;e.preventDefault();const n=(S.negs||[]).find(x=>x.id===f.dataset.ngnota),tx=(f.elements.t.value||'').trim();if(!n||!tx)return;negLog(n,tx);save();render()});
 document.addEventListener('change',e=>{const t=e.target,d=t.dataset||{};if(d.ngof){const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n){n[d.ngof]=t.value;save();render()}return}
- if(d.ngorc){const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(!n)return;n.orc=n.orc||[];const l=n.orc[+d.i];if(!l)return;
+ if(d.ngorc){const n=(S.negs||[]).find(x=>x.id===ui.ngV)||(ui.fatV&&S.tarefas.find(x=>x.id===ui.fatV));if(!n)return;n.orc=n.orc||[];const l=n.orc[+d.i];if(!l)return;
   if(d.ngorc==='item'){if(t.value==='__livre'){l.ps='';l.livre=true;l.nome=l.nome||'';l.cat=''}else{const x=(S.pservs||[]).find(y=>y.id===t.value);if(x){l.ps=x.id;l.livre=false;l.nome=x.nome;l.cat=x.categoria||'';l.vu=+x.valor||0}}}
   else if(d.ngorc==='nome')l.nome=t.value.trim();
   else if(d.ngorc==='raca')l.raca=t.value;
@@ -2477,7 +2477,7 @@ const negOrcHtml=n=>{const L=n.orc||[];
   return `<div class="ngd-sec"><div class="ngd-sh"><h3>Proposta</h3><div class="acts">${L.length?'<button class="btn sm pri" data-a="ngOrcOpen">Editar</button><button class="btn sm" data-a="ngOrcPdf">Imprimir</button>'+'<button class="btn sm dng" data-a="ngOrcDel">Excluir</button>':'<button class="btn sm pri" data-a="ngOrcOpen" data-v="servico">Proposta de Serviço</button><button class="btn sm pri" data-a="ngOrcOpen" data-v="semen">Proposta de Sêmen</button>'}</div></div>
    ${L.length?`<div class="ngo-sum"><div><b>Proposta de ${negTipoL(n)}</b><small>${L.length} ${L.length===1?'item':'itens'}${n.orcData?' · '+dt(n.orcData):''}${n.orcVal?' · válido até '+dt(n.orcVal):''}</small></div><div class="ngo-tot">${brl(negTotOf(n))}</div></div>`:empty('Nenhuma proposta ainda. Escolha Serviço ou Sêmen.')}</div>`};
 const negOrcNum=n=>{if(!n.orcNum){n.orcNum=Math.max(0,...(S.negs||[]).map(x=>+x.orcNum||0))+1}return n.orcNum};
-function vNegOrc(n){
+function negOrcItems(n){
   const sem=negTipo(n)==='semen',cat=(S.pservs||[]).filter(x=>x.exibir!==false&&((x.categoria||'')==='Sêmen')===sem).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'})),L=n.orc||[],f=n.farm?F(n.farm):null,ct=S.contacts.find(c=>c.id===n.contact),num=v=>String(v==null?'':v).replace('.',',');
   const lines=L.map((l,i)=>{const ps=l.ps&&cat.some(x=>x.id===l.ps)?l.ps:(l.ps?'__old':'');
    const tot=(+l.qtd||0)*(+l.vu||0),to=negLOf(l),m2=v=>(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}),ro=v=>`<input value="${m2(v)}" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed;font-weight:700">`;
@@ -2492,6 +2492,11 @@ function vNegOrc(n){
     ${fldHtml('Valor oferta (R$)',`<input data-ngorc="vo" data-i="${i}" inputmode="decimal" value="${+l.vo>0?m2(l.vo):''}" placeholder="Sem oferta">`)}
     ${fldHtml('Total oferta (R$)',ro(to))}
    </div>${l.cat?`<div class="muted" style="font-size:12px;margin-top:6px">Categoria: ${esc(l.cat)}</div>`:''}</div>`}).join('');
+  return `<h3 style="margin:0 0 8px">Itens da proposta</h3>${lines||empty('Nenhum item. Clique em + Adicionar item.')}
+  <div style="margin-top:12px"><button type="button" class="btn" data-a="ngOrcAddL">+ Adicionar item</button></div>
+  <div class="ngo-total"><span>Total da proposta<small style="display:block;opacity:.8;font-size:12px">Valor total sem oferta: ${brl(negTotOrc(n))}</small></span><b>${brl(negTotOf(n))}</b></div>`}
+function vNegOrc(n){
+  const sem=negTipo(n)==='semen',cat=(S.pservs||[]).filter(x=>x.exibir!==false&&((x.categoria||'')==='Sêmen')===sem).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'})),L=n.orc||[],f=n.farm?F(n.farm):null,ct=S.contacts.find(c=>c.id===n.contact),num=v=>String(v==null?'':v).replace('.',',');
   return `<div class="card"><div class="card-h"><h3>Proposta <small class="muted">· ${esc(n.titulo)}</small></h3><div class="acts"><button class="btn" data-a="ngOrcBack">← Voltar à negociação</button><button class="btn dng" data-a="ngOrcDel">Excluir proposta</button><button class="btn pri" data-a="ngOrcPdf">Imprimir proposta</button></div></div>
   <div class="form ngo-h3" style="margin-bottom:16px">
    ${fldHtml('Cliente',`<input value="${esc(ct?ct.name:'')}" placeholder="Negociação sem contato" readonly tabindex="-1" style="background:var(--navy-soft);cursor:not-allowed">`)}
@@ -2501,9 +2506,7 @@ function vNegOrc(n){
    ${fldHtml('Validade proposta',`<input type="date" data-ngof="orcVal" value="${esc(n.orcVal||addDays(today(),15))}">`)}
    ${fldHtml('Responsável',`<select data-ngof="orcResp">${opts(TK_TEAM.map(x=>[x,x]),n.orcResp||n.resp||tkMe(),'Selecione…')}</select>`)}
   </div>
-  <h3 style="margin:0 0 8px">Itens da proposta</h3>${lines||empty('Nenhum item. Clique em + Adicionar item.')}
-  <div style="margin-top:12px"><button type="button" class="btn" data-a="ngOrcAddL">+ Adicionar item</button></div>
-  <div class="ngo-total"><span>Total da proposta<small style="display:block;opacity:.8;font-size:12px">Valor total sem oferta: ${brl(negTotOrc(n))}</small></span><b>${brl(negTotOf(n))}</b></div>
+  ${negOrcItems(n)}
   <h3 style="margin:16px 0 8px">Condições</h3>
   <div class="form">${fldHtml('Condições de pagamento',`<textarea data-ngof="orcPag" rows="3" placeholder="Ex.: 50% na assinatura e 50% após o serviço">${esc(n.orcPag||'')}</textarea>`,'wide')}${fldHtml('Observações (opcional)',`<textarea data-ngof="orcObs" rows="3">${esc(n.orcObs||'')}</textarea>`,'wide')}</div></div>`}
 const NEG_ST=['Sem contato','Contato feito','Qualificação','Proposta','Negociação'];
@@ -2542,7 +2545,7 @@ function negFatAnx(c){const A=c.anexos||[];
   return `<div class="ngd-sec"><div class="ngd-sh"><h3>Anexos${A.length?' ('+A.length+')':''}</h3><label class="btn sm pri" style="cursor:pointer">+ Anexar arquivo<input type="file" multiple data-fatfile="${c.id}" style="display:none"></label></div>
    ${A.length?A.map((a,i)=>`<div class="tk-ci tk-an">${a.p?`<a href="#" data-a="fatAnxOpen" data-v="${i}">${tkIc('clip')} ${esc(a.n)}</a>`:`<a href="${a.d}" download="${esc(a.n)}">${tkIc('clip')} ${esc(a.n)}</a>`}<span class="muted tk-as">${tkKB(a.s||0)}</span><span class="muted tk-ad">${tkDM(a.m)}</span><button class="tk-x" data-a="fatAnxDel" data-v="${i}" aria-label="Remover anexo">✕</button></div>`).join(''):'<div class="muted" style="padding:8px 0">Nenhum anexo. Use para nota fiscal, comprovante ou contrato.</div>'}</div>`}
 function vFatCard(c){const cols=S.tcols.filter(x=>x.area==='fat').sort((a,b)=>(a.ord||0)-(b.ord||0)),idx=cols.findIndex(x=>x.id===c.col),last=idx===cols.length-1;
-  const hist=[...(c.msgs||[]).map((m,i)=>({...m,c:1,i})),...(c.log||[])].sort((a,b)=>b.h-a.h),ct=S.contacts.find(x=>x.id===c.contact),f=c.farm?F(c.farm):null;
+  const hist=[...(c.msgs||[]).map((m,i)=>({...m,c:1,i})),...(c.log||[])].sort((a,b)=>b.h-a.h),ct=S.contacts.find(x=>x.id===c.contact),f=c.farm?F(c.farm):null,itens=c.orcTipo==='servico'||c.orcTipo==='semen';
   const row=(l,x)=>`<div class="ngd-r"><span>${l}</span><div>${x}</div></div>`;
   return `<div class="card ngd"><div class="ngd-top"><button class="ngd-back" data-a="fatBack" aria-label="Voltar" title="Voltar">←</button>
    <div class="ngd-tt" style="flex:1;min-width:0"><input data-fatc="titulo" value="${esc(c.titulo||'')}" placeholder="Nome do cartão" aria-label="Nome do cartão" style="font-size:22px;font-weight:700;border:0;border-bottom:2px solid var(--line);background:transparent;width:100%;padding:4px 0;color:var(--ink)"><span class="ngd-tag">Faturamento</span></div>
@@ -2550,7 +2553,7 @@ function vFatCard(c){const cols=S.tcols.filter(x=>x.area==='fat').sort((a,b)=>(a
    ${last?`<button class="btn" data-a="fatStage" data-v="${cols[0].id}">Reabrir</button>`:`<button class="btn pri" data-a="fatDone" data-v="${c.id}">${idx+1===cols.length-1?'✓ Concluir':'Avançar → '+esc((cols[idx+1]||{}).nome||'')}</button>`}</div>
    <div class="ngd-steps" role="group" aria-label="Etapa">${cols.map((x,i)=>`<button type="button" class="${i<idx?'p':i===idx?'c':''}" data-a="fatStage" data-v="${x.id}">${esc(x.nome)}</button>`).join('')}</div>
    <div class="ngd-g"><div class="ngd-l"><details open><summary>Cartão</summary>
-     ${row('Valor a faturar',`<input data-fatc="valor" value="${+c.valor?(+c.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):''}" inputmode="decimal" placeholder="R$ 0,00">`)}
+     ${row('Valor a faturar',itens?`<b>${brl(negTotOf(c))}</b>`:`<input data-fatc="valor" value="${+c.valor?(+c.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):''}" inputmode="decimal" placeholder="R$ 0,00">`)}
      ${row('Criado em','<span class="ngd-ro">'+(c.criado?dt(c.criado):'—')+'</span>')}
      ${row('Prazo',`<input type="date" data-fatc="prazo" value="${esc(c.prazo||'')}">`)}
     </details>
@@ -2560,7 +2563,7 @@ function vFatCard(c){const cols=S.tcols.filter(x=>x.area==='fat').sort((a,b)=>(a
     <details open class="ngd-d"><summary>Empresa</summary>
      <select data-fatc="farm" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:6px">${opts(S.farms.map(x=>[x.id,x.name]),c.farm||'','Selecione a fazenda…')}</select>
      ${f&&f.name?`${row('Cidade','<span class="ngd-ro">'+esc(f.city||'—')+'</span>')}${row('Segmento','<span class="ngd-ro">'+esc(segTxt(f)||'—')+'</span>')}`:''}</details></div>
-    <div class="ngd-rr"><div class="ngd-sec"><div class="ngd-sh"><h3>Descrição</h3></div><textarea data-fatc="desc" rows="6" style="width:100%;box-sizing:border-box" placeholder="O que será faturado: itens, quantidades, condições de pagamento…">${esc(c.desc||'')}</textarea></div>
+    <div class="ngd-rr">${itens?`<div class="ngd-sec"><div class="ngd-sh"><h3>Cobrança de ${negTipoL(c)}</h3><button class="btn sm" data-a="fatTipo" data-v="${c.orcTipo==='semen'?'servico':'semen'}">Trocar para ${c.orcTipo==='semen'?'Serviço':'Sêmen'}</button></div>${negOrcItems(c)}</div>`:c.cobLivre?'':`<div class="ngd-sec"><div class="ngd-sh"><h3>O que será cobrado?</h3></div><p class="muted" style="margin:0 0 10px">Escolha o tipo. Serviço já realizado no campo e sêmen usam os itens do cadastro de Produtos e Serviços.</p><div class="acts"><button class="btn pri" data-a="fatTipo" data-v="servico">Serviço</button><button class="btn pri" data-a="fatTipo" data-v="semen">Sêmen</button><button class="btn" data-a="fatTipo" data-v="livre">Outro (só valor e descrição)</button></div></div>`}<div class="ngd-sec"><div class="ngd-sh"><h3>${itens?'Condições e observações':'Descrição'}</h3></div><textarea data-fatc="desc" rows="6" style="width:100%;box-sizing:border-box" placeholder="O que será faturado: itens, quantidades, condições de pagamento…">${esc(c.desc||'')}</textarea></div>
      ${negFatAnx(c)}
      <div class="ngd-sec"><div class="ngd-sh"><h3>Comentários e atividade</h3></div>
       <form class="ngd-nota" data-fatmsg="${c.id}"><input name="t" placeholder="Escreva uma anotação…" autocomplete="off" aria-label="Anotação"><button class="btn pri" type="submit">Adicionar</button></form>
@@ -2922,6 +2925,7 @@ document.addEventListener('click',e=>{
    case 'fatAnxDel':{const c=S.tarefas.find(x=>x.id===ui.fatV),a=c&&(c.anexos||[])[+v];if(a)ask('Remover o anexo "'+a.n+'"?',()=>{if(a.p&&window.GS_CLOUD&&GS_CLOUD.remove)GS_CLOUD.remove([a.p]).catch(()=>{});c.anexos.splice(+v,1);tkLog(c,'removeu o anexo "'+a.n+'"');done()},{ok:'Remover'});break}
    case 'fatMsgDel':{const c=S.tarefas.find(x=>x.id===ui.fatV);if(c&&(c.msgs||[])[+v])ask('Excluir este comentário?',()=>{c.msgs.splice(+v,1);done('Comentário excluído.')},{ok:'Excluir'});break}
    case 'fatBack':{const c=S.tarefas.find(x=>x.id===ui.fatV);if(c&&c.fatNova){const vazio=!(c.titulo||'').trim()&&!(c.desc||'').trim()&&!(+c.valor)&&!c.contact&&!c.farm&&!(c.anexos||[]).length&&!(c.msgs||[]).length;if(vazio)S.tarefas.splice(S.tarefas.indexOf(c),1);else if(!(c.titulo||'').trim())c.titulo='Sem nome';save()}ui.fatV='';ui.ngDm=false;render();break}
+   case 'fatTipo':{const c=S.tarefas.find(x=>x.id===ui.fatV);if(!c)break;const go=()=>{if(v==='livre'){c.orcTipo='';c.cobLivre=true;c.orc=[]}else{c.orcTipo=v;c.cobLivre=false;c.orc=[{id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0}]}c.valor=negTotOf(c);save();render()};if((c.orc||[]).some(l=>l.nome||+l.vu))ask('Trocar o tipo apaga os itens já lançados. Continuar?',go,{ok:'Trocar'});else go();break}
    case 'fatDm':ui.ngDm=!ui.ngDm;render();break
    case 'fatDel':{const c=S.tarefas.find(x=>x.id===v);ui.ngDm=false;if(c)ask('Excluir o cartão "'+(c.titulo||'sem nome')+'"? Não dá para desfazer.',()=>{const ps=(c.anexos||[]).filter(a=>a.p).map(a=>a.p);if(ps.length&&window.GS_CLOUD&&GS_CLOUD.remove)GS_CLOUD.remove(ps).catch(()=>{});S.tarefas.splice(S.tarefas.indexOf(c),1);ui.fatV='';done('Cartão excluído.')},{ok:'Excluir'});else render();break}
    case 'fatStage':{const c=S.tarefas.find(x=>x.id===ui.fatV);if(c){c.col=v;{const cs=S.tcols.filter(x=>x.area==='fat').sort((a,b)=>(a.ord||0)-(b.ord||0));c.feito=cs.length>0&&cs[cs.length-1].id===v;c.concluidaEm=c.feito?today():''}tkLog(c,'moveu para '+(S.tcols.find(x=>x.id===v)||{}).nome);save()}render();break}
@@ -2933,9 +2937,9 @@ document.addEventListener('click',e=>{
    case 'ngOrcDelId':{const n=(S.negs||[]).find(x=>x.id===v);if(n)ask('Excluir esta proposta? Os itens serão apagados e não dá para desfazer.',()=>{n.orc=[];n.orcNum=0;n.orcData='';n.orcVal='';n.orcPag='';n.orcObs='';n.orcTipo='';n.valor=0;negLog(n,'excluiu a proposta');save();render()},{ok:'Excluir'});break}
    case 'ngOrcOpen':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n){if(v==='servico'||v==='semen')n.orcTipo=v;negOrcNum(n);if(!n.orcData)n.orcData=today();if(!n.orcVal)n.orcVal=addDays(today(),15);if(!(n.orc||[]).length){n.orc=[{id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0}]}save();ui.ngOrc=true}render();break}
    case 'ngOrcBack':ui.ngOrc=false;render();break
-   case 'ngOrcAddL':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n){(n.orc=n.orc||[]).push({id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0});save()}render();break}
+   case 'ngOrcAddL':{const n=(S.negs||[]).find(x=>x.id===ui.ngV)||(ui.fatV&&S.tarefas.find(x=>x.id===ui.fatV));if(n){(n.orc=n.orc||[]).push({id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0});save()}render();break}
    case 'ngOrcPdf':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n){negOrcNum(n);ui.modal={type:'orcpdf',id:n.id}}render();break}
-   case 'ngOrcRm':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n&&n.orc){const l=n.orc.splice(+v,1)[0];if(l)negLog(n,'removeu da proposta: '+l.nome);n.valor=negTotOf(n);save()}render();break}
+   case 'ngOrcRm':{const n=(S.negs||[]).find(x=>x.id===ui.ngV)||(ui.fatV&&S.tarefas.find(x=>x.id===ui.fatV));if(n&&n.orc){const l=n.orc.splice(+v,1)[0];if(l)negLog(n,'removeu da proposta: '+l.nome);n.valor=negTotOf(n);save()}render();break}
    case 'psTog':{const x=(S.pservs||[]).find(y=>y.id===v);if(x){x.exibir=x.exibir===false;save()}render();break}
    case 'psMn':ui.psMenu=ui.psMenu===v?null:v;render();break
    case 'psPg':ui.psP=+v;render();break
