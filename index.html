@@ -2428,13 +2428,7 @@ function vNegDet(n){
   <div class="ngd-steps" role="group" aria-label="Etapa do funil">${NEG_ST.map((x,i)=>`<button type="button" class="${i<idx?'p':i===idx?'c':''}" data-a="ngStage" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
   <div class="ngd-g"><div class="ngd-l"><details open><summary>Negociação</summary>
     ${row('Nome',inp('titulo',n.titulo))}
-    ${row('Fazenda',sel('farm',S.farms.map(x=>[x.id,x.name]).sort((a,b)=>a[1].localeCompare(b[1])),n.farm,'Selecionar'))}
-    ${row('Contato',sel('contact',S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name+(x.farm?' · '+(farmShort(x.farm)||F(x.farm).name):'')]),n.contact,'Selecionar'))}
-    ${row('Valor (R$)',inp('valor',+n.valor?(+n.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'','text','inputmode="decimal" placeholder="0,00"'))}
-    ${row('Responsável',sel('resp',TK_TEAM.map(x=>[x,x]),n.resp,'Sem responsável'))}
     ${row('Qualificação',sel('qual',NEG_Q.map(x=>[x,x]),n.qual,'Selecionar'))}
-    ${row('Previsão de fechamento',inp('prev',n.prev,'date'))}
-    ${row('Próximo retorno',inp('retorno',n.retorno,'date'))}
     ${row('Criada em','<span class="ngd-ro">'+(negCri(n)?dt(negCri(n)):'—')+'</span>')}
     ${row('Observações',`<textarea data-ngd="obs" rows="3">${esc(n.obs||'')}</textarea>`)}
    </details>
