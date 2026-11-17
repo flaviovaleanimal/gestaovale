@@ -469,10 +469,10 @@ function seed(){
       {id:'n4',tank:'t3',kind:'medicao',date:'2026-11-01',level:31,liters:0,total:0,note:''}]};
 }
 /* ---------- armazenamento: banco compartilhado (db) ou, sem ele, este navegador ---------- */
-const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],diaristas:[],tarefas:[],tcols:[],recorrencias:[],agcores:[],negs:[],pservs:[]});
+const emptyS=()=>({farms:[],breeders:[],tanks:[],movs:[],meas:[],products:[],pmovs:[],lotes:[],fichas:[],estacoes:[],lancs:[],ordens:[],contacts:[],diarias:[],kms:[],eventos:[],eventos_lixo:[],diaristas:[],tarefas:[],tcols:[],recorrencias:[],agcores:[],negs:[],pservs:[],fdl:[]});
 let S=emptyS();
 let DB=null,dbState='conectando',slowT=null,busy=false,q=[],needRender=false;
-const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},diaristas:{},tarefas:{},tcols:{},recorrencias:{},agcores:{},negs:{},pservs:{}},lastSnap={},held={},got={};
+const synced={farms:{},breeders:{},tanks:{},movs:{},meas:{},products:{},pmovs:{},lotes:{},fichas:{},estacoes:{},lancs:{},ordens:{},contacts:{},diarias:{},kms:{},eventos:{},eventos_lixo:{},diaristas:{},tarefas:{},tcols:{},recorrencias:{},agcores:{},negs:{},pservs:{},fdl:{}},lastSnap={},held={},got={};
 const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const loadLocal=()=>{try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}};
 function bannerTxt(){return {ok:'Conectado à nuvem: tudo o que for lançado fica salvo e aparece para todos os usuários.',
@@ -1320,6 +1320,12 @@ document.addEventListener('change',e=>{const d=e.target.dataset||{};if(d.psq!==u
 document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.fatc;if(!k)return;const c=S.tarefas.find(x=>x.id===ui.fatV);if(!c)return;
  if(k==='valor'){c.valor=tkParseV(t.value);t.value=c.valor>0?c.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):''}else c[k]=t.value;
  save();if(k==='contact'||k==='farm')render()});
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||t.dataset.fdlfile===undefined||!ui.modal||ui.modal.type!=='fdl')return;const f=t.files[0];t.value='';if(!f)return;const tp=fdlTipo(f.name);if(!tp){toast('Use arquivo PDF ou Excel (.pdf, .xls, .xlsx).');return}
+ const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;if(f.size>lim){toast('"'+f.name+'" passa de '+(cloud?'10':'1,5')+' MB.');return}
+ const keep=()=>{const fm=t.closest('form');if(fm){const g=n=>fm.elements[n]?fm.elements[n].value:'';ui.modal.data={...(ui.modal.data||{}),nome:g('nome'),cat:g('cat'),desc:g('desc')}}};
+ if(cloud){toast('Enviando "'+f.name+'"…');const path='fichas/'+Date.now().toString(36)+'-'+f.name.replace(/[^\w.\-]+/g,'_');GS_CLOUD.upload(path,f).then(()=>{keep();ui.modal.file={n:f.name,s:f.size,tipo:tp,p:path,m:f.lastModified||Date.now()};toast('Arquivo enviado.');render()}).catch(()=>toast('Não foi possível enviar o arquivo.'))}
+ else{const r=new FileReader();r.onload=()=>{keep();ui.modal.file={n:f.name,s:f.size,tipo:tp,d:r.result,m:f.lastModified||Date.now()};render()};r.readAsDataURL(f)}});
+document.addEventListener('input',e=>{const t=e.target;if(!t.dataset||t.dataset.fdlq===undefined)return;ui.fdlQ=t.value;clearTimeout(window.__fdlT);window.__fdlT=setTimeout(()=>{render();const i=document.querySelector('[data-fdlq]');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)});
 document.addEventListener('submit',e=>{const f=e.target;if(!f.dataset||!f.dataset.fatmsg)return;e.preventDefault();const c=S.tarefas.find(x=>x.id===f.dataset.fatmsg),tx=(f.elements.t.value||'').trim();if(!c||!tx)return;(c.msgs=c.msgs||[]).push({a:tkMe(),t:tx,h:Date.now()});save();render()});
 document.addEventListener('change',e=>{const t=e.target,id=t.dataset&&t.dataset.fatfile;if(!id)return;const c=S.tarefas.find(x=>x.id===id);if(!c)return;const fs=[...t.files];t.value='';if(!fs.length)return;const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;let n=fs.length;const res=[];
  const fin=()=>{if(!--n){res.filter(Boolean).forEach(x=>{(c.anexos=c.anexos||[]).push(x);tkLog(c,'anexou "'+x.n+'"')});save();render()}};
@@ -1952,6 +1958,14 @@ function modalHtml(){
     </div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia da proposta para impressão.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='fdl'){const x=m.data||{},fl=m.file||(x.id?{n:x.n,s:x.s,tipo:x.tipo,old:1}:null),cats=[...new Set((S.fdl||[]).map(y=>y.cat).filter(Boolean))];
+    body=`<div class="ng-h"><h3>${x.id?'Editar ficha':'Adicionar ficha'}</h3><button class="ng-x" type="button" data-a="close" aria-label="Fechar">✕</button></div>
+    <form data-form="fdl" data-id="${x.id||''}" novalidate>${err?`<div style="padding:0 24px">${err}</div>`:''}<div class="ng-b">
+    ${fldHtml('Nome da ficha',`<input name="nome" value="${esc(x.nome||'')}" required autocomplete="off">`)}
+    ${fldHtml('Categoria',`<input name="cat" list="dl-fdlc" value="${esc(x.cat||'')}" autocomplete="off" placeholder="Ex.: IATF, Campo, Estoque"><datalist id="dl-fdlc">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`)}
+    ${fldHtml('Descrição (opcional)',`<input name="desc" value="${esc(x.desc||'')}" autocomplete="off">`)}
+    <div style="border:1px dashed var(--line);border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">${fl?`<div style="flex:1;min-width:0;font-size:13px"><b>${esc(fl.n)}</b><div class="muted" style="font-size:12px">${esc(fl.tipo||fdlTipo(fl.n))} · ${tkKB(fl.s||0)}${fl.old?' · arquivo atual':' · novo arquivo'}</div></div>`:'<div class="muted" style="flex:1;font-size:13px">Nenhum arquivo escolhido (PDF ou Excel).</div>'}<label class="btn sm" style="cursor:pointer">${fl?'Substituir arquivo':'Escolher arquivo'}<input type="file" accept=".pdf,.xls,.xlsx" data-fdlfile style="display:none"></label></div>
+    </div>${foot('Salvar')}</form>`}
   if(m.type==='pserv'){const x=m.data||{};
     body=`<div class="ng-h"><h3>${x.id?'Editar produto ou serviço':'Criar produto ou serviço'}</h3><button class="ng-x" type="button" data-a="close" aria-label="Fechar">✕</button></div>
     <form data-form="pserv" data-id="${x.id||''}" novalidate>${err?`<div style="padding:0 24px">${err}</div>`:''}<div class="ng-b">
@@ -2244,7 +2258,7 @@ function pSaidaFields(){
 /* ---------- serviços da iatf ---------- */
 const LCAT=NCATS;
 const LPAR=['Vacas Primíparas','Vacas Secundíparas','Vacas Multíparas'];
-const ITIT={'i-painel':'Painel','i-lotes':'Agendamentos','i-fichas':'Ficha Saída','i-ordens':'Ordens','i-estacao':'Estação de Monta'};
+const ITIT={'i-painel':'Painel','i-lotes':'Agendamentos','i-fichas':'Ficha Saída','i-ordens':'Ordens','i-estacao':'Estação de Monta','i-fdl':'Fichas para Download'};
 const ititle=()=>ui.tab==='i-painel'?'Serviços':(ui.tab==='i-fichas'?'Estoque':'Serviços')+' › '+ITIT[ui.tab];
 function vEmBreve(){
   return `<div class="card"><div class="card-h"><h3>${ITIT[ui.tab]}</h3></div>${empty('Esta tela está em construção. Envie a estrutura para eu montar.')}</div>`;
@@ -2425,7 +2439,8 @@ const NAV=[
   {tab:'agenda',label:'Calendário',icon:'cal'},
   {tab:'i-lotes',label:'Agendamentos',icon:'cal'},
   {tab:'i-ordens',label:'Ordens',icon:'list'},
-  {tab:'i-estacao',label:'Estação de Monta',icon:'grid'}]},
+  {tab:'i-estacao',label:'Estação de Monta',icon:'grid'},
+  {tab:'i-fdl',label:'Fichas para Download',icon:'list'}]},
  {id:'est',label:'Estoque',icon:'box',home:'e-painel',kids:[
   {tab:'e-cad',label:'Cadastro',icon:'list'},
   {tab:'e-mov',label:'Movimentações',icon:'swap'},
@@ -2455,6 +2470,15 @@ function navHtml(list,d){
 document.addEventListener('click',e=>{if(ui.ngSn&&!(e.target.closest&&e.target.closest('.ng-menu,[data-a=ngSn]'))){ui.ngSn=null;render()}});
 document.addEventListener('click',e=>{if(ui.ngMenu&&!(e.target.closest&&e.target.closest('.ng-menu,[data-a=ngMenu]'))){ui.ngMenu=false;render()}});
 const PSCAT=[...PCAT,'Sêmen'];
+const FDL_EXT={pdf:'PDF',xls:'XLSX',xlsx:'XLSX'};
+const fdlTipo=n=>FDL_EXT[(String(n||'').split('.').pop()||'').toLowerCase()]||'';
+function vFDL(){const q=nrm(ui.fdlQ||''),cat=ui.fdlC||'',L=(S.fdl||[]).slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR',{sensitivity:'base'})),cats=[...new Set(L.map(x=>x.cat).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')),adm=isAdm();
+  const list=L.filter(x=>(!cat||x.cat===cat)&&(!q||nrm([x.nome,x.cat,x.desc].join(' ')).includes(q)));
+  const cor=t=>t==='PDF'?'background:#fdecea;color:#b42318':'background:#e6f4ea;color:#1b7f4b';
+  return `<div class="card"><div class="card-h"><h3>Fichas para Download</h3><span class="tk-sp"></span><div class="acts"><input data-fdlq placeholder="Pesquisar ficha…" value="${esc(ui.fdlQ||'')}" aria-label="Pesquisar ficha" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;min-width:220px;background:var(--surface);color:var(--ink);font:inherit">${adm?'<button class="btn pri" data-a="fdlNew">+ Adicionar ficha</button>':''}</div></div>
+  <p class="muted" style="margin:0 0 14px">Modelos em PDF ou Excel para imprimir ou preencher. Toque em Baixar para salvar no aparelho.</p>
+  ${cats.length?`<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><button class="btn sm${cat?'':' pri'}" data-a="fdlCat" data-v="">Todas</button>${cats.map(c=>`<button class="btn sm${cat===c?' pri':''}" data-a="fdlCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>`:''}
+  ${list.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px">${list.map(x=>`<div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:52px;border-radius:8px;${cor(x.tipo)};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none">${esc(x.tipo||'')}</div><div style="min-width:0"><b>${esc(x.nome)}</b><div class="muted" style="font-size:12px">${esc(x.cat||'Sem categoria')} · ${tkKB(x.s||0)}</div><div class="muted" style="font-size:12px">atualizada em ${dt(x.atual||'')}</div></div></div>${x.desc?`<div class="muted" style="font-size:13px">${esc(x.desc)}</div>`:''}<div style="display:flex;gap:8px"><button class="btn pri" style="flex:1" data-a="fdlDl" data-v="${x.id}">⬇ Baixar</button>${adm?`<button class="btn sm" data-a="fdlEdit" data-v="${x.id}">Editar</button><button class="btn sm dng" data-a="fdlDel" data-v="${x.id}">Excluir</button>`:''}</div></div>`).join('')}</div>`:empty(L.length?'Nenhuma ficha encontrada.':(adm?'Nenhuma ficha ainda. Clique em + Adicionar ficha.':'Nenhuma ficha disponível.'))}</div>`}
 function vPServ(){
   const q=nrm(ui.psQ||''),n=+ui.psN||10,all=(S.pservs||[]).slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'})),F2=all.filter(x=>!q||nrm(x.nome+' '+(x.categoria||'')).includes(q)),pgs=Math.max(1,Math.ceil(F2.length/n)),pg=Math.min(Math.max(1,+ui.psP||1),pgs),L=F2.slice((pg-1)*n,pg*n);
   return `<div class="card ps"><div class="ngd-top" style="align-items:center"><button class="ngd-back" data-a="go" data-v="negociacoes" aria-label="Voltar" title="Voltar às negociações">←</button><div class="ngd-tt"><h2 style="margin:0">Produtos e Serviços</h2></div><button class="ps-new" data-a="psNew">＋ Cadastrar produto ou serviço</button></div>
@@ -2661,7 +2685,7 @@ function render(){
   normData();
   {let s=document.getElementById('pg-land');const on=ui.modal&&ui.modal.type==='agpdf';if(on&&!s){s=document.createElement('style');s.id='pg-land';s.textContent='@media print{@page{size:A4 landscape;margin:10mm}}';document.head.appendChild(s)}else if(!on&&s)s.remove()}
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'e-mov':vEMov,'e-est':vEEst,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,prodserv:vPServ,'f-fatur':()=>ui.fatV?vNegFatPg():vTarefas(),cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,'i-fdl':vFDL,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'e-mov':vEMov,'e-est':vEEst,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,prodserv:vPServ,'f-fatur':()=>ui.fatV?vNegFatPg():vTarefas(),cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
   const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab==='e-cad'?'Estoque › Cadastro':ui.tab==='e-mov'?'Estoque › Movimentações':ui.tab==='e-est'?'Estoque › Por Fazenda':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Calendário':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':ui.tab==='prodserv'?'CRM › Produtos e Serviços':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
@@ -2940,6 +2964,11 @@ document.addEventListener('click',e=>{
    case 'ngOrcAddL':{const n=(S.negs||[]).find(x=>x.id===ui.ngV)||(ui.fatV&&S.tarefas.find(x=>x.id===ui.fatV));if(n){(n.orc=n.orc||[]).push({id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0});save()}render();break}
    case 'ngOrcPdf':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n){negOrcNum(n);ui.modal={type:'orcpdf',id:n.id}}render();break}
    case 'ngOrcRm':{const n=(S.negs||[]).find(x=>x.id===ui.ngV)||(ui.fatV&&S.tarefas.find(x=>x.id===ui.fatV));if(n&&n.orc){const l=n.orc.splice(+v,1)[0];if(l)negLog(n,'removeu da proposta: '+l.nome);n.valor=negTotOf(n);save()}render();break}
+   case 'fdlNew':if(!isAdm()){toast('Somente o administrador pode fazer isso.');break}ui.modal={type:'fdl',data:{},file:null};render();break
+   case 'fdlEdit':{if(!isAdm()){toast('Somente o administrador pode fazer isso.');break}const x=(S.fdl||[]).find(y=>y.id===v);if(x){ui.modal={type:'fdl',data:{...x},file:null};render()}break}
+   case 'fdlDel':{if(!isAdm()){toast('Somente o administrador pode fazer isso.');break}const x=(S.fdl||[]).find(y=>y.id===v);if(x)ask('Excluir a ficha "'+x.nome+'"? Não dá para desfazer.',()=>{if(x.p&&window.GS_CLOUD&&GS_CLOUD.remove)GS_CLOUD.remove([x.p]).catch(()=>{});S.fdl.splice(S.fdl.indexOf(x),1);done('Ficha excluída.')},{ok:'Excluir'});break}
+   case 'fdlCat':ui.fdlC=v;render();break
+   case 'fdlDl':{e.preventDefault();const x=(S.fdl||[]).find(y=>y.id===v);if(!x)break;if(x.p&&window.GS_CLOUD){GS_CLOUD.url(x.p).then(u=>{const a=document.createElement('a');a.href=u;a.download=x.n||x.nome;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()}).catch(()=>toast('Não foi possível baixar a ficha.'))}else if(x.d){const a=document.createElement('a');a.href=x.d;a.download=x.n||x.nome;document.body.appendChild(a);a.click();a.remove()}else toast('Arquivo indisponível.');break}
    case 'psTog':{const x=(S.pservs||[]).find(y=>y.id===v);if(x){x.exibir=x.exibir===false;save()}render();break}
    case 'psMn':ui.psMenu=ui.psMenu===v?null:v;render();break
    case 'psPg':ui.psP=+v;render();break
@@ -3342,6 +3371,10 @@ document.addEventListener('submit',e=>{
       if(rec.sit==='Paga')rec.paidAt=(old&&old.paidAt)||today();
       if(old){if(rec.sit!=='Paga')delete old.paidAt;Object.assign(old,rec)}else arr.push({id:nid(c.pre),...rec})});
     return done(rows.length>1?rows.length+' lançamentos salvos.':'Lançamento salvo.')}
+  if(k==='fdl'){const nome=(fd.nome||'').trim(),id=form.dataset.id,old=id?(S.fdl||[]).find(x=>x.id===id):null,fl=ui.modal.file;if(!isAdm())return modalErr('Somente o administrador pode fazer isso.');if(!nome)return modalErr('Informe o nome da ficha.');if(!old&&!fl)return modalErr('Escolha o arquivo (PDF ou Excel).');
+    const rec={nome,cat:(fd.cat||'').trim(),desc:(fd.desc||'').trim()};S.fdl=S.fdl||[];
+    if(fl){const pp=old&&old.p;if(pp&&window.GS_CLOUD&&GS_CLOUD.remove&&pp!==fl.p)GS_CLOUD.remove([pp]).catch(()=>{});Object.assign(rec,{n:fl.n,s:fl.s,tipo:fl.tipo,p:fl.p||'',d:fl.d||'',m:fl.m,atual:today()});if(!fl.p)delete rec.p;if(!fl.d)delete rec.d}
+    if(old)Object.assign(old,rec);else S.fdl.push({id:nid('fd'),criado:today(),atual:today(),...rec});return done('Ficha salva.')}
   if(k==='pserv'){const nome=(fd.nome||'').trim(),id=form.dataset.id;if(!nome)return modalErr('Informe o nome.');
     const rec={nome,categoria:fd.categoria||'',valor:tkParseV(fd.valor)||0,exibir:!!fd.exibir};S.pservs=S.pservs||[];
     if(S.pservs.some(x=>x.id!==id&&x.nome.toLowerCase()===nome.toLowerCase()))return modalErr('Já existe um item com esse nome.');
