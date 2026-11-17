@@ -1564,7 +1564,7 @@ function emList(){
   return [...sem,...pro].sort((a,b)=>b.m.date.localeCompare(a.m.date)||(b.m.ts||0)-(a.m.ts||0));
 }
 function vEEst(){
-  const t=ui.eft||'';
+  const t=ui.eft||'p';
   const seg=(v,l)=>`<button class="btn sm${t===v?' pri':''}" data-a="eft" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
   if(!ui.efz||!FZV().some(f=>f.id===ui.efz)){
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
@@ -1585,7 +1585,7 @@ function vEEst(){
   const rows=list.map(o=>{const tk=o.k==='s'?Object.entries(o.tanks).filter(([,q])=>q>0):[],many=tk.length>1,key=ui.efz+'|'+o.b,op=ui.open[key];
    const nm=many?`<button class="tog" data-a="toggle" data-v="${esc(key)}" aria-expanded="${!!op}"><b>${op?'▼':'▶'} ${esc(o.name)}</b></button>`:`<b>${esc(o.name)}</b>`;
    return `<tr><td>${nm}</td><td>${esc(o.cat)}</td><td><span class="pill ${o.k==='s'?'ok':'in'}">${o.k==='s'?'Sêmen':'Produto'}</span></td><td>${o.un?esc(o.un):'<span class="muted">—</span>'}</td><td class="num">${fmt(o.ent)}</td><td class="num">${fmt(o.sai)}</td><td class="num"><b>${fmt(o.bal)}</b></td>${minCell(o)}</tr>${many&&op?tk.map(([tn,q],i)=>`<tr class="loc"><td colspan="${colN}">${i+1}. ${esc(f.name)} — ${esc(tkn(tn))} — ${fmt(q)} doses</td></tr>`).join(''):''}`}).join('');
-  return `<div class="card"><div class="card-h"><div><button class="btn sm" data-a="efzback">← Voltar às fazendas</button><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px"><h2 style="margin:0">${esc(f.name)}</h2><span class="ag-seg">${seg('','Todos')}${seg('p','Produtos')}${seg('s','Sêmen')}</span></div></div>
+  return `<div class="card"><div class="card-h"><div><button class="btn sm" data-a="efzback">← Voltar às fazendas</button><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px"><h2 style="margin:0">${esc(f.name)}</h2><span class="ag-seg">${seg('p','Produtos')}${seg('s','Sêmen')}</span></div></div>
     <button class="btn pri" data-a="efzPdf">Imprimir PDF</button></div>
     ${t==='s'?`<div class="filters" style="margin:12px 0">${fldHtml('Raça',`<select data-s="fBreed">${opts(BREEDS.map(x=>[x,x]),ui.fBreed,'Todas')}</select>`)}${fldHtml('Indicação',`<select data-s="fInd">${opts(INDS.map(x=>[x,x]),ui.fInd,'Todas')}</select>`)}</div>`:''}
     <div class="tw">${list.length?`<table><thead><tr><th>Item</th><th>Categoria / raça</th><th>Tipo</th><th>Unidade</th><th class="num">Entrada</th><th class="num">Saída</th><th class="num">Saldo</th>${vale?'<th class="num">Estoque mínimo</th>':''}</tr></thead><tbody>${rows}</tbody>${totRows}</table>`:empty(t==='s'&&(ui.fBreed||ui.fInd)?'Nenhum sêmen em estoque com esses filtros.':'Nenhum item em estoque nesta fazenda.')}</div></div>`;
@@ -2702,10 +2702,10 @@ document.addEventListener('click',e=>{
    case 'ativBreeder':delete B(v).inativo;done(B(v).name+' ativado. Ele voltou ao estoque de sêmen.');break
    case 'ecT':ui.ecT=v;ui.q.ec='';render();break;
    case 'editMin':ui.modal={type:'pmin',data:{...PR(v)}};render();break;
-   case 'efz':ui.efz=v;ui.eft='';ui.farm=v;ui.pfarm=v;ui.fBreed='';ui.fInd='';ui.pcat='';render();break;
+   case 'efz':ui.efz=v;ui.eft='p';ui.farm=v;ui.pfarm=v;ui.fBreed='';ui.fInd='';ui.pcat='';render();break;
    case 'efzback':ui.efz=null;render();break;
    case 'eft':ui.eft=v;render();break;
-   case 'efzPdf':ui.farm=ui.efz;ui.pfarm=ui.efz;if(ui.eft==='s')ui.modal={type:'pdf'};else if(ui.eft==='p')ui.modal={type:'ppdf'};else ui.modal={type:'movtipo',est:true};render();break;
+   case 'efzPdf':ui.farm=ui.efz;ui.pfarm=ui.efz;if(ui.eft==='s')ui.modal={type:'pdf'};else ui.modal={type:'ppdf'};render();break;
    case 'emT':ui.emT=v;if(ui.emItem&&((v==='p'&&ui.emItem[0]==='s')||(v==='s'&&ui.emItem[0]==='p')))ui.emItem='';render();break;
    case 'emNew':if(ui.emT){emOpen(v,ui.emT)}else ui.modal={type:'movtipo',k:v,pdf:false};render();break;
    case 'emPdf':if(ui.emT)emPdfGo(ui.emT);else ui.modal={type:'movtipo',pdf:true};render();break;
