@@ -2258,7 +2258,7 @@ function pSaidaFields(){
 /* ---------- serviços da iatf ---------- */
 const LCAT=NCATS;
 const LPAR=['Vacas Primíparas','Vacas Secundíparas','Vacas Multíparas'];
-const ITIT={'i-painel':'Painel','i-lotes':'Agendamentos','i-fichas':'Ficha Saída','i-ordens':'Ordens','i-estacao':'Estação de Monta','i-fdl':'Fichas para Download'};
+const ITIT={'i-painel':'Painel','i-lotes':'Agendamentos','i-fichas':'Ficha Saída','i-ordens':'Ordens','i-estacao':'Estação de Monta','i-fdl':'Fichas'};
 const ititle=()=>ui.tab==='i-painel'?'Serviços':(ui.tab==='i-fichas'?'Estoque':'Serviços')+' › '+ITIT[ui.tab];
 function vEmBreve(){
   return `<div class="card"><div class="card-h"><h3>${ITIT[ui.tab]}</h3></div>${empty('Esta tela está em construção. Envie a estrutura para eu montar.')}</div>`;
@@ -2440,7 +2440,7 @@ const NAV=[
   {tab:'i-lotes',label:'Agendamentos',icon:'cal'},
   {tab:'i-ordens',label:'Ordens',icon:'list'},
   {tab:'i-estacao',label:'Estação de Monta',icon:'grid'},
-  {tab:'i-fdl',label:'Fichas para Download',icon:'list'}]},
+  {tab:'i-fdl',label:'Fichas',icon:'list'}]},
  {id:'est',label:'Estoque',icon:'box',home:'e-painel',kids:[
   {tab:'e-cad',label:'Cadastro',icon:'list'},
   {tab:'e-mov',label:'Movimentações',icon:'swap'},
@@ -2475,7 +2475,7 @@ const fdlTipo=n=>FDL_EXT[(String(n||'').split('.').pop()||'').toLowerCase()]||''
 function vFDL(){const q=nrm(ui.fdlQ||''),cat=ui.fdlC||'',L=(S.fdl||[]).slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR',{sensitivity:'base'})),cats=[...new Set(L.map(x=>x.cat).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')),adm=isAdm();
   const list=L.filter(x=>(!cat||x.cat===cat)&&(!q||nrm([x.nome,x.cat,x.desc].join(' ')).includes(q)));
   const cor=t=>t==='PDF'?'background:#fdecea;color:#b42318':'background:#e6f4ea;color:#1b7f4b';
-  return `<div class="card"><div class="card-h"><h3>Fichas para Download</h3><span class="tk-sp"></span><div class="acts"><input data-fdlq placeholder="Pesquisar ficha…" value="${esc(ui.fdlQ||'')}" aria-label="Pesquisar ficha" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;min-width:220px;background:var(--surface);color:var(--ink);font:inherit">${adm?'<button class="btn pri" data-a="fdlNew">+ Adicionar ficha</button>':''}</div></div>
+  return `<div class="card"><div class="card-h"><h3>Fichas</h3><span class="tk-sp"></span><div class="acts"><input data-fdlq placeholder="Pesquisar ficha…" value="${esc(ui.fdlQ||'')}" aria-label="Pesquisar ficha" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;min-width:220px;background:var(--surface);color:var(--ink);font:inherit">${adm?'<button class="btn pri" data-a="fdlNew">+ Adicionar ficha</button>':''}</div></div>
   <p class="muted" style="margin:0 0 14px">Modelos em PDF ou Excel para imprimir ou preencher. Toque em Baixar para salvar no aparelho.</p>
   ${cats.length?`<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><button class="btn sm${cat?'':' pri'}" data-a="fdlCat" data-v="">Todas</button>${cats.map(c=>`<button class="btn sm${cat===c?' pri':''}" data-a="fdlCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>`:''}
   ${list.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px">${list.map(x=>`<div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:52px;border-radius:8px;${cor(x.tipo)};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none">${esc(x.tipo||'')}</div><div style="min-width:0"><b>${esc(x.nome)}</b><div class="muted" style="font-size:12px">${esc(x.cat||'Sem categoria')} · ${tkKB(x.s||0)}</div><div class="muted" style="font-size:12px">atualizada em ${dt(x.atual||'')}</div></div></div>${x.desc?`<div class="muted" style="font-size:13px">${esc(x.desc)}</div>`:''}<div style="display:flex;gap:8px"><button class="btn pri" style="flex:1" data-a="fdlDl" data-v="${x.id}">⬇ Baixar</button>${adm?`<button class="btn sm" data-a="fdlEdit" data-v="${x.id}">Editar</button><button class="btn sm dng" data-a="fdlDel" data-v="${x.id}">Excluir</button>`:''}</div></div>`).join('')}</div>`:empty(L.length?'Nenhuma ficha encontrada.':(adm?'Nenhuma ficha ainda. Clique em + Adicionar ficha.':'Nenhuma ficha disponível.'))}</div>`}
