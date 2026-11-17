@@ -2448,9 +2448,9 @@ function vNegDet(n){
   <div class="ngd-steps" role="group" aria-label="Etapa do funil">${NEG_ST.map((x,i)=>`<button type="button" class="${i<idx?'p':i===idx?'c':''}" data-a="ngStage" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
   <div class="ngd-g"><div class="ngd-l"><details open><summary>Negociação</summary>
     ${row('Nome',inp('titulo',n.titulo))}
-    ${row('Qualificação',sel('qual',NEG_Q.map(x=>[x,x]),n.qual,'Selecionar'))}
     ${row('Criada em','<span class="ngd-ro">'+(negCri(n)?dt(negCri(n)):'—')+'</span>')}
-    ${row('Observações',`<textarea data-ngd="obs" rows="3">${esc(n.obs||'')}</textarea>`)}
+    ${row('Previsão de fechamento',inp('prev',n.prev,'date'))}
+    ${row('Valor total',inp('valor',+n.valor?(+n.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'','text','inputmode="decimal" placeholder="R$ 0,00"'))}
    </details>
    <details open class="ngd-d"><summary>Contatos</summary>
     ${[n.contact,...(n.extra||[])].filter(Boolean).map(id=>S.contacts.find(c=>c.id===id)).filter(Boolean).map(c=>`<div class="ngd-c"><div class="ngd-cn"><button class="ngd-lk" data-a="editContact" data-v="${c.id}" title="Editar contato"><b>${esc(c.name)}</b> 👤</button><button class="ngd-lk" data-a="ngRmC" data-v="${c.id}" title="Tirar da negociação" aria-label="Tirar contato da negociação">✕</button></div>
