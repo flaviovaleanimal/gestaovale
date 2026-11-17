@@ -2397,6 +2397,7 @@ const negOk=n=>{const u=negU();
   if(u.st==='atrasado'&&!negLate(n))return false;if(u.st==='emdia'&&!(n.retorno&&!negLate(n)))return false;if(u.st==='sem'&&n.retorno)return false;
   if(!negPerOk(n))return false;
   const q=nrm(u.q||'');if(!q)return true;return nrm([n.titulo,n.obs,F(n.farm).name,(S.contacts.find(c=>c.id===n.contact)||{}).name,n.resp].join(' ')).includes(q)};
+const negCri=n=>n.criado||(n.ord>1e12?(d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'))(new Date(n.ord)):'');
 const negLate=n=>!!n.retorno&&n.retorno<today();
 function vNegoc(){
   const u=negU(),all=S.negs||[],vis=all.filter(negOk),tot=a=>a.reduce((x,n)=>x+(+n.valor||0),0);
@@ -2418,7 +2419,7 @@ function vNegoc(){
    return `<div class="tk-col" data-ngdrop="${esc(st)}"><div class="tk-ch"><b class="tk-cn" style="flex:1">${esc(st)}</b><span class="tk-n">${cs.length}${tot(cs)?' · '+brl(tot(cs)):''}</span><button class="tk-plus" type="button" data-a="ngNew" data-v="${esc(st)}" title="Nova negociação" aria-label="Nova negociação em ${esc(st)}">+</button></div>
     <div class="tk-cl">${cs.length?cs.map(n=>{const ct=S.contacts.find(c=>c.id===n.contact);return `<div class="tk-c" draggable="true" data-ng="${n.id}" data-a="ngEdit" data-v="${n.id}" role="button" tabindex="0"><div class="tk-ct1"><b>${esc(n.titulo)}</b></div>
       <div class="tk-meta tk-meta1">${n.farm?`<span class="tk-b">${esc(farmShort(n.farm)||F(n.farm).name)}</span>`:''}${ct?`<span class="tk-b">${esc(ct.name)}</span>`:''}</div>
-      <div class="tk-meta">${+n.valor>0?`<span class="tk-b"><b>${brl(n.valor)}</b></span>`:''}${n.retorno?`<span class="tk-b ${negLate(n)?'tkst-late':''}">${negLate(n)?'Atrasado · ':'Retorno '}${dt(n.retorno)}</span>`:''}${n.resp?`<span class="tk-avs"><span class="tk-av" title="${esc(n.resp)}">${esc(n.resp.split(' ').map(x=>x[0]).slice(0,2).join(''))}</span></span>`:''}</div></div>`}).join(''):'<div class="tk-vz">Sem negociações</div>'}</div></div>`}).join('');
+      <div class="tk-meta">${+n.valor>0?`<span class="tk-b"><b>${brl(n.valor)}</b></span>`:''}${negCri(n)?`<span class="tk-b" title="Data de criação">Criada em ${dt(negCri(n))}</span>`:''}${n.resp?`<span class="tk-avs"><span class="tk-av" title="${esc(n.resp)}">${esc(n.resp.split(' ').map(x=>x[0]).slice(0,2).join(''))}</span></span>`:''}</div></div>`}).join(''):'<div class="tk-vz">Sem negociações</div>'}</div></div>`}).join('');
    body=`<div class="tk-board">${cols}</div>`}
   const seg=`<span class="ag-seg"><button class="btn sm ${u.modo==='quadro'?'pri':''}" data-a="ngModo" data-v="quadro">Quadro</button><button class="btn sm ${u.modo==='lista'?'pri':''}" data-a="ngModo" data-v="lista">Lista</button></span>`;
   return `<div class="card"><div class="card-h"><h3>Negociações <small class="muted">(${vis.length}${vis.length!==all.length?' de '+all.length:''} · ${brl(tot(vis))})</small></h3>${seg}<span class="tk-sp"></span><div style="position:relative"><button class="btn pri" data-a="ngMenu" aria-haspopup="true" aria-expanded="${!!ui.ngMenu}">Criar ▾</button>${ui.ngMenu?`<div class="ng-menu" role="menu"><button type="button" role="menuitem" data-a="ngNew" data-v="${NEG_ST[0]}">Criar Negociação</button><button type="button" role="menuitem" data-a="newContact">Criar Contato</button><button type="button" role="menuitem" data-a="newFarm">Criar Empresa</button><button type="button" role="menuitem" data-a="ngTask">Criar Tarefas</button></div>`:''}</div></div>${filt}${body}</div>`}
@@ -3081,7 +3082,7 @@ document.addEventListener('submit',e=>{
     if(!titulo)return modalErr('Informe o título da negociação.');
     const rec={titulo,st:fd.st||NEG_ST[0],farm:fd.farm||'',contact:fd.contact||'',valor:tkParseV(fd.valor)||0,resp:fd.resp===undefined?tkMe():(fd.resp||''),retorno:fd.retorno||'',obs:(fd.obs||'').trim()};
     S.negs=S.negs||[];const old=id&&S.negs.find(x=>x.id===id);
-    if(old){if(old.st!==rec.st)rec.ord=Date.now();Object.assign(old,rec)}else S.negs.push({id:nid('ng'),ord:Date.now(),...rec});
+    if(old){if(old.st!==rec.st)rec.ord=Date.now();Object.assign(old,rec)}else S.negs.push({id:nid('ng'),ord:Date.now(),criado:today(),...rec});
     if(ui.ngAgain&&!old){ui.ngAgain=false;save();ui.modal={type:'neg',data:{st:rec.st}};render();return toast('Negociação criada.')}
     return done('Negociação salva.')}
   if(k==='contact'){
