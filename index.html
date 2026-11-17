@@ -1304,7 +1304,7 @@ document.addEventListener('dragstart',e=>{const g=e.target.closest&&e.target.clo
 document.addEventListener('dragover',e=>{const t=tkCD&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();if(!t.classList.contains('tk-colover')){document.querySelectorAll('.tk-colover').forEach(x=>x.classList.remove('tk-colover'));t.classList.add('tk-colover')}});
 document.addEventListener('dragend',()=>{if(!tkCD)return;tkCD=null;document.querySelectorAll('.tk-colover,.tk-colmv').forEach(x=>x.classList.remove('tk-colover','tk-colmv'))});
 document.addEventListener('drop',e=>{const t=tkCD&&e.target.closest&&e.target.closest('[data-tkdrop]');if(!t)return;e.preventDefault();const id=tkCD;tkCD=null;const list=tkCols(),to=list.findIndex(x=>x.id===t.dataset.tkdrop),m=list.find(x=>x.id===id);if(!m||to<0||m.id===t.dataset.tkdrop){render();return}list.splice(list.indexOf(m),1);list.splice(to,0,m);list.forEach((x,i)=>x.ord=i+1);save();render()});
-document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.ngq!==undefined){ui.ngQ=t.value;render()}});
+document.addEventListener('change',e=>{const t=e.target,d=t.dataset||{};if(d.ngq!==undefined){negU().q=t.value;render()}else if(d.ngf){const u=negU();if(d.ngf==='sem')u.sem=t.checked;else u[d.ngf]=t.value;render()}});
 let ngDrag=null;
 document.addEventListener('dragstart',e=>{const b=e.target.closest&&e.target.closest('[data-ng]');if(!b)return;ngDrag=b.dataset.ng;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',ngDrag)}catch(_){}b.style.opacity='.5'});
 document.addEventListener('dragend',()=>{ngDrag=null;document.querySelectorAll('.tk-over').forEach(x=>x.classList.remove('tk-over'));document.querySelectorAll('[data-ng]').forEach(x=>x.style.opacity='')});
@@ -2383,20 +2383,45 @@ function navHtml(list,d){
 }
 document.addEventListener('click',e=>{if(ui.ngMenu&&!(e.target.closest&&e.target.closest('.ng-menu,[data-a=ngMenu]'))){ui.ngMenu=false;render()}});
 const NEG_ST=['Sem contato','Contato feito','Qualificação','Proposta','Negociação'];
-const negU=()=>({resp:ui.ngResp||'Todos',q:ui.ngQ||''});
-const negOk=n=>{const u=negU();if(u.resp!=='Todos'&&n.resp!==u.resp)return false;const q=nrm(u.q||'');if(!q)return true;return nrm([n.titulo,n.obs,F(n.farm).name,(S.contacts.find(c=>c.id===n.contact)||{}).name,n.resp].join(' ')).includes(q)};
+const negU=()=>{const u=ui.ng||(ui.ng={modo:'quadro',resp:'Todos',per:'todos',st:'todos',q:'',fp:false,sem:false});return u};
+const NEG_PER={hoje:'Hoje',semana:'Esta semana',mes:'Este mês','7':'Próximos 7 dias','30':'Próximos 30 dias'};
+const NEG_STT={atrasado:'Atrasado',emdia:'Retorno em dia',sem:'Sem retorno'};
+const negPerOk=n=>{const u=negU();if(u.per==='todos')return true;if(!n.retorno)return false;const td=today(),d=n.retorno;
+  if(u.per==='hoje')return d===td;
+  if(u.per==='semana'){const w=(new Date(td+'T12:00:00').getDay()+6)%7,a=addDays(td,-w);return d>=a&&d<=addDays(a,6)}
+  if(u.per==='mes')return d.slice(0,7)===td.slice(0,7);
+  return d>=td&&d<=addDays(td,+u.per)};
+const negOk=n=>{const u=negU();
+  if(u.resp==='meu'){if(n.resp!==tkMe())return false}else if(u.resp!=='Todos'&&n.resp!==u.resp)return false;
+  if(u.sem&&n.resp)return false;
+  if(u.st==='atrasado'&&!negLate(n))return false;if(u.st==='emdia'&&!(n.retorno&&!negLate(n)))return false;if(u.st==='sem'&&n.retorno)return false;
+  if(!negPerOk(n))return false;
+  const q=nrm(u.q||'');if(!q)return true;return nrm([n.titulo,n.obs,F(n.farm).name,(S.contacts.find(c=>c.id===n.contact)||{}).name,n.resp].join(' ')).includes(q)};
 const negLate=n=>!!n.retorno&&n.retorno<today();
 function vNegoc(){
   const u=negU(),all=S.negs||[],vis=all.filter(negOk),tot=a=>a.reduce((x,n)=>x+(+n.valor||0),0);
-  const cols=NEG_ST.map(st=>{const cs=vis.filter(n=>n.st===st).sort((a,b)=>(a.ord||0)-(b.ord||0));
+  const I={u:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg>',c:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',s:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',f:'<svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>'};
+  const pill=(ic,k,inner,on)=>`<label class="tk-pill${on?' on':''}">${ic}<select data-ngf="${k}">${inner}</select></label>`;
+  const nf=(u.resp!=='Todos')+(u.per!=='todos')+(u.st!=='todos')+(!!u.q)+(!!u.sem);
+  const chips=[];if(u.resp!=='Todos')chips.push(['resp',I.u+esc(u.resp==='meu'?'Minhas negociações':u.resp)]);if(u.per!=='todos')chips.push(['per',I.c+NEG_PER[u.per]]);if(u.st!=='todos')chips.push(['st',I.s+NEG_STT[u.st]]);if(u.q)chips.push(['q','🔎 '+esc(u.q)]);if(u.sem)chips.push(['sem',I.u+'Sem responsável']);
+  const filt=`<div class="tk-fb"><label class="tk-search"><button type="button" class="tk-sbtn" aria-label="Pesquisar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button><input type="text" data-ngq value="${esc(u.q)}" placeholder="Pesquisar negociações…" autocomplete="off" aria-label="Pesquisar negociações">${u.q?'<button type="button" class="tk-sx" data-a="ngChip" data-v="q" aria-label="Limpar pesquisa">✕</button>':''}</label>
+   ${pill(I.u,'resp',`<option value="Todos">Todas</option><option value="meu"${u.resp==='meu'?' selected':''}>Minhas</option>${TK_TEAM.map(n=>`<option${u.resp===n?' selected':''}>${n}</option>`).join('')}`,u.resp!=='Todos')}
+   ${pill(I.c,'per',`<option value="todos">Período</option>${Object.entries(NEG_PER).map(([k,v])=>`<option value="${k}"${u.per===k?' selected':''}>${v}</option>`).join('')}`,u.per!=='todos')}
+   ${pill(I.s,'st',`<option value="todos">Todos os status</option>${Object.entries(NEG_STT).map(([k,v])=>`<option value="${k}"${u.st===k?' selected':''}>${v}</option>`).join('')}`,u.st!=='todos')}
+   <button class="tk-fbtn${u.fp?' open':''}" data-a="ngFp">${I.f}Filtros (${nf})</button></div>
+  <div class="tk-aft">${u.fp?`<div class="tk-fp"><label class="tk-chk"><input type="checkbox" data-ngf="sem"${u.sem?' checked':''}> Sem responsável</label></div>`:''}
+  ${chips.length?`<div class="tk-chips">${chips.map(([k,h])=>`<span class="tk-chip">${h}<button data-a="ngChip" data-v="${k}" aria-label="Remover filtro">✕</button></span>`).join('')}<button class="btn sm" data-a="ngClr">Limpar tudo</button></div>`:''}</div>`;
+  let body;
+  if(u.modo==='lista'){const L=vis.slice().sort((a,b)=>NEG_ST.indexOf(a.st)-NEG_ST.indexOf(b.st)||(a.ord||0)-(b.ord||0));
+   body=L.length?`<div class="tw"><table><thead><tr><th>Negociação</th><th>Etapa</th><th>Fazenda</th><th>Contato</th><th class="num">Valor</th><th>Responsável</th><th>Retorno</th></tr></thead><tbody>${L.map(n=>{const ct=S.contacts.find(c=>c.id===n.contact);return `<tr class="tk-row" data-a="ngEdit" data-v="${n.id}"><td><b>${esc(n.titulo)}</b></td><td>${esc(n.st)}</td><td>${esc(n.farm?(farmShort(n.farm)||F(n.farm).name):'—')}</td><td>${esc(ct?ct.name:'—')}</td><td class="num">${+n.valor>0?brl(n.valor):'—'}</td><td>${esc(n.resp||'—')}</td><td>${n.retorno?`<span class="${negLate(n)?'pill out':''}">${dt(n.retorno)}</span>`:'—'}</td></tr>`}).join('')}</tbody></table></div>`:empty('Nenhuma negociação encontrada.')}
+  else{const cols=NEG_ST.map(st=>{const cs=vis.filter(n=>n.st===st).sort((a,b)=>(a.ord||0)-(b.ord||0));
    return `<div class="tk-col" data-ngdrop="${esc(st)}"><div class="tk-ch"><b class="tk-cn" style="flex:1">${esc(st)}</b><span class="tk-n">${cs.length}${tot(cs)?' · '+brl(tot(cs)):''}</span><button class="tk-plus" type="button" data-a="ngNew" data-v="${esc(st)}" title="Nova negociação" aria-label="Nova negociação em ${esc(st)}">+</button></div>
     <div class="tk-cl">${cs.length?cs.map(n=>{const ct=S.contacts.find(c=>c.id===n.contact);return `<div class="tk-c" draggable="true" data-ng="${n.id}" data-a="ngEdit" data-v="${n.id}" role="button" tabindex="0"><div class="tk-ct1"><b>${esc(n.titulo)}</b></div>
       <div class="tk-meta tk-meta1">${n.farm?`<span class="tk-b">${esc(farmShort(n.farm)||F(n.farm).name)}</span>`:''}${ct?`<span class="tk-b">${esc(ct.name)}</span>`:''}</div>
       <div class="tk-meta">${+n.valor>0?`<span class="tk-b"><b>${brl(n.valor)}</b></span>`:''}${n.retorno?`<span class="tk-b ${negLate(n)?'tkst-late':''}">${negLate(n)?'Atrasado · ':'Retorno '}${dt(n.retorno)}</span>`:''}${n.resp?`<span class="tk-avs"><span class="tk-av" title="${esc(n.resp)}">${esc(n.resp.split(' ').map(x=>x[0]).slice(0,2).join(''))}</span></span>`:''}</div></div>`}).join(''):'<div class="tk-vz">Sem negociações</div>'}</div></div>`}).join('');
-  return `<div class="card"><div class="card-h"><h3>Negociações <small class="muted">(${vis.length}${vis.length!==all.length?' de '+all.length:''} · ${brl(tot(vis))} no funil)</small></h3><div style="position:relative"><button class="btn pri" data-a="ngMenu" aria-haspopup="true" aria-expanded="${!!ui.ngMenu}">Criar ▾</button>${ui.ngMenu?`<div class="ng-menu" role="menu"><button type="button" role="menuitem" data-a="ngNew" data-v="${NEG_ST[0]}">Criar Negociação</button><button type="button" role="menuitem" data-a="newContact">Criar Contato</button><button type="button" role="menuitem" data-a="newFarm">Criar Empresa</button><button type="button" role="menuitem" data-a="ngTask">Criar Tarefas</button></div>`:''}</div></div>
-   <div class="tk-fil"><label style="width:220px">Responsável<select data-s="ngResp">${['Todos',...TK_TEAM].map(x=>`<option${u.resp===x?' selected':''}>${esc(x)}</option>`).join('')}</select></label>
-   <label style="width:300px;max-width:100%">Buscar<input data-ngq value="${esc(u.q||'')}" placeholder="Título, empresa, contato…"></label></div>
-   <div class="tk-board">${cols}</div></div>`}
+   body=`<div class="tk-board">${cols}</div>`}
+  const seg=`<span class="ag-seg"><button class="btn sm ${u.modo==='quadro'?'pri':''}" data-a="ngModo" data-v="quadro">Quadro</button><button class="btn sm ${u.modo==='lista'?'pri':''}" data-a="ngModo" data-v="lista">Lista</button></span>`;
+  return `<div class="card"><div class="card-h"><h3>Negociações <small class="muted">(${vis.length}${vis.length!==all.length?' de '+all.length:''} · ${brl(tot(vis))})</small></h3>${seg}<span class="tk-sp"></span><div style="position:relative"><button class="btn pri" data-a="ngMenu" aria-haspopup="true" aria-expanded="${!!ui.ngMenu}">Criar ▾</button>${ui.ngMenu?`<div class="ng-menu" role="menu"><button type="button" role="menuitem" data-a="ngNew" data-v="${NEG_ST[0]}">Criar Negociação</button><button type="button" role="menuitem" data-a="newContact">Criar Contato</button><button type="button" role="menuitem" data-a="newFarm">Criar Empresa</button><button type="button" role="menuitem" data-a="ngTask">Criar Tarefas</button></div>`:''}</div></div>${filt}${body}</div>`}
 const LBL={painel:'Sêmen',cadastro:'Cadastro',estoque:'Estoque',botijoes:'Botijões',movs:'Movimentações',fazendas:'Empresas',contatos:'Contatos',negociacoes:'Negociações'};
 const SUBL={entrada:'Entrada de sêmen',saida:'Saída de sêmen',hist:'Histórico'};
 
@@ -2663,6 +2688,10 @@ document.addEventListener('click',e=>{
    case 'printLotes':ui.modal={type:'gpdf'};render();break;
    case 'printFarms':ui.modal={type:'epdf'};render();break;
    case 'ngAgain':{ui.ngAgain=true;const f=b.closest('form');if(f)f.requestSubmit();break}
+   case 'ngModo':negU().modo=v;render();break;
+   case 'ngFp':negU().fp=!negU().fp;render();break;
+   case 'ngClr':ui.ng=null;render();break;
+   case 'ngChip':{const u=negU();if(v==='q')u.q='';else if(v==='sem')u.sem=false;else u[v]='todos';if(v==='resp')u.resp='Todos';render();break}
    case 'ngMenu':ui.ngMenu=!ui.ngMenu;render();break;
    case 'ngTask':{ui.ngMenu=false;const u=tkU();if(!tkCols().length){toast('Crie uma coluna em Tarefas primeiro.');render();break}u.cOpen=false;u.editDesc=false;const id=nid('t');u.draft={id,col:tkCols()[0].id,titulo:'',desc:'',membros:[],prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[]};u.sel=id;u.pop='';u.showChk=false;ui.modal={type:'tk'};render();break}
    case 'ngNew':ui.ngMenu=false;ui.modal={type:'neg',data:{st:v,resp:tkMe(),novo:true}};render();break;
