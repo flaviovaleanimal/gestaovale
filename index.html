@@ -1958,6 +1958,11 @@ function modalHtml(){
     </div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia da proposta para impressão.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
+  if(m.type==='ngpick'){const n=(S.negs||[]).find(x=>x.id===m.id)||{},ja=new Set([n.contact,...(n.extra||[])].filter(Boolean)),lst=S.contacts.filter(c=>!ja.has(c.id)).sort((a,b)=>((b.farm===n.farm&&!!n.farm)-(a.farm===n.farm&&!!n.farm))||a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+    body=`<div class="ng-h"><h3>Adicionar contato</h3><button class="ng-x" type="button" data-a="close" aria-label="Fechar">✕</button></div>
+    <form data-form="ngpick" data-id="${esc(m.id)}" novalidate>${err?`<div style="padding:0 24px">${err}</div>`:''}<div class="ng-b">
+    ${lst.length?fldHtml('Contato do cadastro',`<select name="contact" required>${opts(lst.map(c=>[c.id,c.name+(c.farm?' · '+(farmShort(c.farm)||F(c.farm).name):'')]),'','Selecione o contato…')}</select><small class="muted">Os contatos da fazenda da negociação aparecem primeiro. Para um contato novo, use Criar › Contato.</small>`):'<p class="muted" style="margin:0">Não há outros contatos no cadastro para adicionar. Cadastre em Criar › Contato.</p>'}
+    </div>${lst.length?foot('Adicionar'):'<div class="mf"><button class="btn" type="button" data-a="close">Fechar</button></div>'}</form>`}
   if(m.type==='fdl'){const x=m.data||{},fl=m.file||(x.id?{n:x.n,s:x.s,tipo:x.tipo,old:1}:null),cats=[...new Set((S.fdl||[]).map(y=>y.cat).filter(Boolean))];
     body=`<div class="ng-h"><h3>${x.id?'Editar ficha':'Adicionar ficha'}</h3><button class="ng-x" type="button" data-a="close" aria-label="Fechar">✕</button></div>
     <form data-form="fdl" data-id="${x.id||''}" novalidate>${err?`<div style="padding:0 24px">${err}</div>`:''}<div class="ng-b">
@@ -2934,7 +2939,7 @@ document.addEventListener('click',e=>{
    case 'printLotes':ui.modal={type:'gpdf'};render();break;
    case 'printFarms':ui.modal={type:'epdf'};render();break;
    case 'ngAgain':{ui.ngAgain=true;const f=b.closest('form');if(f)f.requestSubmit();break}
-   case 'ngAddC':{const n=(S.negs||[]).find(x=>x.id===v);if(!n)break;ui.ngLink=v;const f=n.farm?F(n.farm):null;ui.modal={type:'contact',data:n.farm?{farm:n.farm,city:f.city||'',state:f.state||''}:{}};render();break}
+   case 'ngAddC':{const n=(S.negs||[]).find(x=>x.id===v);if(!n)break;ui.modal={type:'ngpick',id:v};render();break}
    case 'ngRmC':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n){if(n.contact===v){n.contact=(n.extra||[]).shift()||''}else n.extra=(n.extra||[]).filter(x=>x!==v);save()}render();break}
    case 'ngCopy':{try{navigator.clipboard.writeText(v).then(()=>toast('Telefone copiado.'),()=>toast('Não foi possível copiar.'))}catch(_){toast('Não foi possível copiar.')}break}
    case 'ngEmp':ui.modal={type:'farm',data:{...F(v)}};render();break
@@ -3376,6 +3381,9 @@ document.addEventListener('submit',e=>{
       if(rec.sit==='Paga')rec.paidAt=(old&&old.paidAt)||today();
       if(old){if(rec.sit!=='Paga')delete old.paidAt;Object.assign(old,rec)}else arr.push({id:nid(c.pre),...rec})});
     return done(rows.length>1?rows.length+' lançamentos salvos.':'Lançamento salvo.')}
+  if(k==='ngpick'){const n=(S.negs||[]).find(x=>x.id===form.dataset.id),id=fd.contact;if(!n)return done();if(!id||!S.contacts.some(c=>c.id===id))return modalErr('Selecione um contato do cadastro.');
+    if(!n.contact)n.contact=id;else if(n.contact!==id&&!(n.extra||[]).includes(id))n.extra=[...(n.extra||[]),id];
+    negLog(n,'adicionou o contato '+S.contacts.find(c=>c.id===id).name);return done('Contato adicionado.')}
   if(k==='fdl'){const nome=(fd.nome||'').trim(),id=form.dataset.id,old=id?(S.fdl||[]).find(x=>x.id===id):null,fl=ui.modal.file;if(!isAdm())return modalErr('Somente o administrador pode fazer isso.');if(!nome)return modalErr('Informe o nome da ficha.');if(!old&&!fl)return modalErr('Escolha o arquivo (PDF ou Excel).');
     const rec={nome,cat:(fd.cat||'').trim(),desc:(fd.desc||'').trim()};S.fdl=S.fdl||[];
     if(fl){const pp=old&&old.p;if(pp&&window.GS_CLOUD&&GS_CLOUD.remove&&pp!==fl.p)GS_CLOUD.remove([pp]).catch(()=>{});Object.assign(rec,{n:fl.n,s:fl.s,tipo:fl.tipo,p:fl.p||'',d:fl.d||'',m:fl.m,atual:today()});if(!fl.p)delete rec.p;if(!fl.d)delete rec.d}
