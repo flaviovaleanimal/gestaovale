@@ -1859,7 +1859,7 @@ function modalHtml(){
        <td class="num">${fmt(l.impl)}</td><td class="num">${n(l.ret)}</td><td class="num">${n(l.ins)}</td><td class="num">${n(l.diag)}</td><td class="num">${n(l.pren)}</td><td class="num">${n(vz)}</td><td class="num">${l.pren!==undefined&&l.ins?pct(l.pren,l.ins):'—'}</td></tr>`}).join('')}
       </tbody><tfoot><tr><td colspan="7">Total IATF ${tab}</td><td class="num">${fmt(c.impl)}</td><td class="num">${n(c.ret)}</td><td class="num">${n(c.ins)}</td><td class="num">${n(c.diag)}</td><td class="num">${n(c.pren)}</td><td class="num">${n(c.vaz)}</td><td class="num">${c.conc}</td></tr></tfoot></table>`:'<p>Nenhum lançamento nesta IATF.</p>';
     }
-    const ttl=tab==='G'?'GERAL IATF':'IATF '+tab;
+    const ttl='Relatório '+(tab==='G'?'GERAL IATF':'IATF '+tab);
     body=`<h3>Estação de Monta · ${ttl}</h3>
     <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Estação de Monta · ${ttl}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b" style="font-size:12px"><p style="margin:0 0 12px"><b>Fazenda:</b> ${esc(F(e.farm).name)}${e.city?' · '+esc(e.city):''} &nbsp; <b>EM:</b> ${dt(e.start)} a ${dt(e.end)}</p>${tbl}</div></div>
@@ -2323,7 +2323,7 @@ const lcalc=a=>{const d=hasN(a,'diag')&&hasN(a,'pren');
 function vEstLanc(){
   const e=S.estacoes.find(x=>x.id===ui.est.id),tab=ui.est.tab;
   const all=S.lancs.filter(x=>x.est===e.id);
-  const tabs=['1','2','3','G'].map(t=>`<button class="btn ${tab===t?'pri':''}" data-a="estTab" data-v="${t}">${t==='G'?'GERAL IATF':'IATF '+t}</button>`).join('');
+  const tabs=['1','2','3','G'].map(t=>`<button class="btn ${tab===t?'pri':''}" data-a="estTab" data-v="${t}">Relatório ${t==='G'?'GERAL IATF':'IATF '+t}</button>`).join('');
   const head=`<div class="card"><div class="card-h"><div><button class="btn sm" data-a="backEst">← Estações</button></div></div>
    <h3 style="margin:0 0 4px">${esc(F(e.farm).name)}</h3><p class="muted" style="margin:0 0 12px">EM ${dt(e.start)} a ${dt(e.end)}${e.city?' · '+esc(e.city):''}</p>
    <div class="acts" style="margin-bottom:14px;flex-wrap:wrap">${tabs}</div>`;
@@ -2332,14 +2332,14 @@ function vEstLanc(){
   if(tab==='G'){
     const rows=[1,2,3].map(i=>({lbl:'IATF '+i,...calc(all.filter(x=>x.etapa===i))})),tot={lbl:'Total',...calc(all)};
     const mz=F(e.farm).matrices,prenhez=tot.pren!==undefined&&mz?pct(tot.pren,mz):'—';
-    return head+`<div class="card-h" style="padding:0 0 10px"><h3>GERAL IATF</h3><button class="btn pri" data-a="printLanc">Imprimir</button></div><div class="tw"><table><thead><tr><th>Etapa</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th></tr></thead><tbody>
+    return head+`<div class="card-h" style="padding:0 0 10px"><h3>Relatório GERAL IATF</h3><button class="btn pri" data-a="printLanc">Imprimir</button></div><div class="tw"><table><thead><tr><th>Etapa</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th></tr></thead><tbody>
     ${rows.map(r=>`<tr><td>${r.lbl}</td><td class="num">${fmt(r.impl)}</td><td class="num">${n(r.ret)}</td><td class="num">${n(r.ins)}</td><td class="num">${n(r.diag)}</td><td class="num">${n(r.pren)}</td><td class="num">${n(r.vaz)}</td><td class="num">${r.conc}</td></tr>`).join('')}
     </tbody><tfoot><tr><td>Total</td><td class="num">${fmt(tot.impl)}</td><td class="num">${n(tot.ret)}</td><td class="num">${n(tot.ins)}</td><td class="num">${n(tot.diag)}</td><td class="num">${n(tot.pren)}</td><td class="num">${n(tot.vaz)}</td><td class="num">${tot.conc}</td></tr></tfoot></table></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Matrizes da fazenda: <b>${mz?fmt(mz):'—'}</b> (do cadastro da fazenda) · Prenhez geral: <b>${prenhez}</b> (prenhas ÷ matrizes).</p></div>`;
   }
   const list=all.filter(x=>String(x.etapa)===tab).sort((a,b)=>a.im.localeCompare(b.im));
   const c=calc(list);
-  return head+`<div class="card-h" style="padding:0 0 10px"><h3>IATF ${tab}</h3><div class="acts"><button class="btn" data-a="printLanc">Imprimir</button><button class="btn pri" data-a="newLanc">Novo Lançamento IATF</button></div></div>
+  return head+`<div class="card-h" style="padding:0 0 10px"><h3>Relatório IATF ${tab}</h3><div class="acts"><button class="btn" data-a="printLanc">Imprimir</button><button class="btn pri" data-a="newLanc">Novo Lançamento IATF</button></div></div>
   <div class="tw cmp">${list.length?`<table><thead><tr><th>Lote</th><th>Data IM</th><th>Data RE</th><th>Data IA</th><th>Data DG</th><th>Categoria</th><th>Carimbo</th><th class="num">Implantadas</th><th class="num">Retiradas</th><th class="num">Inseminadas</th><th class="num">Diagnósticos</th><th class="num">Prenhas</th><th class="num">Vazias</th><th class="num">Concepção</th><th>Ações</th></tr></thead><tbody>
   ${list.map(l=>{const lt=S.lotes.find(x=>x.id===l.lote),vz=l.diag!==undefined&&l.pren!==undefined?l.diag-l.pren:undefined;
    return `<tr><td><b>${esc(lt?lt.name:'?')}</b></td><td>${dt(l.im)||'—'}</td><td>${dt(l.re)||'—'}</td><td>${dt(l.ia)||'—'}</td><td>${dt(l.dg)||'—'}</td><td>${esc(l.cat)}</td><td>${esc(l.carimbo||'—')}</td>
@@ -2802,7 +2802,7 @@ document.addEventListener('click',e=>{
    case 'back':ui.farm=null;render();break;
    case 'toggle':ui.open[v]=!ui.open[v];render();break;
    case 'pdf':ui.modal={type:'pdf'};render();break;
-   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='orcpdf'?(()=>{const _n=S.negs.find(x=>x.id===ui.modal.id)||{};let _f=negNm(F(_n.farm).name||'');if(_f&&!/^fazenda\b/i.test(_f))_f='Fazenda '+_f;const _d=new Date(),_p=v=>String(v).padStart(2,'0');return (_f?_f+' - ':'')+'Proposta de '+negTipoL(_n)+' '+_p(_d.getDate())+'.'+_p(_d.getMonth()+1)+'.'+_d.getFullYear()})():y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Estação de Monta - '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha Saída - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='gpdf'?'Agendamentos':y==='agpdf'?'Calendário - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
+   case 'print':{const o=document.title,y=ui.modal.type;document.title=y==='orcpdf'?(()=>{const _n=S.negs.find(x=>x.id===ui.modal.id)||{};let _f=negNm(F(_n.farm).name||'');if(_f&&!/^fazenda\b/i.test(_f))_f='Fazenda '+_f;const _d=new Date(),_p=v=>String(v).padStart(2,'0');return (_f?_f+' - ':'')+'Proposta de '+negTipoL(_n)+' '+_p(_d.getDate())+'.'+_p(_d.getMonth()+1)+'.'+_d.getFullYear()})():y==='opdf'?'Ordem de Serviço - '+(((ui.modal.data||ui.os).farm)?F((ui.modal.data||ui.os).farm).name:''):y==='lpdf'?'Estação de Monta - Relatório '+(ui.modal.tab==='G'?'GERAL IATF':'IATF '+ui.modal.tab)+' - '+F((S.estacoes.find(x=>x.id===ui.est.id)||{}).farm).name:y==='fpdf'?'Ficha Saída - '+(((ui.modal.data||ui.fi).farm)?F((ui.modal.data||ui.fi).farm).name:''):y==='epdf'?'Empresas':y==='gpdf'?'Agendamentos':y==='agpdf'?'Calendário - '+agTitle():y==='finpdf'?FIN[ui.modal.kind].title:y==='ppdf'?'Estoque de produtos - '+F(ui.pfarm).name:y==='ppdfmov'?'Movimentações de Produtos':y==='pdfmov'?'Histórico de Movimentações':y==='pdfhist'?(ui.hist.kind==='abastecimento'?'Abastecimento de Nitrogênio':'Medição de Nitrogênio'):'Estoque de sêmen - '+F(ui.farm).name;window.print();document.title=o;break}
    case 'pdfHist':ui.modal={type:'pdfhist'};render();break;
    case 'pdfMov':ui.modal={type:'pdfmov'};render();break;
    case 'export':ui.modal={type:'export'};render();break;
