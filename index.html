@@ -1644,7 +1644,7 @@ function vMovs(){
 function modalHtml(){
   const m=ui.modal, c=ui.confirm;
   if(c)return `<div class="ov"><div class="modal" role="dialog" aria-modal="true"><h3>${esc(c.title||'Confirmar')}</h3><p style="margin:0">${esc(c.msg)}</p>
-    <div class="mf"><button class="btn" data-a="close">${esc(c.cancel||'Cancelar')}</button><button class="btn pri" data-a="confirmYes">${esc(c.ok||'Excluir')}</button></div></div></div>`;
+    <div class="mf"><button class="btn" data-a="close">${esc(c.cancel||'Cancelar')}</button><button class="btn pri" data-a="confirmYes">${esc(c.ok||(/^Limpar/.test(c.msg)?'Limpar':/Inativar mesmo/.test(c.msg)?'Inativar':/Exclu|apagar/.test(c.msg)?'Excluir':'Confirmar'))}</button></div></div></div>`;
   if(!m)return '';
   if(m.type==='tk')return tkModal();
   if(m.type==='tkprint')return tkPrintHtml();
@@ -2988,7 +2988,7 @@ document.addEventListener('click',e=>{
    case 'ngBack':ui.ngV=null;ui.ngOrc=false;ui.ngDm=false;render();break;
    case 'ngDm':ui.ngDm=!ui.ngDm;render();break;
    case 'ngStage':{const n=(S.negs||[]).find(x=>x.id===ui.ngV);if(n&&n.st!==v){negLog(n,'moveu de "'+n.st+'" para "'+v+'"');n.st=v;n.ord=Date.now();save()}render();break}
-   case 'ngVenda':{const n=(S.negs||[]).find(x=>x.id===v);ask(`Marcar "${n.titulo}" como venda ganha?`,()=>{n.fim='venda';n.fimEm=today();negLog(n,'marcou como venda ganha');done('Venda registrada.');if(!isRestr()&&(n.orc||[]).length&&!negFatCard(n))setTimeout(()=>ask('Enviar a proposta ('+brl(negTotOf(n))+') para o Faturamento agora?',()=>{if(negFatSend(n))done('Enviada para o Faturamento.')},{ok:'Enviar'}),50)});break}
+   case 'ngVenda':{const n=(S.negs||[]).find(x=>x.id===v);ask(`Marcar "${n.titulo}" como venda ganha?`,()=>{n.fim='venda';n.fimEm=today();negLog(n,'marcou como venda ganha');done('Venda registrada.');if(!isRestr()&&(n.orc||[]).length&&!negFatCard(n))setTimeout(()=>ask('Enviar a proposta ('+brl(negTotOf(n))+') para o Faturamento agora?',()=>{if(negFatSend(n))done('Enviada para o Faturamento.')},{ok:'Enviar'}),50)},{ok:'Marcar venda'});break}
    case 'ngPerda':ui.modal={type:'ngperda',id:v};render();break;
    case 'ngReabrir':{const n=(S.negs||[]).find(x=>x.id===v);if(n){negLog(n,'reabriu a negociação');delete n.fim;delete n.fimEm;delete n.motivo;save()}render();break}
    case 'ngTaskN':ui.modal={type:'ngtask',id:v};render();break
