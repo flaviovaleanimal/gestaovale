@@ -1327,8 +1327,8 @@ document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||t.dataset
  else{const r=new FileReader();r.onload=()=>{keep();ui.modal.file={n:f.name,s:f.size,tipo:tp,d:r.result,m:f.lastModified||Date.now()};render()};r.readAsDataURL(f)}});
 document.addEventListener('input',e=>{const t=e.target;if(!t.dataset||t.dataset.fdlq===undefined)return;ui.fdlQ=t.value;clearTimeout(window.__fdlT);window.__fdlT=setTimeout(()=>{render();const i=document.querySelector('[data-fdlq]');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)});
 document.addEventListener('submit',e=>{const f=e.target;if(!f.dataset||!f.dataset.fatmsg)return;e.preventDefault();const c=S.tarefas.find(x=>x.id===f.dataset.fatmsg),tx=(f.elements.t.value||'').trim();if(!c||!tx)return;(c.msgs=c.msgs||[]).push({a:tkMe(),t:tx,h:Date.now()});save();render()});
-document.addEventListener('change',e=>{const t=e.target,id=t.dataset&&t.dataset.fatfile;if(!id)return;const c=S.tarefas.find(x=>x.id===id);if(!c)return;const fs=[...t.files];t.value='';if(!fs.length)return;const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;let n=fs.length;const res=[];
- const fin=()=>{if(!--n){res.filter(Boolean).forEach(x=>{(c.anexos=c.anexos||[]).push(x);tkLog(c,'anexou "'+x.n+'"')});save();render()}};
+document.addEventListener('change',e=>{const t=e.target,id=t.dataset&&t.dataset.fatfile;if(!id)return;const c=S.tarefas.find(x=>x.id===id)||(S.negs||[]).find(x=>x.id===id);if(!c)return;const fs=[...t.files];t.value='';if(!fs.length)return;const cloud=!!(DB&&window.GS_CLOUD&&GS_CLOUD.upload),lim=cloud?10485760:1572864;let n=fs.length;const res=[];
+ const fin=()=>{if(!--n){res.filter(Boolean).forEach(x=>{(c.anexos=c.anexos||[]).push(x);anxLog(c,'anexou "'+x.n+'"')});save();render()}};
  fs.forEach((f,fi)=>{if(f.size>lim){toast('"'+f.name+'" passa de '+(cloud?'10':'1,5')+' MB.');fin();return}
   if(cloud){toast('Enviando "'+f.name+'"…');const path=c.id+'/'+Date.now().toString(36)+'-'+f.name.replace(/[^\w.\-]+/g,'_');GS_CLOUD.upload(path,f).then(()=>{res[fi]={n:f.name,s:f.size,p:path,m:f.lastModified||Date.now()};toast('Anexo enviado.')}).catch(()=>toast('Não foi possível enviar "'+f.name+'".')).finally(fin)}
   else{const r=new FileReader();r.onload=()=>{res[fi]={n:f.name,s:f.size,d:r.result,m:f.lastModified||Date.now()};fin()};r.onerror=fin;r.readAsDataURL(f)}})});
@@ -2492,7 +2492,7 @@ const negFatCard=n=>n.fat?S.tarefas.find(x=>x.id===n.fat):null;
 function negFatSend(n){const cols=S.tcols.filter(x=>x.area==='fat').sort((a,b)=>(a.ord||0)-(b.ord||0));if(!cols.length){toast('Crie uma coluna no Faturamento primeiro.');return false}
   const L=(n.orc||[]).filter(l=>l.nome||+l.vu),f=n.farm?F(n.farm):null,ct=S.contacts.find(c=>c.id===n.contact),tp=negTipoL(n);
   const desc=['PROPOSTA DE '+tp.toUpperCase()+' — origem: negociação "'+n.titulo+'"','Cliente: '+(ct?ct.name:'—')+' · Fazenda: '+(f?f.name:'—'),'Responsável: '+(n.orcResp||n.resp||'—'),'','Itens:',...L.map(l=>'• '+l.nome+(l.raca?' ('+l.raca+')':'')+' — '+(+l.qtd||0)+' × '+brl(+l.vo>0?l.vo:l.vu)+' = '+brl(negLOf(l))),'','Total: '+brl(negTotOf(n)),'Condições de pagamento: '+(n.orcPag||'—')].join('\n');
-  const c={id:nid('t'),area:'fat',col:cols[0].id,titulo:n.titulo,desc,membros:[],valor:negTotOf(n),prazo:'',hora:'',rec:'',lemb:'',check:[],anexos:[],msgs:[],fatNeg:n.id};
+  const c={id:nid('t'),area:'fat',col:cols[0].id,titulo:n.titulo,desc,membros:[],anexos:(n.anexos||[]).map(a=>({...a})),valor:negTotOf(n),prazo:'',hora:'',rec:'',lemb:'',check:[],msgs:[],fatNeg:n.id};
   tkLog(c,'criou este cartão a partir da negociação "'+n.titulo+'"');S.tarefas.push(c);n.fat=c.id;n.fatEm=today();negLog(n,'enviou a proposta para o faturamento');save();return true}
 const negTotOrc=n=>(n.orc||[]).reduce((a,l)=>a+(+l.qtd||0)*(+l.vu||0),0);
 const negLOf=l=>(+l.qtd||0)*((+l.vo>0)?+l.vo:(+l.vu||0));
@@ -2565,6 +2565,9 @@ function negFatHtml(n){const L=(n.orc||[]).filter(l=>l.nome||+l.vu),sem=negTipo(
   return `<div class="ngd-sec"><div class="ngd-sh"><h3>Proposta aprovada · ${negTipoL(n)}</h3><div class="acts"><button class="btn sm" data-a="fatOrcPdf" data-v="${n.id}">Imprimir</button></div></div>
    ${L.length?`<div class="tw"><table style="width:100%;min-width:0;font-size:12.5px"><thead><tr><th>${sem?'Produto':'Serviço'}</th>${sem?'<th>Raça</th>':''}<th class="num">Qtd</th><th class="num">Valor unit.</th><th class="num">Valor oferta</th><th class="num">Total</th></tr></thead><tbody>${L.map(l=>`<tr><td>${esc(l.nome)}</td>${sem?`<td>${esc(l.raca||'—')}</td>`:''}<td class="num">${fmt(+l.qtd||0)}</td><td class="num">${brl(l.vu)}</td><td class="num">${+l.vo>0?brl(l.vo):'—'}</td><td class="num"><b>${brl(negLOf(l))}</b></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="${sem?5:4}"><b>Total a faturar</b></td><td class="num"><b>${brl(negTotOf(n))}</b></td></tr></tfoot></table></div>
    <div style="margin-top:10px;font-size:13px"><b>Condições de pagamento:</b> ${esc(n.orcPag||'—')}</div>${n.orcObs?`<div style="margin-top:6px;font-size:13px"><b>Observações:</b> ${esc(n.orcObs)}</div>`:''}`:empty('Sem itens.')}</div>`}
+const anxOwner=()=>ui.fatV?S.tarefas.find(x=>x.id===ui.fatV):(S.negs||[]).find(x=>x.id===ui.ngV);
+const anxLog=(c,t)=>{if((S.negs||[]).includes(c))negLog(c,t);else tkLog(c,t)};
+const anxRefs=p=>[...(S.tarefas||[]),...(S.negs||[])].reduce((k,o)=>k+(o.anexos||[]).filter(a=>a.p===p).length,0);
 function negFatAnx(c){const A=c.anexos||[];
   return `<div class="ngd-sec"><div class="ngd-sh"><h3>Anexos${A.length?' ('+A.length+')':''}</h3><label class="btn sm pri" style="cursor:pointer">+ Anexar arquivo<input type="file" multiple data-fatfile="${c.id}" style="display:none"></label></div>
    ${A.length?A.map((a,i)=>`<div class="tk-ci tk-an">${a.p?`<a href="#" data-a="fatAnxOpen" data-v="${i}">${tkIc('clip')} ${esc(a.n)}</a>`:`<a href="${a.d}" download="${esc(a.n)}">${tkIc('clip')} ${esc(a.n)}</a>`}<span class="muted tk-as">${tkKB(a.s||0)}</span><span class="muted tk-ad">${tkDM(a.m)}</span><button class="tk-x" data-a="fatAnxDel" data-v="${i}" aria-label="Remover anexo">✕</button></div>`).join(''):'<div class="muted" style="padding:8px 0">Nenhum anexo. Use para nota fiscal, comprovante ou contrato.</div>'}</div>`}
@@ -2620,7 +2623,7 @@ function vNegDet(n,fc){
    ${n.farm&&F(n.farm).name?`<details open class="ngd-d"><summary>Empresa</summary>
     ${row('Nome','<span class="ngd-ro">'+esc(F(n.farm).name)+'</span>')}${row('Segmento','<span class="ngd-ro">'+esc(segTxt(F(n.farm))||'—')+'</span>')}${row('Cidade','<span class="ngd-ro">'+esc(F(n.farm).city||'—')+'</span>')}${row('Estado','<span class="ngd-ro">'+esc(F(n.farm).state||'—')+'</span>')}
     <button class="ngd-add" data-a="ngEmp" data-v="${n.farm}">Abrir página da Empresa ↗</button></details>`:''}</div>
-   <div class="ngd-rr">${fc?negFatHtml(n)+negFatAnx(fc):n.st==='Proposta'?negOrcHtml(n):''}
+   <div class="ngd-rr">${fc?negFatHtml(n)+negFatAnx(fc):(n.st==='Proposta'?negOrcHtml(n):'')+negFatAnx(n)}
     <div class="ngd-sec"><div class="ngd-sh"><h3>Próximas tarefas</h3><button class="btn sm pri" data-a="ngTaskN" data-v="${n.id}">+ Criar tarefa</button></div>
      ${ab.length?ab.map(tk).join(''):empty('Nenhuma tarefa aberta nesta negociação.')}
      ${ok.length?`<h4 class="ngd-h4">Concluídas (${ok.length})</h4>${ok.map(tk).join('')}`:''}</div>
@@ -2945,8 +2948,8 @@ document.addEventListener('click',e=>{
    case 'ngOrcGo':ui.ngPg='';ui.ngV=v;ui.ngOrc=true;render();break
    case 'ngOrcPdfId':{const n=(S.negs||[]).find(x=>x.id===v);if(n){negOrcNum(n);save();ui.modal={type:'orcpdf',id:v}}render();break}
    case 'ngTc':ui.ngTc=!!v;render();break
-   case 'fatAnxOpen':{e.preventDefault();const c=S.tarefas.find(x=>x.id===ui.fatV),a=c&&(c.anexos||[])[+v];if(!a||!a.p||!window.GS_CLOUD)break;const w=window.open('','_blank');GS_CLOUD.url(a.p).then(u=>{if(w)w.location=u;else location.href=u}).catch(()=>{if(w)w.close();toast('Não foi possível abrir o anexo.')});break}
-   case 'fatAnxDel':{const c=S.tarefas.find(x=>x.id===ui.fatV),a=c&&(c.anexos||[])[+v];if(a)ask('Remover o anexo "'+a.n+'"?',()=>{if(a.p&&window.GS_CLOUD&&GS_CLOUD.remove)GS_CLOUD.remove([a.p]).catch(()=>{});c.anexos.splice(+v,1);tkLog(c,'removeu o anexo "'+a.n+'"');done()},{ok:'Remover'});break}
+   case 'fatAnxOpen':{e.preventDefault();const c=anxOwner(),a=c&&(c.anexos||[])[+v];if(!a||!a.p||!window.GS_CLOUD)break;const w=window.open('','_blank');GS_CLOUD.url(a.p).then(u=>{if(w)w.location=u;else location.href=u}).catch(()=>{if(w)w.close();toast('Não foi possível abrir o anexo.')});break}
+   case 'fatAnxDel':{const c=anxOwner(),a=c&&(c.anexos||[])[+v];if(a)ask('Remover o anexo "'+a.n+'"?',()=>{c.anexos.splice(+v,1);if(a.p&&window.GS_CLOUD&&GS_CLOUD.remove&&!anxRefs(a.p))GS_CLOUD.remove([a.p]).catch(()=>{});anxLog(c,'removeu o anexo "'+a.n+'"');done()},{ok:'Remover'});break}
    case 'fatMsgDel':{const c=S.tarefas.find(x=>x.id===ui.fatV);if(c&&(c.msgs||[])[+v])ask('Excluir este comentário?',()=>{c.msgs.splice(+v,1);done('Comentário excluído.')},{ok:'Excluir'});break}
    case 'fatBack':{const c=S.tarefas.find(x=>x.id===ui.fatV);if(c&&c.fatNova){const vazio=!(c.titulo||'').trim()&&!(c.desc||'').trim()&&!(+c.valor)&&!c.contact&&!c.farm&&!(c.anexos||[]).length&&!(c.msgs||[]).length;if(vazio)S.tarefas.splice(S.tarefas.indexOf(c),1);else if(!(c.titulo||'').trim())c.titulo='Sem nome';save()}ui.fatV='';ui.ngDm=false;render();break}
    case 'fatTipo':{const c=S.tarefas.find(x=>x.id===ui.fatV);if(!c)break;const go=()=>{if(v==='livre'){c.orcTipo='';c.cobLivre=true;c.orc=[]}else{c.orcTipo=v;c.cobLivre=false;c.orc=[{id:nid('o'),ps:'',nome:'',cat:'',qtd:1,vu:0}]}c.valor=negTotOf(c);save();render()};if((c.orc||[]).some(l=>l.nome||+l.vu))ask('Trocar o tipo apaga os itens já lançados. Continuar?',go,{ok:'Trocar'});else go();break}
