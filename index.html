@@ -2786,12 +2786,13 @@ document.addEventListener('click',e=>{
        if(x.kind==='fat'&&(c.fatNova||(c.fatNeg&&(S.negs||[]).some(y=>y.id===c.fatNeg)))){ui.fatV=c.id}else{ui.fatV='';const u=tkU();u.snap=JSON.stringify(c);u.cOpen=false;u.menu=false;u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=c.id;ui.modal={type:'tk'}}}
      render();break}
    case 'tab':if(v==='agenda'&&ui.tab!=='agenda'){ui.miniPrev=!!ui.mini;ui.mini=true}else if(v!=='agenda'&&ui.tab==='agenda'&&ui.miniPrev!==undefined){ui.mini=ui.miniPrev;ui.miniPrev=undefined}ui.ngV=null;ui.ngPg='';ui.tab=v;if(v==='e-mov'&&b.dataset.s)ui.emT=b.dataset.s;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
-   case 'go':ui.ngV=null;ui.ngPg='';ui.tab=v;ui.rv=null;if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
+   case 'go':ui.ngV=null;ui.ngPg='';ui.tab=v;ui.rv=null;if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;if(!isMob()){ui.mini=true;try{localStorage.setItem('gv_mini','1')}catch(e){}}render();document.getElementById('app').scrollTop=0;break;
    case 'grp':{const g=b.dataset.home;
      const goHome=g&&!(curTab()===g&&(g!=='movs'||ui.msub==='hist'));
      if(ui.mini&&!isMob()){ui.mini=false;ui.nav[v]=true;if(g){ui.tab=g;if(g==='movs')ui.msub='hist'}navOnly(v)}
      else if(goHome){ui.tab=g;if(g==='movs')ui.msub='hist';ui.nav[v]=true;navOnly(v)}
      else{ui.nav[v]=!ui.nav[v];if(ui.nav[v])navOnly(v)}
+     if(goHome&&!isMob()){ui.mini=true;try{localStorage.setItem('gv_mini','1')}catch(e){}}
      render();if(g)document.getElementById('app').scrollTop=0;break}
    case 'toggleSide':if(isMob())ui.drawer=!ui.drawer;else{ui.mini=!ui.mini;try{localStorage.setItem('gv_mini',ui.mini?'1':'')}catch(e){}}render();break;
    case 'scrim':ui.drawer=false;render();break;
