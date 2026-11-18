@@ -2628,8 +2628,7 @@ function vNegDet(n,fc){
       <div class="ngd-ci">${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:'<span class="muted">Sem e-mail</span>'}</div></div>`).join('')||'<div class="muted" style="padding:6px 0">Nenhum contato nesta negociação.</div>'}
     <button class="ngd-add" data-a="ngAddC" data-v="${n.id}">＋ Adicionar contato</button></details>
    ${n.farm&&F(n.farm).name?`<details open class="ngd-d"><summary>Empresa</summary>
-    ${row('Nome','<span class="ngd-ro">'+esc(F(n.farm).name)+'</span>')}${row('Segmento','<span class="ngd-ro">'+esc(segTxt(F(n.farm))||'—')+'</span>')}${row('Cidade','<span class="ngd-ro">'+esc(F(n.farm).city||'—')+'</span>')}${row('Estado','<span class="ngd-ro">'+esc(F(n.farm).state||'—')+'</span>')}
-    <button class="ngd-add" data-a="ngEmp" data-v="${n.farm}">Abrir página da Empresa ↗</button></details>`:''}</div>
+    ${row('Nome','<span class="ngd-ro">'+esc(F(n.farm).name)+'</span>')}${row('Segmento','<span class="ngd-ro">'+esc(segTxt(F(n.farm))||'—')+'</span>')}${row('Cidade','<span class="ngd-ro">'+esc(F(n.farm).city||'—')+'</span>')}${row('Estado','<span class="ngd-ro">'+esc(F(n.farm).state||'—')+'</span>')}</details>`:''}</div>
    <div class="ngd-rr">${fc?negFatHtml(n)+negFatAnx(fc):(n.st==='Proposta'||n.st==='Negociação'||(n.orc||[]).length||n.fim?negOrcHtml(n):'')+negFatAnx(n)}
     <div class="ngd-sec"><div class="ngd-sh"><h3>Próximas tarefas</h3><button class="btn sm pri" data-a="ngTaskN" data-v="${n.id}">+ Criar tarefa</button></div>
      ${ab.length?ab.map(tk).join(''):empty('Nenhuma tarefa aberta nesta negociação.')}
