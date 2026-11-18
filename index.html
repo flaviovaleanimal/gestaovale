@@ -170,7 +170,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .paper-h span{font-size:12px;opacity:.85}
 .paper-b{padding:14px 16px;overflow-x:auto}
 .paper table{min-width:520px}
-.paper th{background:#12285a;color:#fff;border-bottom:0}
+.paper th{background:#12285a;color:#fff;border-bottom:0;text-transform:none;letter-spacing:0;font-size:12px}
 .paper td{border-bottom:1px solid var(--paper-line)}
 .paper tfoot td{background:#e6ebf7;color:#12285a}
 .paper .loc-l{font-size:12px;color:#44506e;padding:2px 0 2px 12px}
@@ -1949,10 +1949,10 @@ function modalHtml(){
     body=`<h3>Proposta de ${negTipoL(n)}</h3>
     <div class="paper"><div class="paper-h"><div><b>Vale Animal</b><br><span style="font-size:15px;font-weight:700;text-transform:uppercase">Proposta de ${negTipoL(n)}</span></div><span>Emitido em ${dt(n.orcData||today())}${n.orcVal?' · Válido até '+dt(n.orcVal):''}</span></div>
     <div class="paper-b">
-     <table><tbody><tr><td><b>Cliente:</b> ${esc(ct?ct.name:'—')}${ct&&ct.phone?' · '+esc(ct.phone):''}</td><td><b>Fazenda:</b> ${esc(f?f.name:'—')}</td><td><b>Cidade:</b> ${esc((f&&f.city)||'—')}</td></tr>
+     <table><tbody><tr><td><b>Cliente:</b> ${esc(ct?ct.name:'—')}</td><td><b>Fazenda:</b> ${esc(f?f.name:'—')}</td><td><b>Cidade:</b> ${esc((f&&f.city)||'—')}</td></tr>
      <tr><td><b>Data proposta:</b> ${dt(n.orcData||today())}</td><td><b>Validade proposta:</b> ${n.orcVal?dt(n.orcVal):'—'}</td><td><b>Responsável:</b> ${esc(n.orcResp||n.resp||'—')}</td></tr></tbody></table>
      <h4 style="margin:16px 0 6px">Itens</h4>
-     ${L.length?`<table style="min-width:0;width:100%;font-size:12px"><thead><tr><th>${negTipo(n)==='semen'?'Produto':'Serviço'}</th>${negTipo(n)==='semen'?'<th>Raça</th>':''}<th class="num">Qtd</th><th class="num">Valor unit.</th><th class="num">Valor total</th><th class="num">Valor oferta</th><th class="num">Total oferta</th></tr></thead><tbody>${L.map(l=>`<tr><td>${esc(l.nome||'')}${l.cat&&negTipo(n)!=='semen'?`<div class="loc-l" style="padding-left:0">${esc(l.cat)}</div>`:''}</td>${negTipo(n)==='semen'?`<td>${esc(l.raca||'—')}</td>`:''}<td class="num">${fmt(+l.qtd||0)}</td><td class="num">${brl(l.vu)}</td><td class="num">${brl((+l.qtd||0)*(+l.vu||0))}</td><td class="num">${+l.vo>0?brl(l.vo):'—'}</td><td class="num"><b>${brl(negLOf(l))}</b></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="${negTipo(n)==='semen'?4:3}">Total da proposta</td><td class="num">${brl(negTotOrc(n))}</td><td></td><td class="num"><b>${brl(negTotOf(n))}</b></td></tr></tfoot></table>`:'<p>Nenhum item lançado.</p>'}
+     ${L.length?`<table style="min-width:0;width:100%;font-size:12px"><thead><tr><th>${negTipo(n)==='semen'?'Produto':'Serviço'}</th>${negTipo(n)==='semen'?'<th>Raça</th>':''}<th class="num">Quantidade</th><th class="num">Valor Unitário</th><th class="num">Valor Total</th><th class="num">Valor Oferta</th><th class="num">Valor Total</th></tr></thead><tbody>${L.map(l=>`<tr><td>${esc(l.nome||'')}${l.cat&&negTipo(n)!=='semen'?`<div class="loc-l" style="padding-left:0">${esc(l.cat)}</div>`:''}</td>${negTipo(n)==='semen'?`<td>${esc(l.raca||'—')}</td>`:''}<td class="num">${fmt(+l.qtd||0)}</td><td class="num">${brl(l.vu)}</td><td class="num">${brl((+l.qtd||0)*(+l.vu||0))}</td><td class="num">${+l.vo>0?brl(l.vo):'—'}</td><td class="num"><b>${brl(negLOf(l))}</b></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="${negTipo(n)==='semen'?4:3}">Total da proposta</td><td class="num">${brl(negTotOrc(n))}</td><td></td><td class="num"><b>${brl(negTotOf(n))}</b></td></tr></tfoot></table>`:'<p>Nenhum item lançado.</p>'}
      <h4 style="margin:16px 0 6px">Condições de pagamento</h4><div style="border:1px solid #999;border-radius:4px;min-height:48px;padding:8px;white-space:pre-wrap">${esc(n.orcPag||'')}</div>
      ${n.orcObs?`<h4 style="margin:16px 0 6px">Observações</h4><div style="border:1px solid #999;border-radius:4px;min-height:48px;padding:8px;white-space:pre-wrap">${esc(n.orcObs)}</div>`:''}
     </div></div>
