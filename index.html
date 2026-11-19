@@ -562,7 +562,7 @@ const ATIVS=['IMPLANTADAS','RETIRADAS','INSEMINADAS','DIAGNÓSTICO DA IATF','DIA
 const tc=v=>String(v||'').trim().toLowerCase().replace(/(^|[\s\-\/])([^\s\-\/])/g,(m,a,b)=>a+b.toUpperCase());
 const CIDADES=['ÁGUA BOA','BARRA DO GARÇAS','NOVA XAVANTINA','NOVA NAZARÉ','COCALINHO','RIBEIRÃO CASCALHEIRA','CANARANA','CAMPINÁPOLIS','NOVO SÃO JOAQUIM','PARANATINGA','ARAGUAIANA','SÃO JOSÉ XINGU'].map(tc).sort((a,b)=>a.localeCompare(b,'pt-BR'));
 const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x=>[x,x]);
-const loteFmt=v=>String(v==null?'':v).replace(/\S+/g,w=>w.length>2&&w===w.toUpperCase()&&/[A-ZÀ-Ú]/.test(w)?w.charAt(0)+w.slice(1).toLowerCase():w);
+const loteFmt=v=>String(v==null?'':v).replace(/[A-Za-zÀ-ÿ]+/g,w=>w.length>3&&w===w.toUpperCase()?w.charAt(0)+w.slice(1).toLowerCase():w);
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
