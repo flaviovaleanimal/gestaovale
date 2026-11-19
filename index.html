@@ -559,7 +559,7 @@ async function init(){
 }
 
 const ATIVS=['IMPLANTADAS','RETIRADAS','INSEMINADAS','DIAGNÓSTICO DA IATF','DIAGNÓSTICO FINAL','EXAME DE ANDROLÓGICO','EXAME DE BRUCELOSE','DIÁRIA VETERINÁRIA','PROCEDIMENTO CIRÚRGICO'];
-const nomeFmt=v=>{let i=0;return String(v||'').trim().replace(/\s+/g,' ').replace(/\S+/g,w=>{const first=i++===0,sig=w.length<=4&&w===w.toUpperCase()&&/[A-ZÀ-Ú]{2}/.test(w)&&!first;return sig?w:(first?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():w.toLowerCase())})};
+const nomeFmt=v=>{let i=0;return String(v||'').trim().replace(/\s+/g,' ').replace(/\S+/g,w=>{const first=i++===0,sig=w.length<=4&&w===w.toUpperCase()&&/[A-ZÀ-Ú]{2}/.test(w);return sig?w:(first?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():w.toLowerCase())})};
 const tc=v=>String(v||'').trim().toLowerCase().replace(/(^|[\s\-\/])([^\s\-\/])/g,(m,a,b)=>a+b.toUpperCase());
 const CIDADES=['ÁGUA BOA','BARRA DO GARÇAS','NOVA XAVANTINA','NOVA NAZARÉ','COCALINHO','RIBEIRÃO CASCALHEIRA','CANARANA','CAMPINÁPOLIS','NOVO SÃO JOAQUIM','PARANATINGA','ARAGUAIANA','SÃO JOSÉ XINGU'].map(tc).sort((a,b)=>a.localeCompare(b,'pt-BR'));
 const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x=>[x,x]);
