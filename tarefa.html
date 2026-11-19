@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tarefa rápida</title>
+<link rel="manifest" href="manifest-tarefa.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon-tarefa.png">
+<meta name="theme-color" content="#14275a">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tarefa"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f2f4f9;--surface:#fff;--ink:#14213d;--muted:#5a6785;--line:#dce1ee;--navy:#12285a;--blue:#1d5fd1;--ok-bg:#e7f6ee;--ok:#1d6b3a;--err-bg:#fdecea;--err:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1a3f;--surface:#12285a;--ink:#eef2fb;--muted:#a9b6d6;--line:#2c4486;--navy:#1d5fd1;--blue:#5b94f0;--ok-bg:#12382a;--ok:#7fdca5;--err-bg:#3d1a17;--err:#ffb4a9}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "IBM Plex Sans",-apple-system,Helvetica,Arial,sans-serif}
+body{min-height:100vh;padding:0 0 env(safe-area-inset-bottom,0)}
+header{background:#14275a;color:#fff;padding:calc(18px + env(safe-area-inset-top,0)) max(18px,env(safe-area-inset-right,0)) 16px max(18px,env(safe-area-inset-left,0))}
+header small{display:block;opacity:.75;font-size:12.5px;letter-spacing:.3px}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600}
+main{max-width:520px;margin:0 auto;padding:18px max(18px,env(safe-area-inset-right,0)) 28px max(18px,env(safe-area-inset-left,0))}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin:16px 0 5px}
+input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;min-height:48px;appearance:none;-webkit-appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 21px,calc(100% - 14px) 21px;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+input:focus,select:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,95,209,.22)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row>div{min-width:0}
+button.go{display:block;width:100%;margin-top:22px;padding:15px;border:0;border-radius:12px;background:#14275a;color:#fff;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+@media (prefers-color-scheme:dark){button.go{background:#1d5fd1}}
+button.go[disabled]{opacity:.6}
+.msg{margin:14px 0 0;padding:11px 13px;border-radius:10px;font-size:14px;font-weight:600}.msg:empty{display:none}
+.msg.ok{background:var(--ok-bg);color:var(--ok)}.msg.err{background:var(--err-bg);color:var(--err)}
+.foot{margin-top:22px;text-align:center;font-size:13px}.foot a{color:var(--blue)}
+.load{padding:40px 0;text-align:center;color:var(--muted)}
+</style></head><body>
+<header><small>Gestão de Serviços · Vale Animal</small><h1>Tarefa rápida</h1></header>
+<main>
+  <div class="load" id="load">Carregando…</div>
+  <form id="f" hidden novalidate autocomplete="off">
+    <label for="t" style="margin-top:2px">Tarefa</label>
+    <input id="t" name="t" type="text" placeholder="Digite a tarefa…" autocapitalize="sentences" enterkeyhint="done" required>
+    <label for="c">Coluna</label><select id="c" name="c"></select>
+    <label for="m">Membro</label><select id="m" name="m"></select>
+    <div class="row"><div><label for="d">Data</label><input id="d" name="d" type="date"></div><div><label for="h">Hora</label><input id="h" name="h" type="time"></div></div>
+    <button class="go" id="b" type="submit">Criar tarefa</button>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+  </form>
+  <div class="foot"><a href="index.html">Abrir o Gestão completo</a></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="cloud.js"></script>
+<script>
+(async()=>{
+  const $=id=>document.getElementById(id),TEAM=['Flávio Alves','Bina Alves','Isabella Galdioli'];
+  const me=()=>{const e=(window.GS_EMAIL||'').toLowerCase().split('@')[0];if(/flavio|flávio/.test(e))return 'Flávio Alves';if(/isabel/.test(e))return 'Isabella Galdioli';if(/bina|atendimento/.test(e))return 'Bina Alves';return 'Flávio Alves'};
+  const resp=n=>TEAM.find(p=>n&&(n.toUpperCase().includes('('+p.toUpperCase()+')')||n.toUpperCase().includes('('+p.split(' ')[0].toUpperCase()+')')))||'';
+  const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+  const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+  const msg=(t,k)=>{$('msg').textContent=t||'';$('msg').className='msg'+(t?' '+k:'')};
+  if(!(window.GS_CLOUD&&GS_CLOUD.enabled)){$('load').textContent='Sem conexão com o sistema. Abra o Gestão completo.';return}
+  let DB=null;try{DB=await GS_CLOUD.connect()}catch(e){}
+  if(!DB){$('load').textContent='Não foi possível conectar. Verifique a internet e tente de novo.';return}
+  const cols=await new Promise(res=>{let un=null,done=false;const fin=a=>{if(done)return;done=true;try{un&&un()}catch(e){}res(a)};
+    un=DB.collection('tcols').onSnapshot(sn=>fin(sn.docs.map(d=>d.data())),()=>fin(null));setTimeout(()=>fin(null),15000)});
+  if(!cols){$('load').textContent='Não foi possível carregar as colunas. Tente de novo.';return}
+  const lista=cols.filter(c=>!c.area&&!/CONCLU/i.test(c.nome||'')).sort((a,b)=>(a.ord||0)-(b.ord||0));
+  if(!lista.length){$('load').textContent='Crie uma coluna em Tarefas, no Gestão completo.';return}
+  $('c').innerHTML=lista.map(c=>`<option value="${c.id}">${String(c.nome).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</option>`).join('');
+  $('m').innerHTML=TEAM.map(n=>`<option>${n}</option>`).join('');
+  const lastC=store.get('tr_col');if(lastC&&lista.some(c=>c.id===lastC))$('c').value=lastC;
+  const seta=()=>{const c=lista.find(x=>x.id===$('c').value),r=resp(c&&c.nome);$('m').value=r||me()};
+  seta();$('c').addEventListener('change',seta);
+  $('load').hidden=true;$('f').hidden=false;$('t').focus();
+  $('f').addEventListener('submit',async e=>{
+    e.preventDefault();const titulo=$('t').value.trim();
+    if(!titulo){msg('Digite a tarefa.','err');$('t').focus();return}
+    const col=lista.find(x=>x.id===$('c').value),agora=Date.now();
+    let prazo=$('d').value,hora=$('h').value,lemb='';
+    if(hora&&!prazo)prazo=today();
+    if(prazo){if(!hora)hora='07:00';lemb='15'}
+    const card={id:'t'+agora.toString(36)+Math.random().toString(36).slice(2,6),col:col.id,movEm:agora,titulo,desc:'',membros:[$('m').value],prazo:prazo||'',hora:hora||'',rec:'',lemb,check:[],anexos:[],msgs:[],log:[{a:me(),t:'adicionou este cartão a '+col.nome,h:agora}]};
+    $('b').disabled=true;$('b').textContent='Criando…';msg('');
+    try{
+      await DB.collection('tarefas').doc(card.id).set(card);
+      store.set('tr_col',col.id);
+      msg('✓ Tarefa criada em '+col.nome,'ok');
+      $('t').value='';$('d').value='';$('h').value='';seta();$('t').focus();
+    }catch(err){msg('Não foi possível criar a tarefa. Verifique a internet e tente de novo.','err')}
+    $('b').disabled=false;$('b').textContent='Criar tarefa';
+  });
+})();
+</script>
+</body></html>
