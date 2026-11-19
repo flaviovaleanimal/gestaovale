@@ -1992,7 +1992,7 @@ function modalHtml(){
   if(m.type==='contact'){const c=m.data||{};
     body=`<h3>${c.id?'Editar contato':'Cadastrar contato'}</h3>${err}<form data-form="contact" data-id="${c.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name)}" required>`)}
-    ${fldHtml('Empresa',`<select name="company" required>${opts(S.farms.map(x=>[x.id,x.name]),c.farm||c.company,S.farms.length?'Selecione…':'Cadastre uma empresa primeiro')}</select>`)}
+    ${fldHtml('Empresa',`<input name="company" list="dl-emp" value="${esc((()=>{const f=S.farms.find(x=>x.id===(c.farm||c.company));return f?(f.city?f.name+' - '+f.city:f.name):''})())}" autocomplete="off" placeholder="${S.farms.length?'Digite para buscar a empresa…':'Cadastre uma empresa primeiro'}" required><datalist id="dl-emp">${[...S.farms].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'})).map(f=>`<option value="${esc(f.city?f.name+' - '+f.city:f.name)}"></option>`).join('')}</datalist>`)}
     ${fldHtml('E-mail',`<input name="email" type="email" value="${esc(c.email||'')}" autocomplete="off">`)}
     ${fldHtml('Telefone',`<input name="phone" type="tel" value="${esc(c.phone||'')}" inputmode="tel" placeholder="(66) 99999-9999">`)}
     ${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}
@@ -3486,7 +3486,10 @@ document.addEventListener('submit',e=>{
     return done('Negociação salva.')}
   if(k==='contact'){
     const name=(fd.name||'').trim(),id=form.dataset.id,email=(fd.email||'').trim();
-    if(!name||!fd.company)return modalErr('Informe o nome do contato e a empresa.');
+    if(!name||!(fd.company||'').trim())return modalErr('Informe o nome do contato e a empresa.');
+    const _q=nrm(fd.company),_fm=S.farms.find(x=>nrm(x.city?x.name+' - '+x.city:x.name)===_q)||S.farms.find(x=>x.id===fd.company)||(S.farms.filter(x=>nrm(x.name)===_q).length===1?S.farms.find(x=>nrm(x.name)===_q):null);
+    if(!_fm)return modalErr('Empresa não encontrada. Escolha uma da lista que aparece ao digitar.');
+    fd.company=_fm.id;
     if(email&&!/^\S+@\S+\.\S+$/.test(email))return modalErr('E-mail inválido.');
     const rec={name,farm:fd.company,email,phone:fmtFone(fd.phone),role:tc(fd.role)};
     if(id)Object.assign(S.contacts.find(x=>x.id===id),rec);else{const cid=nid('c');S.contacts.push({id:cid,...rec});const ln=ui.ngLink&&(S.negs||[]).find(x=>x.id===ui.ngLink);if(ln){if(!ln.contact)ln.contact=cid;else(ln.extra=ln.extra||[]).push(cid);negLog(ln,'adicionou o contato '+name)}}
