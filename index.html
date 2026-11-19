@@ -3405,7 +3405,6 @@ document.addEventListener('submit',e=>{
     if(!fd.farm)return err('Selecione a fazenda.');
     if(!title)return err('Selecione o procedimento.');
     if(!fd.date)return err('Informe a data do procedimento.');
-    {const old=id?S.eventos.find(x=>x.id===id):null;if(isDom(fd.date)&&(!old||old.date!==fd.date))return err('Não é permitido agendar evento no domingo. Escolha outra data.')}
     if(fd.total!==''&&fd.total!==undefined&&!(Number.isInteger(Number(fd.total))&&Number(fd.total)>=0))return err('O total deve ser um número inteiro.');
     const [start,etime]=all?['','']:PERH[per];
     const rec={title,date:fd.date,end:fd.date,allday:all,periodo:per,start,etime,cat:fd.cat||'',color:EVCOL[0],farm:fd.farm,total:fd.total===''||fd.total===undefined?'':Number(fd.total),lote:(fd.lote||'').trim().toUpperCase(),team:title==='Entourar'?'':tcTeam(fd.team),tecs,desc:(fd.desc||'').trim()};
