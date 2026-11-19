@@ -562,6 +562,7 @@ const ATIVS=['IMPLANTADAS','RETIRADAS','INSEMINADAS','DIAGNÓSTICO DA IATF','DIA
 const tc=v=>String(v||'').trim().toLowerCase().replace(/(^|[\s\-\/])([^\s\-\/])/g,(m,a,b)=>a+b.toUpperCase());
 const CIDADES=['ÁGUA BOA','BARRA DO GARÇAS','NOVA XAVANTINA','NOVA NAZARÉ','COCALINHO','RIBEIRÃO CASCALHEIRA','CANARANA','CAMPINÁPOLIS','NOVO SÃO JOAQUIM','PARANATINGA','ARAGUAIANA','SÃO JOSÉ XINGU'].map(tc).sort((a,b)=>a.localeCompare(b,'pt-BR'));
 const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x=>[x,x]);
+const loteFmt=v=>String(v==null?'':v).replace(/\S+/g,w=>w.length>2&&w===w.toUpperCase()&&/[A-ZÀ-Ú]/.test(w)?w.charAt(0)+w.slice(1).toLowerCase():w);
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
 const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
@@ -771,7 +772,7 @@ const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Induçã
 const AVCATS=['Novilhas Nelore','Novilhas Angus','Vacas Solteiras'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Vacas Primíparas','Vacas Secundíparas','Vacas Multíparas','Vacas Solteiras'];
 const catOpts=cur=>[...NCATS,...(cur&&!NCATS.includes(cur)?[cur]:[])].map(x=>[x,x]);
-const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Agendado').sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${esc(String(l.name).toUpperCase())}</option>`).join('');
+const evLoteOpts=fid=>S.lotes.filter(l=>l.farm===fid&&l.status!=='Agendado').sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name,'pt-BR',{numeric:true})).map(l=>`<option value="${esc(String(l.name).toUpperCase())}">${esc(loteFmt(l.name))}</option>`).join('');
 const PERIODOS=['Manhã','Tarde','Dia Inteiro'],EVCATS=[...NCATS,'Touros'],PERH={'Manhã':['07:00','12:00'],'Tarde':['13:00','18:00']};
 const perOf=e=>e.periodo||(e.allday!==false?'Dia Inteiro':(tmin(e.start)<720?'Manhã':'Tarde'));
 const tcTeam=v=>tc(v).replace(/\sE\s/g,' e ');
@@ -806,7 +807,7 @@ const evPlano=(im,p,n,farm)=>{const L=[];let ia=null,dom=[];const LT=i=>n>1?'ABC
 const farmShort=id=>tc(evFarm({farm:id}).replace(/^\s*fazenda\s+/i,''));
 const firstNames=t=>String(t||'').split(/[,;\/]|\se\s/i).map(x=>tc(x.trim().split(/\s+/)[0])).filter(Boolean).join(', ');
 const SVN={'AV + IM':'Avaliação + Implante','IM':'Implante','RE':'Retirada','IA':'Inseminação','RES':'Ressincronização','DG':'Diagnóstico','DG Final':'Diagnóstico Final'},svn=t=>SVN[t]||t;
-const evLabel=(e,full)=>[farmShort(e.farm),(full?svn(e.title||''):(e.title||''))+(e.lote?` (${e.lote}${e.suf||''})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
+const evLabel=(e,full)=>[farmShort(e.farm),(full?svn(e.title||''):(e.title||''))+(e.lote?` (${loteFmt(e.lote)}${e.suf||''})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
 const evpPrev=(im,p,n,farm)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';const L=evPlano(im,p,n,farm);return L.map(([t,x])=>`${t}: <b>${dt(x)}</b> (${WDS[Dt(x).getDay()]})`).join(' · ')+(L.dom.length?`<br><b style="color:var(--dng,#b42318)">Atenção: ${L.dom.join(' e ')} cai no domingo. Escolha outro protocolo (7, 8 ou 9 dias).</b>`:'')};
 const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – '+e.etime:''));
 const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
@@ -830,7 +831,7 @@ let agTipT=null;const cap1=t=>t.charAt(0).toUpperCase()+t.slice(1);
 function agTipHide(){clearTimeout(agTipT);const t=document.getElementById('ag-tip');if(t)t.remove()}
 function agTipHtml(e){const dd=Dt(e.date),de=Dt(e.end||e.date),same=(e.end||e.date)===e.date,fm=x=>`${WDL[x.getDay()]}, ${x.getDate()} de ${MESES[x.getMonth()]}`;
   const tec=(e.tecs||[])[0],row=(k,v)=>v?`<div class="ag-tr"><span>${k}</span><b>${esc(v)}</b></div>`:'';
-  return `<div class="ag-tt"><i style="background:${evCol(e)}"></i><div><div class="ag-tn">${esc(svn(e.title||''))}${e.lote?' · '+esc(e.lote+(e.suf||'')):''}</div><div class="ag-td">${esc(cap1(same?fm(dd):fm(dd)+' – '+fm(de)))} · ${esc(evTime(e))}</div></div></div>
+  return `<div class="ag-tt"><i style="background:${evCol(e)}"></i><div><div class="ag-tn">${esc(svn(e.title||''))}${e.lote?' · '+esc(loteFmt(e.lote)+(e.suf||'')):''}</div><div class="ag-td">${esc(cap1(same?fm(dd):fm(dd)+' – '+fm(de)))} · ${esc(evTime(e))}</div></div></div>
    ${row('Fazenda',evFarm(e))}${row('Categoria',e.cat)}${row('Total',e.total?String(e.total)+' animais':'')}${row('Equipe',e.team)}${tec?`<div class="ag-tr"><span>Agenda</span><b><i class="ag-tdot" style="background:${tecCol(tec)}"></i>${esc(tec)}</b></div>`:''}${e.desc?`<div class="ag-tdesc">${esc(e.desc)}</div>`:''}`}
 let agTipEl=null,agTipOut=null;
 function agTipShow(el,e){agTipHide();agTipEl=el;const r=el.getBoundingClientRect(),d=document.createElement('div');d.id='ag-tip';d.className='ag-tip';d.innerHTML=agTipHtml(e);document.body.appendChild(d);
@@ -1738,7 +1739,7 @@ function modalHtml(){
     ${lk?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(e.farm).map(f=>[f.id,farmLbl(f)]),e.farm,FZC().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
     </div><div class="form c4" style="margin-top:12px">
     ${fldHtml('Procedimento',`<select name="title" required>${opts(tits.map(x=>[x,svn(x)]),e.title,'Selecione…')}</select>`)}
-    ${lk?fldHtml('Lote',`<input name="lote" value="${esc(e.lote||'')}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
+    ${lk?fldHtml('Lote',`<input name="lote" value="${esc(loteFmt(e.lote||''))}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
     ${lk?'':fldHtml('Lote',`<select name="lote">${evLoteSel(e.farm,e.lote).replace('value="'+esc(String(e.lote||'').toUpperCase())+'"','value="'+esc(String(e.lote||'').toUpperCase())+'" selected')}</select>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly placeholder="Vem do lote">`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly placeholder="Vem do lote">`)}
     </div><div class="form c2" style="margin-top:12px">
     ${fldHtml('Agenda Profissional',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${e.title==='Entourar'?' disabled':(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`)}
@@ -1780,7 +1781,7 @@ function modalHtml(){
     body=`<h3>Calendário</h3>
     <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Calendário · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b" style="font-size:12px">${cal}${cal&&view==='month'?'<div style="break-before:page;page-break-before:always;height:0"></div><div style="font-weight:700;margin:0 0 8px">Detalhamento dos eventos</div>':''}${(!cal||view==='month')?(rows.length?`<table><thead><tr><th>Data</th><th>Procedimento</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Fazenda</th></tr></thead><tbody>
-    ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(svn(e.title))}</td><td>${esc(e.lote||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(evFarm(e)||'—')}</td></tr>`).join('')}
+    ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(svn(e.title))}</td><td>${esc(loteFmt(e.lote)||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(evFarm(e)||'—')}</td></tr>`).join('')}
     </tbody><tfoot><tr><td colspan="6">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>'):''}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês (sem domingo) + lista detalhada na 2ª página':view==='week'?'semana (sem domingo)':view==='day'?'lista do dia':'lista'}.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
@@ -1799,7 +1800,7 @@ function modalHtml(){
     <div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
   if(m.type==='agdelm'){const x=S.eventos.find(q=>q.id===m.id)||{},rel=evRel(x);
     body=`<h3>Mover para a Lixeira</h3><p style="margin:0 0 10px">Evento <b>${esc(evLabel(x))}</b> em ${dt(x.date)} será movido para a Lixeira.</p>
-    <p style="margin:0 0 8px"><b>Deseja excluir também algum destes eventos próximos${x.lote?' do lote '+esc(x.lote):''}?</b></p>
+    <p style="margin:0 0 8px"><b>Deseja excluir também algum destes eventos próximos${x.lote?' do lote '+esc(loteFmt(x.lote)):''}?</b></p>
     <form data-form="agdelm" data-id="${x.id}" novalidate><div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px">
     ${rel.map(e=>`<label style="display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink)"><input type="checkbox" name="rel" value="${e.id}" style="width:auto"> ${dt(e.date)} · ${esc(evLabel(e,true))}</label>`).join('')}</div>
     <div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn" type="button" data-a="agDelAll">Marcar todos</button><button class="btn dng" type="submit">Mover para a Lixeira</button></div></form>`}
@@ -1863,7 +1864,7 @@ function modalHtml(){
      <table><tbody><tr><td><b>Data do procedimento:</b> ${o.date?dt(o.date):'—'}</td><td><b>Fazenda:</b> ${esc(farm)}</td></tr>
      <tr><td><b>Técnico:</b> ${esc(o.tech||'—')}</td><td><b>Cidade:</b> ${esc((o.farm&&F(o.farm).city)||o.city||'—')}</td></tr></tbody></table>
      <h4 style="margin:16px 0 6px">Procedimentos</h4>
-     ${sv.length?`<table><thead><tr><th class="num" style="width:90px">Quantidade</th><th>Descrição da atividade</th><th>Lote</th></tr></thead><tbody>${sv.map(r=>{return `<tr><td class="num">${r.qty===''||r.qty===undefined?'':fmt(Number(r.qty))}</td><td>${esc(r.desc||'')}</td><td>${esc(loteTxt(r.lote)||'—')}</td></tr>`}).join('')}</tbody></table>`:'<p>Nenhum serviço lançado.</p>'}
+     ${sv.length?`<table><thead><tr><th class="num" style="width:90px">Quantidade</th><th>Descrição da atividade</th><th>Lote</th></tr></thead><tbody>${sv.map(r=>{return `<tr><td class="num">${r.qty===''||r.qty===undefined?'':fmt(Number(r.qty))}</td><td>${esc(r.desc||'')}</td><td>${esc(loteFmt(loteTxt(r.lote))||'—')}</td></tr>`}).join('')}</tbody></table>`:'<p>Nenhum serviço lançado.</p>'}
      <h4 style="margin:16px 0 6px">Viagem</h4>
      ${tr.length?`<table><thead><tr><th class="num" style="width:90px">Quantidade</th><th>Origem</th><th>Destino</th></tr></thead><tbody>${tr.map(r=>`<tr><td class="num">${r.qty===''||r.qty===undefined?'':fmt(Number(r.qty))}</td><td>${esc(r.from||'')}</td><td>${esc(r.to||'')}</td></tr>`).join('')}</tbody></table>`:'<p>Nenhuma viagem lançada.</p>'}
      <h4 style="margin:16px 0 6px">Observações</h4><div style="border:1px solid #999;border-radius:4px;min-height:64px;padding:8px;white-space:pre-wrap">${esc(o.obs||'')}</div>
@@ -2391,7 +2392,7 @@ function vLotes(){
    ${searchBox('lt')}
   </div>
   <div class="tw">${list.length?`<table><thead><tr>${lth('fl','Fazenda / Lote')}${lth('proc','Procedimento')}${lth('total','Total','num')}${lth('cat','Categoria')}${lth('ini','Início Parição')}${lth('fim','Final Parição')}${lth('st','Status')}<th>Ações</th></tr></thead><tbody>
-  ${list.map(l=>`<tr data-tot="${Number(l.total)||0}"${qHide('lt',[farmLbl(F(l.farm)),l.name,l.category,l.status,svn(l.proc||''),l.obs,l.total].join(' '))}><td><b>${esc(farmLbl(F(l.farm)))}</b> / ${esc(l.name)}</td><td>${esc(svn(l.proc||'')||'—')}</td><td class="num">${fmt(l.total)}</td><td>${esc(l.category)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td>
+  ${list.map(l=>`<tr data-tot="${Number(l.total)||0}"${qHide('lt',[farmLbl(F(l.farm)),l.name,l.category,l.status,svn(l.proc||''),l.obs,l.total].join(' '))}><td><b>${esc(farmLbl(F(l.farm)))}</b> / ${esc(loteFmt(l.name))}</td><td>${esc(svn(l.proc||'')||'—')}</td><td class="num">${fmt(l.total)}</td><td>${esc(l.category)}</td><td>${dt(l.start)||'—'}</td><td>${dt(l.end)||'—'}</td>
    <td><span class="pill ${l.status==='Aberto'?'in':'out'}">${esc(l.status)}</span></td>
    <td><div class="acts">${l.status==='Aberto'?`<button class="btn sm pri" data-a="iniAgendar" data-v="${l.id}">Agendar</button>`:''}<button class="btn sm" data-a="editLote" data-v="${l.id}">Editar</button></div></td></tr>`).join('')}
   </tbody><tfoot data-ltot="1">${(()=>{const v=list.filter(l=>!ui.q.lt||nrm([farmLbl(F(l.farm)),l.name,l.category,l.status,svn(l.proc||''),l.obs,l.total].join(' ')).includes(nrm(ui.q.lt)));return `<tr><td><b>Total · <span data-n>${fmt(v.length)}</span> <span data-w>${v.length===1?'lote':'lotes'}</span></b></td><td></td><td class="num"><b data-t>${fmt(v.reduce((a,l)=>a+(Number(l.total)||0),0))}</b></td><td colspan="5"></td></tr>`})()}</tfoot></table>`:empty(S.lotes.length?'Nenhum lote com esses filtros.':'Nenhum lote agendado. Clique em Agendar lote para começar.')}</div></div>`;
@@ -3143,7 +3144,7 @@ const loteRowHtml=(l,x)=>`<div class="lrow" style="border-top:1px solid var(--li
     <div class="lote-dates" style="display:${!l.category||LPAR.includes(l.category)?'contents':'none'}">
     ${fldHtml('Início da parição',`<input name="start" type="date" value="${l.start||''}">`)}
     ${fldHtml('Final da parição',`<input name="end" type="date" value="${l.end||''}">`)}</div>
-    <div style="grid-column:span 2">${fldHtml('Observação',`<input name="obs" value="${esc(l.obs||'')}" autocomplete="off">`)}</div></div>${x?`<div style="text-align:right;margin-top:6px"><button type="button" class="btn sm dng" data-a="loteDelRow">Remover este lote</button></div>`:''}</div>`;const evLoteSel=(fid,cur)=>{const u=String(cur||'').toUpperCase(),o=evLoteOpts(fid);return `<option value="">${fid?(o?'Selecione o lote…':'Nenhum lote em aberto'):'Selecione a fazenda primeiro'}</option>${o}${u&&!o.includes('value="'+esc(u)+'"')?`<option value="${esc(u)}">${esc(u)}</option>`:''}`};
+    <div style="grid-column:span 2">${fldHtml('Observação',`<input name="obs" value="${esc(l.obs||'')}" autocomplete="off">`)}</div></div>${x?`<div style="text-align:right;margin-top:6px"><button type="button" class="btn sm dng" data-a="loteDelRow">Remover este lote</button></div>`:''}</div>`;const evLoteSel=(fid,cur)=>{const u=String(cur||'').toUpperCase(),o=evLoteOpts(fid);return `<option value="">${fid?(o?'Selecione o lote…':'Nenhum lote em aberto'):'Selecione a fazenda primeiro'}</option>${o}${u&&!o.includes('value="'+esc(u)+'"')?`<option value="${esc(u)}">${esc(loteFmt(u))}</option>`:''}`};
 const evLoteFill=form=>{const el=form.elements,fid=el['farm'].value,v=String(el['lote'].value||'').trim();if(!fid||!v)return;
   const l=S.lotes.find(x=>x.farm===fid&&x.status!=='Agendado'&&nrm(x.name)===nrm(v));if(!l)return;
   el['lote'].value=String(l.name).toUpperCase();el['total'].value=l.total;el['cat'].value=NCATS.includes(l.category)?l.category:''};
