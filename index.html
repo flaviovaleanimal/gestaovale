@@ -546,7 +546,7 @@ function onSnap(c,snap){
 }
 function softRender(){
   const a=document.activeElement;
-  if(a&&a.dataset&&a.dataset.tkf==='fqtop'){needRender=true;return}
+  if(a&&a.dataset&&(a.dataset.tkf==='fqtop'||a.dataset.tkf==='aq'||a.dataset.tkf==='ade'||a.dataset.tkf==='aate')){needRender=true;return}
   if(a&&a.form&&a.form.classList&&a.form.classList.contains('tk-addf')){needRender=true;return}
   if(a&&a.closest&&a.closest('#modal-root')&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){needRender=true;return}
   needRender=false;render();
