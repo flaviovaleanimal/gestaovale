@@ -79,6 +79,9 @@
     async upload(path,file){const {error}=await sb.storage.from('anexos').upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false});if(error)throw error},
     async url(path){const {data,error}=await sb.storage.from('anexos').createSignedUrl(path,3600);if(error)throw error;return data.signedUrl},
     async remove(paths){const {error}=await sb.storage.from('anexos').remove(paths);if(error)throw error},
+    async pushSave(sub){const email=window.GS_EMAIL||'';if(!sb||!email)throw new Error('sem login');const {error}=await sb.from('push_subs').upsert({endpoint:sub.endpoint,email,sub,agente:String(navigator.userAgent||'').slice(0,160)});if(error)throw error},
+    async pushRemove(endpoint){if(!sb)return;await sb.from('push_subs').delete().eq('endpoint',endpoint)},
+    async pushHas(endpoint){if(!sb)return false;const {data}=await sb.from('push_subs').select('endpoint').eq('endpoint',endpoint).maybeSingle();return !!data},
     async logout(){if(sb)await sb.auth.signOut();location.reload()}
   };
 })();

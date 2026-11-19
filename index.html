@@ -3,6 +3,7 @@
 <meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gestão de Serviços</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#14275a"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Gestão"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap">
 <style>
 /* Layout: barra lateral de módulos + área de trabalho com subabas; tabelas rolam dentro do próprio contêiner */
@@ -550,6 +551,7 @@ async function init(){
   if(!DB){dbState='local';const l=loadLocal();if(l)S=Object.assign(emptyS(),l);render();return}
   slowT=setTimeout(()=>{if(dbState!=='ok'){dbState='lento';render()}},10000);
   Object.keys(synced).forEach(c=>DB.collection(c).onSnapshot(sn=>onSnap(c,sn),e=>{dbState=(e&&e.code==='unavailable')?'lento':'erro';render()}));
+  pushInit();
 }
 
 const ATIVS=['IMPLANTADAS','RETIRADAS','INSEMINADAS','DIAGNÓSTICO DA IATF','DIAGNÓSTICO FINAL','EXAME DE ANDROLÓGICO','EXAME DE BRUCELOSE','DIÁRIA VETERINÁRIA','PROCEDIMENTO CIRÚRGICO'];
@@ -1002,6 +1004,29 @@ function tkCommit(){const u=tkU();
  if(u.draft){const t=u.draft;u.draft=null;if((t.titulo||'').trim()){const cc=S.tcols.find(x=>x.id===t.col);tkLog(t,'adicionou este cartão a '+(cc?cc.nome:''));S.tarefas.push(t);setTimeout(save,0);toast('Tarefa salva.')}u.sel=null;return}
  const c=S.tarefas.find(x=>x.id===u.sel);if(c){if(!(c.titulo||'').trim())c.titulo='Sem nome';if(JSON.stringify(c)!==u.snap)setTimeout(save,0)}u.sel=null}
 
+
+const pushUi={on:false,sup:('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window)};
+const b64u=v=>{const p='='.repeat((4-v.length%4)%4),r=(v+p).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(r);return Uint8Array.from(raw,c=>c.charCodeAt(0))};
+async function pushReg(){try{return await navigator.serviceWorker.register('sw.js')}catch(e){return null}}
+async function pushInit(){if(!pushUi.sup)return;try{const reg=await pushReg();if(!reg)return;const sub=await reg.pushManager.getSubscription();
+  pushUi.on=!!sub&&Notification.permission==='granted';
+  if(pushUi.on&&window.GS_CLOUD&&GS_CLOUD.pushSave){GS_CLOUD.pushSave(sub.toJSON()).catch(()=>{})}
+  render()}catch(e){}
+  navigator.serviceWorker.addEventListener('message',ev=>{const u=ev.data&&ev.data.abrir;if(u)pushGo(u)})}
+function pushGo(u){try{const h=new URL(u,location.href).hash||'',m=h.match(/^#(cartao|neg)=([A-Za-z0-9_-]+)/);if(!m)return;
+  if(m[1]==='neg'){const id=m[2];if((S.negs||[]).some(x=>x.id===id)){ui.modal=null;ui.tab='negociacoes';ui.ngPg='';ui.ngV=id;ui.umenu=false;render()}}
+  else{pendCard=m[2];render()}}catch(e){}}
+async function pushToggle(){
+  if(!pushUi.sup){alert('Para receber notificações no iPhone, abra o sistema pelo ícone da Tela de Início (Safari → Compartilhar → Adicionar à Tela de Início) e tente de novo.');return}
+  try{const reg=await pushReg();if(!reg)throw new Error('sw');const cur=await reg.pushManager.getSubscription();
+    if(cur){await GS_CLOUD.pushRemove(cur.endpoint).catch(()=>{});await cur.unsubscribe();pushUi.on=false;toast('Notificações desativadas neste aparelho.');render();return}
+    const perm=await Notification.requestPermission();if(perm!=='granted'){toast('Permissão de notificação não concedida. Ative em Ajustes do iPhone.');return}
+    const key=(window.GS_CONFIG||{}).VAPID_PUBLIC;if(!key)throw new Error('sem chave');
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(key)});
+    await GS_CLOUD.pushSave(sub.toJSON());pushUi.on=true;ui.umenu=false;
+    try{await reg.showNotification('Notificações ativadas',{body:'Você vai receber aqui os prazos e as marcações com @.',icon:'icon-192.png',tag:'ativado'})}catch(e){}
+    toast('Notificações ativadas neste aparelho.');render()
+  }catch(e){toast('Não foi possível ativar as notificações. Se estiver no iPhone, abra pelo ícone da Tela de Início.')}}
 const nMine=()=>(S.notifs||[]).filter(x=>x.to===tkMe()).sort((a,b)=>b.h-a.h);
 function menNotify(text,ctx,kind,old){
   const me=tkMe(),rx=new RegExp('@('+TK_TEAM.join('|')+')','g'),was=new Set();let m;
@@ -2736,7 +2761,7 @@ function render(){
   sd.className='side'+(mini?' mini':'');
   sd.innerHTML=`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 11:20</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
-   <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div>${bellHtml()}<div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu"><button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
+   <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div>${bellHtml()}<div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu">${window.GS_CLOUD&&GS_CLOUD.enabled?`<button role="menuitem" data-a="pushToggle">${pushUi.on?'Desativar notificações neste aparelho':'Ativar notificações neste aparelho'}</button><hr>`:''}<button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
   document.getElementById('app').innerHTML=`${dbState==='ok'?'':`<div class="banner"><span>${bannerTxt()}</span></div>`}${view}`;
   document.getElementById('modal-root').innerHTML=modalHtml();
@@ -2778,6 +2803,7 @@ document.addEventListener('click',e=>{
    case 'agCorReset':S.agcores=(S.agcores||[]).filter(x=>x.id!==v);save();render();break;
    case 'agFull':ui.agFull=!ui.agFull;render();break;
    case 'umenu':ui.umenu=!ui.umenu;render();break;
+   case 'pushToggle':pushToggle();break;
    case 'nbell':ui.nbell=!ui.nbell;ui.umenu=false;render();break;
    case 'nAll':nMine().forEach(x=>x.lido=true);save();render();break;
    case 'nOpen':{const x=(S.notifs||[]).find(y=>y.id===v);ui.nbell=false;if(!x)break;x.lido=true;save();ui.modal=null;ui.ngPg='';
@@ -3485,9 +3511,9 @@ const NAVKEY='gv_nav';
 try{const n=JSON.parse(sessionStorage.getItem(NAVKEY)||'null');if(n&&typeof n.tab==='string'&&n.tab){const t0=ui.tab;ui.tab=n.tab;if(n.tk){tkU().modo=n.tk}if(n.fk){const t1=ui.tab;ui.tab='f-fatur';tkU().modo=n.fk;ui.tab=t1}try{render()}catch(e){ui.tab=t0;if(ui.tk)ui.tk.modo='quadro'}}}catch(e){}
 try{ui.mini=localStorage.getItem('gv_mini')==='1'}catch(e){}
 let pendCard=null;try{const n=JSON.parse(sessionStorage.getItem(NAVKEY)||'null');if(n&&n.card)pendCard=n.card}catch(e){}
-try{const m=(location.hash||'').match(/^#cartao=([A-Za-z0-9_-]+)/);if(m){pendCard=m[1];try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}}catch(e){}
+try{const m=(location.hash||'').match(/^#cartao=([A-Za-z0-9_-]+)/);if(m){pendCard=m[1];try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}}catch(e){}let pendNeg=null;try{const m=(location.hash||'').match(/^#neg=([A-Za-z0-9_-]+)/);if(m){pendNeg=m[1];try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}}catch(e){}
 const saveNav=()=>{try{const K=ui.tab==='f-fatur'?'fk':'tk',sel=ui.modal&&ui.modal.type==='tk'&&ui[K]?ui[K].sel:null;if(pendCard&&!sel)return;sessionStorage.setItem(NAVKEY,JSON.stringify({tab:ui.tab,tk:ui.tk&&ui.tk.modo,fk:ui.fk&&ui.fk.modo,card:sel||null}))}catch(e){}};
-const _r0=render;render=function(){if(isRestr()&&typeof ui.tab==='string'&&ui.tab.startsWith('f-'))ui.tab='inicio';const r=_r0.apply(this,arguments);document.querySelectorAll('textarea.tk-cn').forEach(e=>{e.style.height='auto';e.style.height=(e.scrollHeight+2)+'px'});if(pendCard){const id=pendCard,c=(S.tarefas||[]).find(x=>x.id===id);if(c){pendCard=null;const want=c.area==='fat'?'f-fatur':'tarefas';if(ui.tab!==want)ui.tab=want;const b=document.createElement('button');b.dataset.tk='open';b.dataset.v=id;b.style.display='none';document.body.appendChild(b);b.click();b.remove();return r}else if(dbState==='ok'&&S.tarefas&&S.tarefas.length)pendCard=null}saveNav();return r};
+const _r0=render;render=function(){if(isRestr()&&typeof ui.tab==='string'&&ui.tab.startsWith('f-'))ui.tab='inicio';const r=_r0.apply(this,arguments);document.querySelectorAll('textarea.tk-cn').forEach(e=>{e.style.height='auto';e.style.height=(e.scrollHeight+2)+'px'});if(pendCard){const id=pendCard,c=(S.tarefas||[]).find(x=>x.id===id);if(c){pendCard=null;const want=c.area==='fat'?'f-fatur':'tarefas';if(ui.tab!==want)ui.tab=want;const b=document.createElement('button');b.dataset.tk='open';b.dataset.v=id;b.style.display='none';document.body.appendChild(b);b.click();b.remove();return r}else if(dbState==='ok'&&S.tarefas&&S.tarefas.length)pendCard=null}if(pendNeg&&dbState==='ok'&&S.negs&&S.negs.length){const id=pendNeg;pendNeg=null;setTimeout(()=>pushGo('#neg='+id),0)}saveNav();return r};
 render();
 init();
 </script>
