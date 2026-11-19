@@ -323,6 +323,10 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 @media(max-width:640px){.ag-day{min-height:78px}.ag-chip{font-size:10px;padding:0 4px}.ag-title{flex-basis:100%;order:-1}}
 
 .ini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.kpi.kc{border:0;color:#fff;box-shadow:0 2px 6px rgba(20,39,90,.18)}
+.kpi.kc .k-n{color:#fff}.kpi.kc .k-l{color:rgba(255,255,255,.9)}
+.kpi.kc1{background:linear-gradient(135deg,#12303f,#12303fdd)}.kpi.kc2{background:linear-gradient(135deg,#1f5a66,#1f5a66dd)}.kpi.kc3{background:linear-gradient(135deg,#1f7a7c,#1f7a7cdd)}.kpi.kc4{background:linear-gradient(135deg,#b5283a,#b5283add)}
+.ini-hi{margin:0 0 16px}.ini-hi h2{margin:0;font-size:26px;font-weight:600;line-height:1.2}.ini-hi p{margin:3px 0 0;font-size:14px;color:var(--muted)}
 .ini-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;align-items:start}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
 .kpi .k-l{font-size:13px;color:var(--muted);font-weight:600}
@@ -1450,11 +1454,13 @@ function vInicio(){
   const faltaDg=S.lancs.filter(l=>l.ia&&!l.dg&&addDays(l.ia,28)<=td).map(l=>{const es=S.estacoes.find(x=>x.id===l.est)||{},lt=S.lotes.find(x=>x.id===l.lote),prev=addDays(l.ia,28);return {l,farm:es.farm,lt,prev,atraso:Math.round((new Date(td+'T12:00:00')-new Date(prev+'T12:00:00'))/864e5)}}).sort((a,b)=>a.prev.localeCompare(b.prev));
   const hoje=S.eventos.filter(e=>e.date<=td&&(e.end||e.date)>=td).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||''));
   const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkHoje=S.tarefas.filter(t=>!t.area&&!t.feito&&t.prazo&&t.prazo<=td&&(!isRestr()||(t.membros||[]).includes(tkEu))).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
-  return `<div class="ini-grid">
-   <div class="kpi"><div class="k-n">${fmt(fazAt.size)}</div><div class="k-l">Fazendas atendidas</div></div>
-   <div class="kpi"><div class="k-n">${fmt(done.length)}</div><div class="k-l">IATFs realizadas</div></div>
-   <div class="kpi"><div class="k-n">${fmt(hoje.length)}</div><div class="k-l">Eventos de hoje</div></div>
-   <div class="kpi"><div class="k-n">${fmt(pend.length)}</div><div class="k-l">Lotes para agendar serviço</div></div>
+  const _h=new Date().getHours(),_sd=_h<12?'Bom dia':_h<18?'Boa tarde':'Boa noite',_dh=dd.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  return `<div class="ini-hi"><h2>${_sd}, ${esc(tkMe().split(' ')[0])}</h2><p>${esc(_dh.charAt(0).toUpperCase()+_dh.slice(1))}</p></div>
+  <div class="ini-grid">
+   <div class="kpi kc kc1"><div class="k-n">${fmt(fazAt.size)}</div><div class="k-l">Fazendas atendidas</div></div>
+   <div class="kpi kc kc2"><div class="k-n">${fmt(done.length)}</div><div class="k-l">IATFs realizadas</div></div>
+   <div class="kpi kc kc3"><div class="k-n">${fmt(hoje.length)}</div><div class="k-l">Eventos de hoje</div></div>
+   <div class="kpi kc kc4"><div class="k-n">${fmt(pend.length)}</div><div class="k-l">Lotes para agendar serviço</div></div>
   </div>
   <div class="card" style="margin-bottom:14px"><div class="card-h"><h3>Tarefas de hoje <small class="muted">(${tkHoje.length}${isRestr()?'':TK_TEAM.map(n=>' · '+n.split(' ')[0]+' '+tkHoje.filter(t=>(t.membros||[]).includes(n)).length).join('')})${tkHoje.length>5?' · mostrando 5':''}</small></h3><button class="btn sm" data-a="go" data-v="tarefas">Abrir Tarefas</button></div>
    ${tkHoje.length?tkHoje.slice(0,5).map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty(isRestr()?'Nenhuma tarefa sua para hoje.':'Nenhuma tarefa para hoje.')}</div>
