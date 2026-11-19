@@ -3412,8 +3412,6 @@ document.addEventListener('submit',e=>{
     rec.color=evCol(rec);
     let ajuste='';
     if(rec.title==='Andrológico'){if(rec.cat!=='Touros'){rec.cat='Touros';ajuste=' Categoria ajustada para Touros.'}}
-    else if(rec.title==='IM'&&AVCATS.includes(rec.cat)){rec.title='AV + IM';ajuste=' Procedimento ajustado para AV + IM ('+rec.cat+').'}
-    else if(rec.title==='AV + IM'&&LPAR.includes(rec.cat)){rec.title='IM';ajuste=' Procedimento ajustado para IM ('+rec.cat+').'}
     ui.ag.date=fd.date;
     const lt=null;
     const msg='Evento salvo.'+ajuste+(lt?` O lote ${lt.name} foi marcado como Agendado.`:'');
