@@ -1992,7 +1992,7 @@ function modalHtml(){
   if(m.type==='contact'){const c=m.data||{};
     body=`<h3>${c.id?'Editar contato':'Cadastrar contato'}</h3>${err}<form data-form="contact" data-id="${c.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name)}" required>`)}
-    ${fldHtml('Empresa',`<select name="company" required>${opts(S.farms.map(x=>[x.id,x.name]),c.farm||c.company,S.farms.length?'Selecione…':'Cadastre uma empresa primeiro')}</select>`)}
+    ${fldHtml('Empresa',`<select name="company" required>${opts(S.farms.slice().sort((p,q)=>(/^vale animal$/i.test(p.name.trim())-/^vale animal$/i.test(q.name.trim()))||p.name.localeCompare(q.name,'pt-BR',{sensitivity:'base'})).map(x=>[x.id,x.name]),c.farm||c.company,S.farms.length?'Selecione…':'Cadastre uma empresa primeiro')}</select>`)}
     ${fldHtml('E-mail',`<input name="email" type="email" value="${esc(c.email||'')}" autocomplete="off">`)}
     ${fldHtml('Telefone',`<input name="phone" type="tel" value="${esc(c.phone||'')}" inputmode="tel" placeholder="(66) 99999-9999">`)}
     ${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}
