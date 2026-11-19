@@ -2538,7 +2538,7 @@ function navHtml(list,d){
 }
 document.addEventListener('click',e=>{if(ui.ngSn&&!(e.target.closest&&e.target.closest('.ng-menu,[data-a=ngSn]'))){ui.ngSn=null;render()}});
 document.addEventListener('click',e=>{if(ui.ngMenu&&!(e.target.closest&&e.target.closest('.ng-menu,[data-a=ngMenu]'))){ui.ngMenu=false;render()}});
-const PSCAT=[...PCAT,'Sêmen'];
+const PSCAT=[...PCAT,'Sêmen','Serviços'];
 const FDL_EXT={pdf:'PDF',xls:'XLSX',xlsx:'XLSX'};
 const fdlTipo=n=>FDL_EXT[(String(n||'').split('.').pop()||'').toLowerCase()]||'';
 function vFDL(){const q=nrm(ui.fdlQ||''),cat=ui.fdlC||'',L=(S.fdl||[]).slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR',{sensitivity:'base'})),cats=[...new Set(L.map(x=>x.cat).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')),adm=isAdm();
