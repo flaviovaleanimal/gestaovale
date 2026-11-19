@@ -813,7 +813,7 @@ const farmShort=id=>tc(evFarm({farm:id}).replace(/^\s*fazenda\s+/i,''));
 const firstNames=t=>String(t||'').split(/[,;\/]|\se\s/i).map(x=>tc(x.trim().split(/\s+/)[0])).filter(Boolean).join(', ');
 const SVN={'AV + IM':'Avaliação + Implante','IM':'Implante','RE':'Retirada','IA':'Inseminação','RES':'Ressincronização','DG':'Diagnóstico','DG Final':'Diagnóstico Final'},svn=t=>SVN[t]||t;
 const evLabel=(e,full)=>[farmShort(e.farm),(full?svn(e.title||''):(e.title||''))+(e.lote?` (${loteFmt(e.lote)}${e.suf||''})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
-const evpPrev=(im,p,n,farm)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';const L=evPlano(im,p,n,farm);return L.map(([t,x])=>`${t}: <b>${dt(x)}</b> (${WDS[Dt(x).getDay()]})`).join(' · ')+(L.dom.length?`<br><b style="color:var(--dng,#b42318)">Atenção: ${L.dom.join(' e ')} cai no domingo. Escolha outro protocolo (7, 8 ou 9 dias).</b>`:'')};
+const evpPrev=(im,p,n,farm)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';const L=evPlano(im,p,n,farm);return L.map(([t,x])=>`${t}: <b>${dt(x)}</b> (${WDS[Dt(x).getDay()]})`).join(' · ')+(L.dom.length?`<br><b style="color:var(--dng,#b42318)">Aviso: ${L.dom.join(' e ')} cai no domingo. Você pode criar assim e ajustar a data depois, ou escolher outro protocolo.</b>`:'')};
 const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – '+e.etime:''));
 const agTitle=()=>{const {view,date}=ui.ag,d=Dt(date);
   if(view==='day')return `${WDL[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
@@ -3434,10 +3434,9 @@ document.addEventListener('submit',e=>{
     if(!prot){m0.sel={prot:'',niatf:n};m0.err='Escolha o protocolo (7, 8 ou 9 dias) para calcular as datas.';return render()}
     const base={title:'',date:'',end:'',allday:ev.allday,periodo:ev.periodo,start:ev.start||'',etime:ev.etime||'',cat:ev.cat||'',color:ev.color,farm:ev.farm,total:ev.total,lote:ev.lote,team:ev.team,tecs:ev.tecs||[],desc:ev.desc};
     const pl=evPlano(ev.date,prot,n,ev.farm);
-    if(pl.dom.length){m0.sel={prot:fd.prot,niatf:n};m0.err='A '+pl.dom.join(' e a ')+' cairia no domingo. Escolha outro protocolo.';return render()}
     if(n>1){const o=S.eventos.find(q=>q.id===ev.id);if(o)o.suf='A'}
     pl.forEach(([t,x,sf])=>S.eventos.push({id:nid('e'),...base,team:t==='Entourar'?'':base.team,tecs:t==='Entourar'?[]:base.tecs,title:t,date:x,end:x,suf:sf||'',color:t==='Entourar'?ENTCOL:base.color}));
-    return done(pl.length+' eventos criados: '+pl.map(x=>x[0]).join(', ')+'.')}
+    return done(pl.length+' eventos criados: '+pl.map(x=>x[0]).join(', ')+'.'+(pl.dom.length?' Atenção: '+pl.dom.join(' e ')+' caiu no domingo — ajuste a data se precisar.':''))}
   if(k==='diaimp'){
     const L=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec).filter(x=>!x.exists&&(ui.modal.sel||[]).includes(x.key));
     if(!L.length)return done();
