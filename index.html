@@ -2588,7 +2588,7 @@ function negOrcItems(n){
    ${l.livre?`<div class="form" style="margin-bottom:12px">${fldHtml('Descrição do item',`<input data-ngorc="nome" data-i="${i}" value="${esc(l.nome||'')}" autocomplete="off">`,'wide')}</div>`:''}
    <div class="form ngo-f ${sem?'s7':'s5'}">
     ${fldHtml(sem?'Produto (sêmen)':'Serviço',`<select data-ngorc="item" data-i="${i}">${opts([...cat.map(x=>[x.id,x.nome+(x.categoria?' ('+x.categoria+')':'')]),...(l.ps&&!cat.some(x=>x.id===l.ps)?[[l.ps,l.nome+' (fora da lista)']]:[]),['__livre','Outro item (digitar)']],l.ps||(l.livre?'__livre':''),'Selecione…')}</select>`)}
-    ${sem?'':fldHtml('Descrição',`<textarea data-ngorc="desc" data-i="${i}" rows="3" placeholder="Escreva algo sobre o serviço…">${esc(l.desc||'')}</textarea>`)}
+    ${sem?'':fldHtml('Descrição',`<input data-ngorc="desc" data-i="${i}" value="${esc(l.desc||'')}" placeholder="Escreva algo sobre o serviço…" autocomplete="off">`)}
     ${sem?fldHtml('Raça',`<select data-ngorc="raca" data-i="${i}">${opts([...BREEDS.map(x=>[x,x]),...(l.raca&&!BREEDS.includes(l.raca)?[[l.raca,l.raca]]:[])],l.raca,'—')}</select>`):''}
     ${fldHtml('Quantidade',`<input data-ngorc="qtd" data-i="${i}" inputmode="decimal" value="${num(l.qtd)}">`)}
     ${fldHtml('Valor unitário (R$)',`<input data-ngorc="vu" data-i="${i}" inputmode="decimal" value="${m2(l.vu)}">`)}
