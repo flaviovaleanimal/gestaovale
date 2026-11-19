@@ -559,6 +559,7 @@ async function init(){
 }
 
 const ATIVS=['IMPLANTADAS','RETIRADAS','INSEMINADAS','DIAGNÓSTICO DA IATF','DIAGNÓSTICO FINAL','EXAME DE ANDROLÓGICO','EXAME DE BRUCELOSE','DIÁRIA VETERINÁRIA','PROCEDIMENTO CIRÚRGICO'];
+const nomeFmt=v=>{let i=0;return String(v||'').trim().replace(/\s+/g,' ').replace(/\S+/g,w=>{const first=i++===0,sig=w.length<=4&&w===w.toUpperCase()&&/[A-ZÀ-Ú]{2}/.test(w)&&!first;return sig?w:(first?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():w.toLowerCase())})};
 const tc=v=>String(v||'').trim().toLowerCase().replace(/(^|[\s\-\/])([^\s\-\/])/g,(m,a,b)=>a+b.toUpperCase());
 const CIDADES=['ÁGUA BOA','BARRA DO GARÇAS','NOVA XAVANTINA','NOVA NAZARÉ','COCALINHO','RIBEIRÃO CASCALHEIRA','CANARANA','CAMPINÁPOLIS','NOVO SÃO JOAQUIM','PARANATINGA','ARAGUAIANA','SÃO JOSÉ XINGU'].map(tc).sort((a,b)=>a.localeCompare(b,'pt-BR'));
 const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x=>[x,x]);
@@ -2550,6 +2551,7 @@ function vFDL(){const q=nrm(ui.fdlQ||''),cat=ui.fdlC||'',L=(S.fdl||[]).slice().s
   ${cats.length?`<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><button class="btn sm${cat?'':' pri'}" data-a="fdlCat" data-v="">Todas</button>${cats.map(c=>`<button class="btn sm${cat===c?' pri':''}" data-a="fdlCat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>`:''}
   ${list.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px">${list.map(x=>`<div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:52px;border-radius:8px;${cor(x.tipo)};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none">${esc(x.tipo||'')}</div><div style="min-width:0"><b>${esc(x.nome)}</b><div class="muted" style="font-size:12px">${esc(x.cat||'Sem categoria')} · ${tkKB(x.s||0)}</div><div class="muted" style="font-size:12px">atualizada em ${dt(x.atual||'')}</div></div></div>${x.desc?`<div class="muted" style="font-size:13px">${esc(x.desc)}</div>`:''}<div style="display:flex;gap:8px"><button class="btn pri" style="flex:1" data-a="fdlDl" data-v="${x.id}">⬇ Baixar</button>${adm?`<button class="btn sm" data-a="fdlEdit" data-v="${x.id}">Editar</button><button class="btn sm dng" data-a="fdlDel" data-v="${x.id}">Excluir</button>`:''}</div></div>`).join('')}</div>`:empty(L.length?'Nenhuma ficha encontrada.':(adm?'Nenhuma ficha ainda. Clique em + Adicionar ficha.':'Nenhuma ficha disponível.'))}</div>`}
 function vPServ(){
+  {let chg=0;(S.pservs||[]).forEach(x=>{const f=nomeFmt(x.nome);if(f&&f!==x.nome){x.nome=f;chg=1}});if(chg)save()}
   const q=nrm(ui.psQ||''),n=+ui.psN||10,all=(S.pservs||[]).slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'})),F2=all.filter(x=>!q||nrm(x.nome+' '+(x.categoria||'')).includes(q)),pgs=Math.max(1,Math.ceil(F2.length/n)),pg=Math.min(Math.max(1,+ui.psP||1),pgs),L=F2.slice((pg-1)*n,pg*n);
   return `<div class="card ps"><div class="ngd-top" style="align-items:center"><button class="ngd-back" data-a="go" data-v="negociacoes" aria-label="Voltar" title="Voltar às negociações">←</button><div class="ngd-tt"><h2 style="margin:0">Produtos</h2></div><button class="ps-new" data-a="psNew">＋ Cadastrar produto</button></div>
    <label class="tk-search ps-s"><input type="text" data-psq value="${esc(ui.psQ||'')}" placeholder="Buscar" autocomplete="off" aria-label="Buscar"><button type="button" class="tk-sbtn" aria-label="Buscar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button></label>
@@ -3461,7 +3463,7 @@ document.addEventListener('submit',e=>{
     const rec={nome,cat:(fd.cat||'').trim(),desc:(fd.desc||'').trim()};S.fdl=S.fdl||[];
     if(fl){const pp=old&&old.p;if(pp&&window.GS_CLOUD&&GS_CLOUD.remove&&pp!==fl.p)GS_CLOUD.remove([pp]).catch(()=>{});Object.assign(rec,{n:fl.n,s:fl.s,tipo:fl.tipo,p:fl.p||'',d:fl.d||'',m:fl.m,atual:today()});if(!fl.p)delete rec.p;if(!fl.d)delete rec.d}
     if(old)Object.assign(old,rec);else S.fdl.push({id:nid('fd'),criado:today(),atual:today(),...rec});return done('Ficha salva.')}
-  if(k==='pserv'){const nome=(fd.nome||'').trim(),id=form.dataset.id;if(!nome)return modalErr('Informe o nome.');
+  if(k==='pserv'){const nome=nomeFmt(fd.nome),id=form.dataset.id;if(!nome)return modalErr('Informe o nome.');
     const rec={nome,categoria:fd.categoria||'',valor:tkParseV(fd.valor)||0,exibir:!!fd.exibir};S.pservs=S.pservs||[];
     if(S.pservs.some(x=>x.id!==id&&x.nome.toLowerCase()===nome.toLowerCase()))return modalErr('Já existe um item com esse nome.');
     if(id)Object.assign(S.pservs.find(x=>x.id===id),rec);else S.pservs.push({id:nid('ps'),...rec});return done('Item salvo.')}
