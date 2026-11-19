@@ -1454,7 +1454,7 @@ function vInicio(){
   abertos.sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));pend.sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));
   const faltaDg=S.lancs.filter(l=>l.ia&&!l.dg&&addDays(l.ia,28)<=td).map(l=>{const es=S.estacoes.find(x=>x.id===l.est)||{},lt=S.lotes.find(x=>x.id===l.lote),prev=addDays(l.ia,28);return {l,farm:es.farm,lt,prev,atraso:Math.round((new Date(td+'T12:00:00')-new Date(prev+'T12:00:00'))/864e5)}}).sort((a,b)=>a.prev.localeCompare(b.prev));
   const hoje=S.eventos.filter(e=>e.date<=td&&(e.end||e.date)>=td).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||''));
-  const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkHoje=S.tarefas.filter(t=>!t.area&&!t.feito&&t.prazo&&t.prazo<=td&&(!isRestr()||(t.membros||[]).includes(tkEu))).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
+  const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkHoje=S.tarefas.filter(t=>!t.area&&!t.feito&&t.prazo&&t.prazo<=td&&(t.membros||[]).includes(tkEu)).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
   const _h=new Date().getHours(),_sd=_h<12?'Bom dia':_h<18?'Boa tarde':'Boa noite',_dh=dd.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   return `<div class="ini-hi"><h2>${_sd}, ${esc(tkMe().split(' ')[0])}</h2><p>${esc(_dh.charAt(0).toUpperCase()+_dh.slice(1))}</p></div>
   <div class="ini-grid">
@@ -1463,7 +1463,7 @@ function vInicio(){
    <div class="kpi kc kc3"><div class="k-n">${fmt(hoje.length)}</div><div class="k-l">Eventos de hoje</div></div>
    <div class="kpi kc kc4"><div class="k-n">${fmt(pend.length)}</div><div class="k-l">Lotes para agendar serviço</div></div>
   </div>
-  <div class="card" style="margin-bottom:14px"><div class="card-h"><h3>Tarefas de hoje <small class="muted">(${tkHoje.length}${isRestr()?'':TK_TEAM.map(n=>' · '+n.split(' ')[0]+' '+tkHoje.filter(t=>(t.membros||[]).includes(n)).length).join('')})${tkHoje.length>5?' · mostrando 5':''}</small></h3><button class="btn sm" data-a="go" data-v="tarefas">Abrir Tarefas</button></div>
+  <div class="card" style="margin-bottom:14px"><div class="card-h"><h3>Minhas tarefas de hoje <small class="muted">(${tkHoje.length})${tkHoje.length>5?' · mostrando 5':''}</small></h3><button class="btn sm" data-a="go" data-v="tarefas">Abrir Tarefas</button></div>
    ${tkHoje.length?tkHoje.slice(0,5).map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty(isRestr()?'Nenhuma tarefa sua para hoje.':'Nenhuma tarefa para hoje.')}</div>
   <div class="ini-two">
    <div class="card"><div class="card-h"><h3>Eventos de hoje${hoje.length>10?` <small class="muted">(${hoje.length} · mostrando 10)</small>`:''}</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Calendário</button></div>
