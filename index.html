@@ -773,7 +773,7 @@ const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=
 const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tecs.length&&'Profissional: '+ui.ag.tecs.join(', '),ui.ag.farms.length&&'Fazenda: '+ui.ag.farms.map(farmShort).join(', '),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
 const evTecIx=e=>{const i=AGTEC.findIndex(t=>(e.tecs||[]).length?e.tecs[0]===t:evTec(e,t));return i<0?99:i};
 const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tecs.length||ui.ag.tecs.some(t=>evTec(e,t)))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||evTecIx(a)-evTecIx(b)||(a.start||'').localeCompare(b.start||'')||farmShort(a.farm).localeCompare(farmShort(b.farm))||a.title.localeCompare(b.title));
-const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','Andrológico'];
+const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','Aplicação','Andrológico'];
 const AVCATS=['Novilhas Nelore','Novilhas Angus','Vacas Solteiras'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Vacas Primíparas','Vacas Secundíparas','Vacas Multíparas','Vacas Solteiras'];
 const catOpts=cur=>[...NCATS,...(cur&&!NCATS.includes(cur)?[cur]:[])].map(x=>[x,x]);
