@@ -1771,19 +1771,19 @@ function modalHtml(){
     const rows=[];for(let i=0;i<n;i++){const x=addDays(a,i);evOn(x).forEach(e=>rows.push([x,e]))}
     const per=agTitle()+(agFilList().length?' · '+agFilList().join(' · '):'');
     const fs=(()=>{try{const c=document.createElement('canvas').getContext('2d');c.font='8px '+getComputedStyle(document.body).fontFamily;
-      const w=Math.max(0,...rows.map(([x,e])=>c.measureText((view==='week'&&!e.allday?perOf(e)+' ':'')+evLabel(e,view==='week')).width)),av=138;
+      const w=Math.max(0,...rows.map(([x,e])=>c.measureText((view==='week'&&!e.allday?perOf(e)+' ':'')+evLabel(e,view==='week')).width)),av=118;
       return w>av?Math.max(4.5,Math.floor(80*av/w)/10):8}catch(err){return 8}})();
     const pc=(e,wk)=>`<div style="background:${evCol(e)};color:#fff;border-radius:3px;padding:1px 2px;margin-top:2px;font-size:${fs}px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:clip;-webkit-print-color-adjust:exact;print-color-adjust:exact">${wk&&!e.allday?`<small style="font-size:${Math.max(4,fs-1)}px;opacity:.9">${esc(perOf(e))}</small> `:''}${esc(evLabel(e,wk))}</div>`;
     const bd='1px solid #888',hd=x=>`style="padding:2px;text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;border-right:${bd};border-bottom:${bd};background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact"`;
     let cal='';
     if(view==='month'){
       const first=a,st=weekStart(first),nn=Math.ceil((wdi(first)+n)/7)*7;
-      cal=`<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:${bd};border-left:${bd}">${WDM.slice(0,6).map(w=>`<div ${hd()}>${w}</div>`).join('')}
-      ${Array.from({length:nn},(_,i)=>i).filter(i=>i%7!==6).map(i=>{const x=addDays(st,i),dd=Dt(x),out=dd.getMonth()!==d.getMonth();
+      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${WDM.slice(0,7).map(w=>`<div ${hd()}>${w}</div>`).join('')}
+      ${Array.from({length:nn},(_,i)=>i).map(i=>{const x=addDays(st,i),dd=Dt(x),out=dd.getMonth()!==d.getMonth();
         return `<div style="min-height:92px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd};break-inside:avoid;${out?'color:#999':''}"><b style="font-size:9px">${dd.getDate()}</b>${out?'':evOn(x).map(e=>pc(e,false)).join('')}</div>`}).join('')}</div>`}
     else if(view==='week'){
-      cal=`<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:${bd};border-left:${bd}">${Array.from({length:6},(_,i)=>{const x=addDays(a,i);return `<div ${hd()}>${WDS[Dt(x).getDay()]} ${dt(x).slice(0,5)}</div>`}).join('')}
-      ${Array.from({length:6},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
+      cal=`<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:${bd};border-left:${bd}">${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div ${hd()}>${WDS[Dt(x).getDay()]} ${dt(x).slice(0,5)}</div>`}).join('')}
+      ${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
     body=`<h3>Calendário</h3>
     <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>Calendário · ${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
     <div class="paper-b" style="font-size:12px">${cal}${cal&&view==='month'?'<div style="break-before:page;page-break-before:always;height:0"></div><div style="font-weight:700;margin:0 0 8px">Detalhamento dos eventos</div>':''}${(!cal||view==='month')?(rows.length?`<table><thead><tr><th>Data</th><th>Procedimento</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Fazenda</th></tr></thead><tbody>
