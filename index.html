@@ -326,6 +326,7 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .kpi.kc{border:0;color:#fff;box-shadow:0 2px 6px rgba(20,39,90,.18)}
 .kpi.kc .k-n{color:#fff}.kpi.kc .k-l{color:rgba(255,255,255,.9)}
 .kpi.kc1{background:linear-gradient(135deg,#12303f,#12303fdd)}.kpi.kc2{background:linear-gradient(135deg,#1f5a66,#1f5a66dd)}.kpi.kc3{background:linear-gradient(135deg,#1f7a7c,#1f7a7cdd)}.kpi.kc4{background:linear-gradient(135deg,#b5283a,#b5283add)}
+.ini-hi~.card h3,.ini-hi~.ini-two h3{text-transform:none;letter-spacing:0}
 .ini-hi{margin:0 0 16px}.ini-hi h2{text-transform:none;letter-spacing:0;margin:0;font-size:26px;font-weight:600;line-height:1.2}.ini-hi p{margin:3px 0 0;font-size:14px;color:var(--muted)}
 .ini-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;align-items:start}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
@@ -559,7 +560,7 @@ async function init(){
 }
 
 const ATIVS=['IMPLANTADAS','RETIRADAS','INSEMINADAS','DIAGNÓSTICO DA IATF','DIAGNÓSTICO FINAL','EXAME DE ANDROLÓGICO','EXAME DE BRUCELOSE','DIÁRIA VETERINÁRIA','PROCEDIMENTO CIRÚRGICO'];
-const nomeFmt=v=>{let i=0;return String(v||'').trim().replace(/\s+/g,' ').replace(/\S+/g,w=>{const first=i++===0,sig=w.length<=4&&w===w.toUpperCase()&&/[A-ZÀ-Ú]{2}/.test(w);return sig?w:(first?w.charAt(0).toUpperCase()+w.slice(1).toLowerCase():w.toLowerCase())})};
+const nomeFmt=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/[A-Za-zÀ-ÿ]+/g,(w,o,t)=>{if(w.length>1&&w.length<=4&&w===w.toUpperCase()&&!/\d/.test(t[o-1]||''))return w;return /\d/.test(t[o-1]||'')?w.toLowerCase():w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()});
 const tc=v=>String(v||'').trim().toLowerCase().replace(/(^|[\s\-\/])([^\s\-\/])/g,(m,a,b)=>a+b.toUpperCase());
 const CIDADES=['ÁGUA BOA','BARRA DO GARÇAS','NOVA XAVANTINA','NOVA NAZARÉ','COCALINHO','RIBEIRÃO CASCALHEIRA','CANARANA','CAMPINÁPOLIS','NOVO SÃO JOAQUIM','PARANATINGA','ARAGUAIANA','SÃO JOSÉ XINGU'].map(tc).sort((a,b)=>a.localeCompare(b,'pt-BR'));
 const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x=>[x,x]);
@@ -1471,7 +1472,7 @@ function vInicio(){
    <div class="card"><div class="card-h"><h3>Eventos de hoje${hoje.length>10?` <small class="muted">(${hoje.length} · mostrando 10)</small>`:''}</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Calendário</button></div>
     ${hoje.length?hoje.slice(0,10).map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><span><b>${esc(evLabel(e,true))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
    <div class="card"><div class="card-h"><h3>Lotes para agendar serviço <small class="muted">(em aberto: ${abertos.length}${abertos.length>5?' · mostrando os 5 primeiros':''})</small></h3><button class="btn sm" data-a="go" data-v="i-lotes">Agendamentos</button></div>
-    ${abertos.length?abertos.slice(0,5).map(l=>`<div class="ini-row"><div><b>${esc(farmShort(l.farm)||F(l.farm).name)}</b> / ${esc(l.name)}<small>${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${l.start?' · parição '+dt(l.start)+' a '+dt(l.end):''}</small></div><span style="display:flex;gap:8px;align-items:center">${loteTemServico(l)?'<span class="muted" style="font-size:12px">✓ Com serviço</span>':'<span style="font-size:12px;font-weight:600">Falta agendar</span>'}<button class="btn sm ${loteTemServico(l)?'':'pri'}" data-a="iniAgendar" data-v="${l.id}">Agendar</button></span></div>`).join(''):empty('Nenhum lote em aberto.')}</div>
+    ${abertos.length?abertos.slice(0,5).map(l=>`<div class="ini-row"><div><b>${esc(farmShort(l.farm)||F(l.farm).name)}</b> / ${esc(loteFmt(l.name))}<small>${fmt(l.total)} animais${l.category?' · '+esc(l.category):''}${l.start?' · parição '+dt(l.start)+' a '+dt(l.end):''}</small></div><span style="display:flex;gap:8px;align-items:center">${loteTemServico(l)?'<span class="muted" style="font-size:12px">✓ Com serviço</span>':'<span style="font-size:12px;font-weight:600">Falta agendar</span>'}<button class="btn sm ${loteTemServico(l)?'':'pri'}" data-a="iniAgendar" data-v="${l.id}">Agendar</button></span></div>`).join(''):empty('Nenhum lote em aberto.')}</div>
   </div>`}
 function vFazendas(){
   const nC=id=>S.contacts.filter(c=>c.farm===id).length;
