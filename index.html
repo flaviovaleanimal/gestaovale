@@ -591,7 +591,8 @@ const segTxt=f=>f.segment&&!(f.segment in OLDSEG)?f.segment:'';
 const isAtivo=f=>tipoOf(f)==='Cliente ativo';
 const TIPOCLS={'Cliente ativo':'in','Cliente inativo':'out','Fornecedor':'warn','Lead':'ok'};
 const tipoPill=t=>`<span class="pill ${TIPOCLS[t]||'ok'}">${esc(t)}</span>`;
-const FZALL=sel=>S.farms.filter(f=>isAtivo(f)||(sel&&f.id===sel));
+const farmSort=(a,b)=>((String(a.name||'').trim().toLowerCase()==='vale animal')-(String(b.name||'').trim().toLowerCase()==='vale animal'))||String(a.name||'').localeCompare(String(b.name||''),'pt-BR',{sensitivity:'base'});
+const FZALL=sel=>S.farms.filter(f=>isAtivo(f)||(sel&&f.id===sel)).sort(farmSort);
 const FZ=sel=>FZALL(sel).filter(f=>!f.parent||(sel&&f.id===sel));
 const farmLbl=f=>{f=f||{};const pr=f.parent?S.farms.find(x=>x.id===f.parent):null;return pr?pr.name+' › '+f.name:(f.name||'?')};
 const isVale=f=>String(f.name||'').trim().toLowerCase()==='vale animal';
@@ -1992,7 +1993,7 @@ function modalHtml(){
   if(m.type==='contact'){const c=m.data||{};
     body=`<h3>${c.id?'Editar contato':'Cadastrar contato'}</h3>${err}<form data-form="contact" data-id="${c.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name)}" required>`)}
-    ${fldHtml('Empresa',`<select name="company" required>${opts(S.farms.slice().sort((p,q)=>(/^vale animal$/i.test(p.name.trim())-/^vale animal$/i.test(q.name.trim()))||p.name.localeCompare(q.name,'pt-BR',{sensitivity:'base'})).map(x=>[x.id,x.name]),c.farm||c.company,S.farms.length?'Selecione…':'Cadastre uma empresa primeiro')}</select>`)}
+    ${fldHtml('Empresa',`<select name="company" required>${opts(S.farms.slice().sort(farmSort).map(x=>[x.id,x.name]),c.farm||c.company,S.farms.length?'Selecione…':'Cadastre uma empresa primeiro')}</select>`)}
     ${fldHtml('E-mail',`<input name="email" type="email" value="${esc(c.email||'')}" autocomplete="off">`)}
     ${fldHtml('Telefone',`<input name="phone" type="tel" value="${esc(c.phone||'')}" inputmode="tel" placeholder="(66) 99999-9999">`)}
     ${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}
@@ -2002,7 +2003,7 @@ function modalHtml(){
     <form data-form="neg" data-id="${n.id||''}" novalidate>${err?`<div style="padding:0 24px">${err}</div>`:''}<div class="ng-b">
     ${fldHtml('Nome da negociação <span class="ng-req">*</span>',`<input name="titulo" value="${esc(n.titulo||'')}" placeholder="Digite o nome da negociação" required>`)}
     ${fldHtml('Etapa do funil de vendas',`<select name="st">${NEG_ST.map(x=>`<option${(n.st||NEG_ST[0])===x?' selected':''}>${esc(x)}</option>`).join('')}</select>`)}
-    ${fldHtml('Fazenda da negociação',`<select name="farm">${opts(S.farms.map(x=>[x.id,x.name]).sort((a,b)=>a[1].localeCompare(b[1])),n.farm,'Selecionar')}</select>`)}
+    ${fldHtml('Fazenda da negociação',`<select name="farm">${opts(S.farms.slice().sort(farmSort).map(x=>[x.id,x.name]),n.farm,'Selecionar')}</select>`)}
     ${fldHtml('Contato',`<select name="contact">${opts(S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>[x.id,x.name+(x.farm?' · '+(farmShort(x.farm)||F(x.farm).name):'')]),n.contact,'Selecionar')}</select>`)}
     ${n.id?`${fldHtml('Valor (R$)',`<input name="valor" inputmode="decimal" value="${n.valor?String(n.valor).replace('.',','):''}" placeholder="0,00">`)}
     ${fldHtml('Responsável',`<select name="resp">${opts(TK_TEAM.map(x=>[x,x]),n.resp,'Sem responsável')}</select>`)}
@@ -2656,10 +2657,10 @@ function vFatCard(c){const cols=S.tcols.filter(x=>x.area==='fat').sort((a,b)=>(a
      ${row('Prazo',`<input type="date" data-fatc="prazo" value="${esc(c.prazo||'')}">`)}
     </details>
     <details open class="ngd-d"><summary>Contato</summary>
-     <select data-fatc="contact" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:6px">${opts(S.contacts.map(x=>[x.id,x.name]),c.contact||'','Selecione o contato…')}</select>
+     <select data-fatc="contact" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:6px">${opts(S.contacts.slice().sort((p,q)=>p.name.localeCompare(q.name,'pt-BR',{sensitivity:'base'})).map(x=>[x.id,x.name]),c.contact||'','Selecione o contato…')}</select>
      ${ct?`<div class="ngd-ci">${ct.phone?foneHtml(ct.phone):'<span class="muted">Sem telefone</span>'}</div><div class="ngd-ci">${ct.email?esc(ct.email):'<span class="muted">Sem e-mail</span>'}</div>`:''}</details>
     <details open class="ngd-d"><summary>Empresa</summary>
-     <select data-fatc="farm" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:6px">${opts(S.farms.map(x=>[x.id,x.name]),c.farm||'','Selecione a fazenda…')}</select>
+     <select data-fatc="farm" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:6px">${opts(S.farms.slice().sort(farmSort).map(x=>[x.id,x.name]),c.farm||'','Selecione a fazenda…')}</select>
      ${f&&f.name?`${row('Cidade','<span class="ngd-ro">'+esc(f.city||'—')+'</span>')}${row('Segmento','<span class="ngd-ro">'+esc(segTxt(f)||'—')+'</span>')}`:''}</details></div>
     <div class="ngd-rr">${itens?`<div class="ngd-sec"><div class="ngd-sh"><h3>Cobrança de ${negTipoL(c)}</h3><span class="acts"><button class="btn sm" data-a="fatOrcPdf" data-v="${c.id}">Imprimir proposta</button><button class="btn sm" data-a="fatTipo" data-v="${c.orcTipo==='semen'?'servico':'semen'}">Trocar para ${c.orcTipo==='semen'?'Serviço':'Sêmen'}</button></span></div>${negOrcItems(c)}</div>`:c.cobLivre?'':`<div class="ngd-sec"><div class="ngd-sh"><h3>O que será cobrado?</h3></div><p class="muted" style="margin:0 0 10px">Escolha o tipo. Serviço já realizado no campo e sêmen usam os itens do cadastro de Produtos.</p><div class="acts"><button class="btn pri" data-a="fatTipo" data-v="servico">Serviço</button><button class="btn pri" data-a="fatTipo" data-v="semen">Sêmen</button><button class="btn" data-a="fatTipo" data-v="livre">Outro (só valor e descrição)</button></div></div>`}<div class="ngd-sec"><div class="ngd-sh"><h3>${itens?'Condições e observações':'Descrição'}</h3></div><textarea data-fatc="desc" rows="6" style="width:100%;box-sizing:border-box" placeholder="O que será faturado: itens, quantidades, condições de pagamento…">${esc(c.desc||'')}</textarea></div>
      ${negFatAnx(c)}
