@@ -370,6 +370,13 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .agc .ag-bar{gap:6px;margin-bottom:6px}
 .agc .ag-bar .btn{border-radius:20px;font-weight:500;min-height:36px;padding:0 12px;font-size:13px;white-space:nowrap;background:transparent;border:1px solid var(--line);color:var(--ink)}
 .agc .ag-bar .btn:hover{background:var(--navy-soft)}
+.agc .ag-bar .btn.ag-ham,.agc .ag-bar .btn.ag-ham.pri{width:40px;min-height:40px;padding:0;border-radius:8px;background:var(--navy);border-color:var(--navy);color:#fff;font-size:18px}
+.ag-sq input::-webkit-search-cancel-button{display:none}
+.agc .ag-bar .ag-sqb,.agc .ag-bar [data-a=agFull]{border-radius:10px;min-height:40px;padding:0 12px;font-size:18px}
+.ag-vsel{width:auto;min-width:130px;height:40px;border-radius:10px;font-weight:700;padding:0 12px}
+.ag-sq{display:flex;align-items:center;gap:6px;border:2px solid var(--navy);border-radius:10px;height:40px;padding:0 6px 0 12px;background:var(--surface,#fff);min-width:0;max-width:240px;flex:0 1 240px}
+.ag-sq input{border:0!important;background:transparent!important;box-shadow:none!important;outline:0;min-height:0;height:100%;padding:0 4px;min-width:0;flex:1}
+.ag-sq button{border:0;background:transparent;font-size:14px;cursor:pointer;color:var(--muted,#6b7280);padding:6px 8px}
 .agc .ag-bar .btn[data-a=agNew],.agc .ag-bar .btn[data-a=agPrint]{border-radius:10px;font-weight:700;min-height:40px;padding:0 18px;font-size:14px}
 .agc .ag-bar .btn.pri[data-a=agNew]{background:var(--navy);border-color:var(--navy);color:#fff}
 .agc .ag-bar .btn.pri{background:#1a73e8;border-color:#1a73e8;color:#fff}
@@ -935,10 +942,11 @@ function vAgenda(){
   const {view,date}=ui.ag,vb=(v,l)=>`<button class="btn ${view===v?'pri':''}" data-a="agView" data-v="${v}">${l}</button>`;
   const body=view==='trash'?agTrash():view==='month'?agMonth():view==='week'?agWeek(Array.from({length:7},(_,i)=>addDays(weekStart(date),i))):view==='day'?agWeek([date]):`<div class="filters" style="margin-bottom:12px">${fldHtml('Data Inicial',`<input type="date" data-agd="lf" value="${esc(ui.ag.lf)}">`)}${fldHtml('Data Final',`<input type="date" data-agd="lt" value="${esc(ui.ag.lt)}">`)}</div><div id="ag-list">${agList()}</div>`;
   const FS=!!ui.agFull;
-  const vsel=`<div class="fld" style="min-width:170px"><label>Visão</label><select data-agview aria-label="Visão do calendário">${[['week','Semana'],['month','Mês'],['list','Lista'],['trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':'')]].map(([v,l])=>`<option value="${v}"${view===v?' selected':''}>${l}</option>`).join('')}</select></div>`;
-  const topF=`<div class="filters" style="margin-bottom:12px">${view==='trash'?'':`<div class="fld" style="max-width:340px;flex:1 1 240px"><label>Pesquisar</label><input type="search" data-agq="1" value="${esc(ui.ag.f.q)}" placeholder="Digite para pesquisar…" autocomplete="off"></div>`}${vsel}</div>`;
-  return `<div class="card agc${FS?' ag-fullc':''}">${topF}<div class="ag-bar">${view==='trash'?'':`<button class="btn ag-ham${ui.ag.side?' pri':''}" data-a="agSideT" aria-label="Mostrar ou esconder profissionais e fazendas" title="Profissionais e fazendas">☰</button>`}<button class="btn pri" data-a="agNew" data-v="${date}">Criar</button><button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
-   <h3 class="ag-title">${agTitle()}</h3>${FS?'':'<button class="btn" data-a="agPrint">Imprimir</button>'}<button class="btn" data-a="agFull" aria-label="Tela cheia" style="padding:0 12px;display:inline-flex;align-items:center" title="${FS?'Sair da tela cheia (Esc)':'Esconder o cabeçalho e as barras para ver o calendário maior'}">${FS?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b3fc4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10h-6V4M4 14h6v6M14 10l7-7M3 21l7-7"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b3fc4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>'}</button></div>
+  const sopen=view!=='trash'&&(ui.ag.sq||!!ui.ag.f.q);
+  const vsel=`<select data-agview aria-label="Visão do calendário" class="ag-vsel">${[['week','Semana'],['month','Mês'],['list','Lista'],['trash','🗑 Lixeira'+(S.eventos_lixo.length?' ('+S.eventos_lixo.length+')':'')]].map(([v,l])=>`<option value="${v}"${view===v?' selected':''}>${l}</option>`).join('')}</select>`;
+  const srch=view==='trash'?'':sopen?`<div class="ag-sq"><span>🔍</span><input type="search" data-agq="1" value="${esc(ui.ag.f.q)}" placeholder="Pesquisar…" autocomplete="off"><button type="button" data-a="agSqX" aria-label="Fechar pesquisa">✕</button></div>`:`<button class="btn ag-sqb" data-a="agSqO" aria-label="Pesquisar" title="Pesquisar">🔍</button>`;
+  return `<div class="card agc${FS?' ag-fullc':''}"><div class="ag-bar">${view==='trash'?'':`<button class="btn ag-ham${ui.ag.side?' pri':''}" data-a="agSideT" aria-label="Mostrar ou esconder profissionais e fazendas" title="Profissionais e fazendas">☰</button>`}<button class="btn pri" data-a="agNew" data-v="${date}">Criar</button><button class="btn" data-a="agToday">Hoje</button><span class="ag-seg"><button class="btn" data-a="agPrev" aria-label="Anterior">‹</button><button class="btn" data-a="agNext" aria-label="Próximo">›</button></span>
+   <h3 class="ag-title">${agTitle()}</h3>${srch}<button class="btn" data-a="agFull" aria-label="Tela cheia" style="padding:0 12px;display:inline-flex;align-items:center" title="${FS?'Sair da tela cheia (Esc)':'Esconder o cabeçalho e as barras para ver o calendário maior'}">${FS?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b3fc4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10h-6V4M4 14h6v6M14 10l7-7M3 21l7-7"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b3fc4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>'}</button>${vsel}${FS?'':'<button class="btn" data-a="agPrint">Imprimir</button>'}</div>
    ${!FS&&view!=='trash'&&agFilList().length?`<div class="ag-bar" style="margin-top:-2px"><span class="muted" style="font-size:13px"><b>Filtros:</b> ${esc(agFilList().join(' · '))}</span><button class="btn sm" data-a="agFilClear">Limpar filtros</button></div>`:''}${view!=='trash'&&ui.ag.side?`<div class="ag-lay">${agSide()}<div class="ag-main">${body}</div></div>`:body}${agCorPop()}${agCorDlg()}</div>`}
 function agAfter(){const e=document.querySelector('.ag-scroll');if(e)e.scrollTop=ui.agST??(7*48-8);agFit()}
 function agFit(){const m=document.querySelector('.ag-month');if(!m)return;
@@ -2827,6 +2835,8 @@ document.addEventListener('click',e=>{
    case 'agCorSet':{const [t,c]=String(v).split('|');S.agcores=(S.agcores||[]).filter(x=>x.id!==t);S.agcores.push({id:t,cor:c});save();render();break}
    case 'agCorReset':S.agcores=(S.agcores||[]).filter(x=>x.id!==v);save();render();break;
    case 'agFull':ui.agFull=!ui.agFull;render();break;
+   case 'agSqO':ui.ag.sq=true;render();{const i=document.querySelector('[data-agq]');if(i)i.focus()}break;
+   case 'agSqX':ui.ag.sq=false;ui.ag.f.q='';render();break;
    case 'umenu':ui.umenu=!ui.umenu;render();break;
    case 'pushToggle':pushToggle();break;
    case 'nbell':ui.nbell=!ui.nbell;ui.umenu=false;render();break;
