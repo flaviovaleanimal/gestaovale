@@ -959,7 +959,7 @@ function agFit(){const m=document.querySelector('.ag-month');if(!m)return;
     const cap=mob?3:Math.min(4,capOf(d));if(ch.length>cap){const k=Math.max(0,cap-1);ch.forEach((c,i)=>c.hidden=i>=k);mb.textContent='+'+(ch.length-k)+' mais';mb.hidden=false}});
   if(mob){m.style.height='';m.style.gridTemplateRows='';apply();return}
   m.classList.remove('dense');m.style.minHeight='';
-  const hd=m.firstElementChild?m.firstElementChild.offsetHeight:24,avail=Math.max(380,innerHeight-m.getBoundingClientRect().top-14),R=Math.max(100,Math.floor((avail-hd)/5));
+  const hd=m.firstElementChild?m.firstElementChild.offsetHeight:24,fb=document.querySelector('.agc .ag-bar[style*="margin-top:-2px"]'),avail=Math.max(380,innerHeight-m.getBoundingClientRect().top-14+(fb?fb.offsetHeight+4:0)),R=Math.max(100,Math.floor((avail-hd)/5));
   m.style.height='auto';m.style.gridTemplateRows='auto repeat('+rows+','+R+'px)';
   apply()}
 /* ===== TAREFAS (quadro estilo Trello) ===== */
