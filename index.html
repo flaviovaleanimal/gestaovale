@@ -133,6 +133,26 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .ov{position:fixed;inset:0;background:rgba(8,14,30,.55);display:flex;align-items:flex-start;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px 16px;overflow:auto;z-index:50}
 .modal{background:var(--surface);border-radius:12px;width:100%;max-width:560px;padding:20px;margin:auto 0}
 .modal.big{max-width:760px}
+.ov.drw{align-items:stretch;justify-content:flex-end;padding:0;overflow:hidden}
+.modal.drw{max-width:420px;width:420px;border-radius:0;padding:0;margin:0;height:100%;overflow:hidden;box-shadow:-10px 0 34px rgba(8,14,30,.28)}
+.modal.drw .drf{display:flex;flex-direction:column;height:100%}
+.modal.drw .drh{flex:0 0 auto;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:12px 16px}
+.modal.drw .drh h3{margin:0;color:#fff;font-size:15px;letter-spacing:.03em}
+.modal.drw .drx{margin-left:auto;background:none;border:0;color:#fff;font-size:18px;line-height:1;cursor:pointer;opacity:.85;padding:2px 4px;font-family:inherit}
+.modal.drw .drb{flex:1 1 auto;overflow:auto;padding:14px 16px}
+.modal.drw .drs{height:1px;background:var(--line);margin:13px 0}
+.modal.drw .mf{flex:0 0 auto;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface);gap:8px}
+.modal.drw .form{gap:10px}
+.modal.drw .form.dr3{grid-template-columns:1.3fr 1fr .66fr;gap:9px}
+.modal.drw .fld>label{font-size:10.5px;letter-spacing:.03em;text-transform:uppercase}
+.modal.drw .fld input,.modal.drw .fld select,.modal.drw .fld textarea{padding:8px 10px;font-size:14px}
+.modal.drw .dr-ck{display:flex;gap:6px;flex-wrap:wrap;padding:2px 0}
+.modal.drw .dr-ck label{display:inline-flex;gap:6px;align-items:center;min-height:30px;padding:0 10px;border:1px solid var(--line);border-radius:15px;font-size:13px;font-weight:500;color:var(--ink);background:var(--surface);cursor:pointer}
+.modal.drw .dr-ck input{width:auto}
+.modal.drw .dr-ck label:has(input:checked){background:var(--navy);border-color:var(--navy);color:#fff}
+.modal.drw .dr-ck label:has(input:disabled){opacity:.5;cursor:default}
+@media(max-width:520px){.modal.drw{width:100%;max-width:100%}}
+@media(max-width:400px){.modal.drw .form.dr3{grid-template-columns:1fr 1fr}}
 
 .line{border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:16px}
 .line-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
@@ -1754,20 +1774,31 @@ function modalHtml(){
     ${fldHtml('Início EM',`<input name="start" type="date" value="${e.start||''}" required>`)}
     ${fldHtml('Final EM',`<input name="end" type="date" value="${e.end||''}" required>`)}</div>${foot('Salvar')}</form>`}
   if(m.type==='ev'){const e=m.data||{},lk=!!e.lock,per=e.id||e.periodo||e.allday!==undefined?perOf(e):'Dia Inteiro',tits=[...EVTIT,...(e.title&&!EVTIT.includes(e.title)?[e.title]:[])];
-    body=`<h3>${e.id?'Editar evento':'Novo evento'}</h3>${err}<form data-form="ev" data-id="${e.id||''}" novalidate><div class="form c3">
-    ${fldHtml('Data do Procedimento',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`)}
-    ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`)}
-    ${lk?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(e.farm).map(f=>[f.id,farmLbl(f)]),e.farm,FZC().length?'Selecione…':'Nenhum cliente ativo')}</select>`)}
-    </div><div class="form c4" style="margin-top:12px">
-    ${fldHtml('Procedimento',`<select name="title" required>${opts(tits.map(x=>[x,svn(x)]),e.title,'Selecione…')}</select>`)}
-    ${lk?fldHtml('Lote',`<input name="lote" value="${esc(loteFmt(e.lote||''))}" readonly>`)+fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`)+fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):''}
-    ${lk?'':fldHtml('Lote',`<input name="lote" value="${esc(loteFmt(e.lote||''))}" autocomplete="off">`)+fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`)+fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),e.cat||'','')}</select>`)}
-    </div><div class="form c2" style="margin-top:12px">
-    ${fldHtml('Agenda Profissional',`<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">${AGTECF.map(t=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="tecs" value="${t}"${e.title==='Entourar'?' disabled':(e.tecs||[]).includes(t)?' checked':''} style="width:auto"> ${t}</label>`).join('')}</div>`)}
-    ${fldHtml('Equipe',`<input name="team" value="${esc(e.title==='Entourar'?'':evTeamIni(e))}" autocomplete="off" placeholder="${e.title==='Entourar'?'Entourar não tem Equipe':'Marque a Agenda Profissional abaixo'}"${e.title==='Entourar'?' readonly':''}>`+((S.diaristas||[]).length?`<div class="ev-hlp" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:8px 0 0${e.title==='Entourar'?';display:none':''}"><span class="muted" style="font-size:12px">Vai junto:</span>${S.diaristas.map(d=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;color:var(--ink);font-size:14px"><input type="checkbox" name="hlp" value="${esc(d.name)}"${evTeamNames(e.team).includes(nrm(d.name))?' checked':''} style="width:auto"> ${esc(d.name)}</label>`).join('')}</div>`:''))}
-    </div><div class="form" style="margin-top:12px">
-    ${fldHtml('Observação',`<textarea name="desc" rows="8" style="min-height:170px;resize:vertical">${esc(e.desc||'')}</textarea>`)}
-    </div><div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}${e.id&&(e.title==='IM'||e.title==='AV + IM'||e.title==='RES')?`<button class="btn" type="button" data-a="agProto" data-v="${e.id}">Criar protocolo IATF</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>`}
+    const ent=e.title==='Entourar';
+    const fFarm=lk?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(e.farm).map(f=>[f.id,farmLbl(f)]),e.farm,FZC().length?'Selecione…':'Nenhum cliente ativo')}</select>`);
+    const fDate=fldHtml('Data',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`);
+    const fPer=fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),per)}</select>`);
+    const fTit=fldHtml('Procedimento',`<select name="title" required>${opts(tits.map(x=>[x,svn(x)]),e.title,'Selecione…')}</select>`);
+    const fLote=lk?fldHtml('Lote',`<input name="lote" value="${esc(loteFmt(e.lote||''))}" readonly>`):fldHtml('Lote',`<input name="lote" value="${esc(loteFmt(e.lote||''))}" autocomplete="off">`);
+    const fTot=lk?fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`):fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`);
+    const fCat=lk?fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),e.cat||'','')}</select>`);
+    const fProf=fldHtml('Profissional',`<div class="dr-ck">${AGTECF.map(t=>`<label><input type="checkbox" name="tecs" value="${t}"${ent?' disabled':(e.tecs||[]).includes(t)?' checked':''}> ${t}</label>`).join('')}</div>`);
+    const fTec=fldHtml('Técnico',`<input name="team" value="${esc(ent?'':evTeamIni(e))}" autocomplete="off" placeholder="${ent?'Entourar não tem Técnico':'Marque o profissional acima'}"${ent?' readonly':''}>`+((S.diaristas||[]).length?`<div class="ev-hlp dr-ck" style="padding-top:7px${ent?';display:none':''}">${S.diaristas.map(d=>`<label><input type="checkbox" name="hlp" value="${esc(d.name)}"${evTeamNames(e.team).includes(nrm(d.name))?' checked':''}> ${esc(d.name)}</label>`).join('')}</div>`:''));
+    const fObs=fldHtml('Observação',`<textarea name="desc" rows="4" style="min-height:96px;resize:vertical">${esc(e.desc||'')}</textarea>`);
+    body=`<form data-form="ev" data-id="${e.id||''}" class="drf" novalidate>
+    <div class="drh"><h3>${e.id?'EDITAR AGENDAMENTO':'NOVO AGENDAMENTO'}</h3><button type="button" class="drx" data-a="close" aria-label="Fechar">✕</button></div>
+    <div class="drb">${err}
+    <div class="form">${fFarm}</div>
+    <div class="form c2" style="margin-top:10px">${fDate}${fPer}</div>
+    <div class="drs"></div>
+    <div class="form dr3">${fTit}${fLote}${fTot}</div>
+    <div class="form" style="margin-top:10px">${fCat}</div>
+    <div class="form" style="margin-top:10px">${fProf}</div>
+    <div class="form" style="margin-top:10px">${fTec}</div>
+    <div class="drs"></div>
+    <div class="form">${fObs}</div>
+    </div>
+    <div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}${e.id&&(e.title==='IM'||e.title==='AV + IM'||e.title==='RES')?`<button class="btn" type="button" data-a="agProto" data-v="${e.id}">Protocolo</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Confirmar</button></div></form>`}
   if(m.type==='agfil'){const f=ui.ag.f;
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
     ${fldHtml('Profissional',`<select name="tec"${ui.ag.farms.length?' disabled':''}>${opts(AGTEC.map(x=>[x,x]),ui.ag.farms.length?'':(ui.ag.tecs[0]||''),'Todos')}</select>`)}
@@ -2188,7 +2219,8 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  return `<div class="ov"><div class="modal${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','ev','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  const DRW=m.type==='ev';
+  return `<div class="ov${DRW?' drw':''}"><div class="modal${DRW?' drw':''}${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -3190,7 +3222,7 @@ document.addEventListener('change',e=>{const t=e.target;if(t.name&&/^prest\.\d+$
 });
 document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.form&&t.form.dataset.form==='agfil'){const s=t.form.elements['tec'];if(s){s.disabled=!!t.value;if(t.value)s.value=''}}});
 document.addEventListener('change',e=>{const t=e.target;if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tm=f.elements['team'],hl=f.querySelector('.ev-hlp'),en=t.value==='Entourar';
-  if(tm){tm.readOnly=en;tm.placeholder=en?'Entourar não tem Equipe':'Marque a Agenda Profissional abaixo';if(en)tm.value='';else tm.value=evTeamCalc([...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value),'')}
+  if(tm){tm.readOnly=en;tm.placeholder=en?'Entourar não tem Técnico':'Marque o profissional acima';if(en)tm.value='';else tm.value=evTeamCalc([...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value),'')}
   if(hl)hl.style.display=en?'none':'flex';f.querySelectorAll('input[name=tecs]').forEach(c=>{c.disabled=en;if(en)c.checked=false})}if(t.dataset&&t.dataset.dimp&&ui.modal&&ui.modal.type==='diaimp'){ui.modal[t.dataset.dimp]=t.value;const L=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec);ui.modal.sel=L.filter(x=>!x.exists).map(x=>x.key);render();return}if((t.name==='tecs'||t.name==='hlp')&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tc2=[...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),hp=[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value);f.elements['team'].value=evTeamCalc(tc2,hp,f.elements['team'].value)}if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const c=t.form.elements['cat'];if(c){if(t.value==='Andrológico')c.value='Touros';else if(c.value==='Touros'){c.value=''}}}if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(false&&t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
   {
     const pend=S.lotes.find(l=>l.farm===t.value&&l.status!=='Agendado'&&String(l.name).toUpperCase()===(lo.options[1]||{}).value);
