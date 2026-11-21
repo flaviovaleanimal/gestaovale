@@ -767,7 +767,7 @@ function vFin(k){
 function vComis(){return `<div class="card"><div class="card-h"><h3>Comissões Vendedores</h3></div>${empty('Esta tela ainda será criada. Em breve.')}</div>`}
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const WDS=['dom','seg','ter','qua','qui','sex','sáb'],WDL=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-const TECCOL={'Flávio':'#1f2328','Hiago':'#3b6fd4','Erikson':'#7d8790','Joaquim':'#e8730c','Célio':'#b5367a'},ENTCOL='#1d8f5a';
+const TECCOL={'Flávio':'#1f2328','Hiago':'#6b4fbb','Erikson':'#7d8790','Joaquim':'#e8730c','Célio':'#b5367a'},ENTCOL='#17348a';
 const tecCol=t=>((S.agcores||[]).find(x=>x.id===t)||{}).cor||TECCOL[t];
 const AGPAL=['#ad1457','#d81b60','#d50000','#e67c73','#f4511e','#ef6c00','#f09300','#f6bf26','#e4c441','#c0ca33','#7cb342','#33b679','#0b8043','#009688','#039be5','#4285f4','#3f51b5','#7986cb','#8e24aa','#9e69af','#795548','#a79b8e','#616161','#1f2328'];
 const evCol=e=>(ui.ag&&ui.ag.farms&&ui.ag.farms.length)?ENTCOL:evCol0(e),evCol0=e=>(e.title==='Entourar'||!(e.tecs||[]).length)?(e.title==='Entourar'?ENTCOL:(e.color||'#1f2328')):(tecCol(e.tecs[0])||e.color||'#1f2328');
