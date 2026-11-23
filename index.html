@@ -766,6 +766,7 @@ const r2=n=>Math.round((Number(n)||0)*100)/100;
 const fnum=n=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:2});
 const finTot=r=>r2((Number(r.qty)||0)*(Number(r.unit)||0));
 const tecFicha=()=>[...new Set(S.contacts.filter(c=>['tecnico vale animal','veterinario vale animal'].includes(nrm(c.role))).map(c=>c.name))].sort((a,b)=>a.localeCompare(b));
+const firstName=n=>tc(String(n||'').trim().split(/\s+/)[0]||'');
 const profDiaFicha=()=>[...new Set([...profNames(),...(S.diaristas||[]).map(d=>d.name)].map(n=>tc(String(n).trim().split(/\s+/)[0])))].sort((a,b)=>a.localeCompare(b));
 const tecVA=()=>[...new Set(S.contacts.filter(c=>nrm(c.role)==='tecnico vale animal').map(c=>c.name))].sort((a,b)=>a.localeCompare(b));
 const VALDIA=[150,250];
@@ -817,7 +818,7 @@ const AGTEC_DEF=['Flávio','Hiago','Erikson','Célio','Joaquim'];const profNames
 const evTec=(e,t)=>(e.tecs||[]).length?e.tecs.some(x=>nrm(x).includes(nrm(t))):nrm(e.team).includes(nrm(t));
 const agMatch=e=>{const f=ui.ag.f;return (!ui.ag.farms.length||ui.ag.farms.includes(e.farm))&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
-const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tecs.length&&'Profissional: '+ui.ag.tecs.join(', '),ui.ag.farms.length&&'Fazenda: '+ui.ag.farms.map(farmShort).join(', '),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
+const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tecs.length&&'Profissional: '+ui.ag.tecs.map(firstName).join(', '),ui.ag.farms.length&&'Fazenda: '+ui.ag.farms.map(farmShort).join(', '),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
 const evTecIx=e=>{const i=profNames().findIndex(t=>(e.tecs||[]).length?e.tecs[0]===t:evTec(e,t));return i<0?99:i};
 const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tecs.length||ui.ag.tecs.some(t=>evTec(e,t)))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||evTecIx(a)-evTecIx(b)||(a.start||'').localeCompare(b.start||'')||farmShort(a.farm).localeCompare(farmShort(b.farm))||a.title.localeCompare(b.title));
 const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','AP','Andrológico'];
@@ -839,7 +840,7 @@ const evRel=x=>S.eventos.filter(q=>q.id!==x.id&&q.farm===x.farm&&(x.lote?nrm(q.l
 const evTeamNames=t=>String(t||'').split(/\s*(?:,|;|\/|\+)\s*|\s+e\s+/i).map(x=>nrm(x.trim().split(/\s+/)[0])).filter(Boolean);
 const evJoin=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' e '+a[a.length-1];
 // Equipe automática: primeiro nome da Agenda Profissional marcada + quem vai junto + nomes digitados que não estão nas listas
-const evTeamCalc=(tecs,helpers,cur)=>{const ag=(tecs||[]).map(t=>tc(String(t).trim().split(/\s+/)[0])),hp=(helpers||[]).map(x=>tc(x));
+const evTeamCalc=(tecs,helpers,cur)=>{const ag=(tecs||[]).map(t=>tc(String(t).trim().split(/\s+/)[0])),hp=(helpers||[]).map(x=>tc(String(x).trim().split(/\s+/)[0]));
   const known=new Set([...profNames(),...profNames().map(x=>x.split(' ')[0]),...(S.diaristas||[]).map(d=>d.name)].map(nrm));
   const ex=String(cur||'').split(/\s*(?:,|;|\/|\+)\s*|\s+e\s+/i).map(x=>tc(x.trim())).filter(x=>x&&!known.has(nrm(x.split(/\s+/)[0])));
   return evJoin([...new Set([...ag,...hp,...ex])])};
@@ -884,7 +885,7 @@ function agTipHide(){clearTimeout(agTipT);const t=document.getElementById('ag-ti
 function agTipHtml(e){const dd=Dt(e.date),de=Dt(e.end||e.date),same=(e.end||e.date)===e.date,fm=x=>`${WDL[x.getDay()]}, ${x.getDate()} de ${MESES[x.getMonth()]}`;
   const tec=(e.tecs||[])[0],row=(k,v)=>v?`<div class="ag-tr"><span>${k}</span><b>${esc(v)}</b></div>`:'';
   return `<div class="ag-tt"><i style="background:${evCol(e)}"></i><div><div class="ag-tn">${esc(svn(e.title||''))}${e.lote?' · '+esc(loteFmt(e.lote)):''}</div><div class="ag-td">${esc(cap1(same?fm(dd):fm(dd)+' – '+fm(de)))} · ${esc(evTime(e))}</div></div></div>
-   ${row('Fazenda',evFarm(e))}${row('Categoria',e.cat)}${row('Total',e.total?String(e.total)+' animais':'')}${row('Equipe',e.team)}${tec?`<div class="ag-tr"><span>Agenda</span><b><i class="ag-tdot" style="background:${tecCol(tec)}"></i>${esc(tec)}</b></div>`:''}${e.desc?`<div class="ag-tdesc">${esc(e.desc)}</div>`:''}`}
+   ${row('Fazenda',evFarm(e))}${row('Categoria',e.cat)}${row('Total',e.total?String(e.total)+' animais':'')}${row('Equipe',e.team)}${tec?`<div class="ag-tr"><span>Agenda</span><b><i class="ag-tdot" style="background:${tecCol(tec)}"></i>${esc(firstName(tec))}</b></div>`:''}${e.desc?`<div class="ag-tdesc">${esc(e.desc)}</div>`:''}`}
 let agTipEl=null,agTipOut=null;
 function agTipShow(el,e){agTipHide();agTipEl=el;const r=el.getBoundingClientRect(),d=document.createElement('div');d.id='ag-tip';d.className='ag-tip';d.innerHTML=agTipHtml(e);document.body.appendChild(d);
   const w=d.offsetWidth,h=d.offsetHeight;let x=r.left+r.width/2-w/2,y=r.bottom+2;if(y+h>innerHeight-8)y=Math.max(8,r.top-h-2);x=Math.max(8,Math.min(innerWidth-w-8,x));d.style.left=x+'px';d.style.top=y+'px'}
@@ -972,7 +973,7 @@ document.addEventListener('input',e=>{if(e.target.id==='dl-hex'&&ui.agDlg){let v
 function agSide(){const T=ui.ag.tecs,dis=ui.ag.farms.length>0;
   return `<aside class="ag-side" aria-label="Agendas e fazendas">
    <div class="ag-sh"><b>Agenda Profissional</b></div>
-   ${profNames().map(t=>`<div class="ag-sr"><label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''} style="accent-color:${tecCol(t)}"><span>${t}</span></label><button type="button" class="ag-sm" data-a="agCorMenu" data-v="${t}" aria-label="Opções da agenda de ${t}" title="Cor e opções">⋮</button></div>`).join('')}
+   ${profNames().map(t=>`<div class="ag-sr"><label class="ag-sl${dis?' dis':''}"><input type="checkbox" data-a="agTecT" data-v="${t}"${T.includes(t)?' checked':''}${dis?' disabled':''} style="accent-color:${tecCol(t)}"><span>${esc(firstName(t))}</span></label><button type="button" class="ag-sm" data-a="agCorMenu" data-v="${t}" aria-label="Opções da agenda de ${t}" title="Cor e opções">⋮</button></div>`).join('')}
    ${dis?'<div class="muted" style="font-size:11px;margin:2px 0 0">Com fazenda marcada, todos os profissionais aparecem. Desmarque as fazendas para escolher o profissional.</div>':''}
    <div class="ag-sh" style="margin-top:14px"><b>Fazendas</b>${ui.ag.farms.length?`<button type="button" class="ag-sx" data-a="agFarmClear">Limpar (${ui.ag.farms.length})</button>`:''}</div>
    <input type="search" class="ag-fs" data-agfs="1" value="${esc(ui.ag.fs||'')}" placeholder="Buscar fazenda…" autocomplete="off">
@@ -1800,8 +1801,8 @@ function modalHtml(){
     const fCat=lk?fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),e.cat||'','')}</select>`);
     const profSel=ent?[]:(e.tecs||[]);
     const diaSel=ent?[]:evTeamNames(e.team).filter(n=>(S.diaristas||[]).some(d=>nrm(d.name)===n));
-    const fProf=fldHtml('Profissional',`<details class="msel ev-prof"${ent?' data-dis="1"':''}><summary>${ent?'Entourar não tem Profissional':(profSel.length?esc(evJoin(profSel)):'Selecione…')}</summary><div class="msel-pop">${profNames().map(t=>`<label><input type="checkbox" name="tecs" value="${t}"${ent?' disabled':profSel.includes(t)?' checked':''}> ${t}</label>`).join('')}</div></details>`);
-    const fTec=fldHtml('Técnico',(S.diaristas||[]).length?`<details class="msel ev-tec"${ent?' data-dis="1"':''}><summary>${ent?'Entourar não tem Técnico':(diaSel.length?esc(evJoin(diaSel.map(n=>tc(n)))):'Selecione…')}</summary><div class="msel-pop">${S.diaristas.map(d=>`<label><input type="checkbox" name="hlp" value="${esc(d.name)}"${ent?' disabled':diaSel.includes(nrm(d.name))?' checked':''}> ${esc(d.name)}</label>`).join('')}</div></details>`:`<div class="muted" style="font-size:13px">Nenhum técnico cadastrado em Configurações.</div>`)
+    const fProf=fldHtml('Profissional',`<details class="msel ev-prof"${ent?' data-dis="1"':''}><summary>${ent?'Entourar não tem Profissional':(profSel.length?esc(evJoin(profSel.map(firstName))):'Selecione…')}</summary><div class="msel-pop">${profNames().map(t=>`<label><input type="checkbox" name="tecs" value="${t}"${ent?' disabled':profSel.includes(t)?' checked':''}> ${esc(firstName(t))}</label>`).join('')}</div></details>`);
+    const fTec=fldHtml('Técnico',(S.diaristas||[]).length?`<details class="msel ev-tec"${ent?' data-dis="1"':''}><summary>${ent?'Entourar não tem Técnico':(diaSel.length?esc(evJoin(diaSel.map(n=>tc(n)))):'Selecione…')}</summary><div class="msel-pop">${S.diaristas.map(d=>`<label><input type="checkbox" name="hlp" value="${esc(d.name)}"${ent?' disabled':diaSel.includes(nrm(d.name))?' checked':''}> ${esc(firstName(d.name))}</label>`).join('')}</div></details>`:`<div class="muted" style="font-size:13px">Nenhum técnico cadastrado em Configurações.</div>`)
       +`<input type="hidden" name="team" value="${esc(ent?'':evTeamIni(e))}">`;
     const fEquipe=fldHtml('Equipe',`<div class="eq-view" id="ev-eqv">Vai:&nbsp;<b>${esc(evTeamIni(e)||'Ninguém selecionado')}</b></div>`);
     const fObs=fldHtml('Observação',`<textarea name="desc" rows="4" style="min-height:96px;resize:vertical">${esc(e.desc||'')}</textarea>`);
@@ -1822,7 +1823,7 @@ function modalHtml(){
     <div class="mf">${e.id?`<button class="btn dng" type="button" data-a="agDel" data-v="${e.id}" style="margin-right:auto">Excluir</button>`:''}${e.id&&(e.title==='IM'||e.title==='AV + IM'||e.title==='RES')?`<button class="btn" type="button" data-a="agProto" data-v="${e.id}">Protocolo</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Confirmar</button></div></form>`}
   if(m.type==='agfil'){const f=ui.ag.f;
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
-    ${fldHtml('Profissional',`<select name="tec"${ui.ag.farms.length?' disabled':''}>${opts(profNames().map(x=>[x,x]),ui.ag.farms.length?'':(ui.ag.tecs[0]||''),'Todos')}</select>`)}
+    ${fldHtml('Profissional',`<select name="tec"${ui.ag.farms.length?' disabled':''}>${opts(profNames().map(x=>[x,firstName(x)]),ui.ag.farms.length?'':(ui.ag.tecs[0]||''),'Todos')}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms.filter(x=>!isVale(x)&&!x.nolote)].sort((a,b)=>farmLbl(a).localeCompare(farmLbl(b))).map(x=>[x.id,farmLbl(x)]),ui.ag.farms[0]||'','Todas')}</select>`)}
     ${fldHtml('Procedimento',`<select name="title">${opts(EVTIT.map(x=>[x,svn(x)]),f.title,'Todos')}</select>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),f.periodo,'Todos')}</select>`)}
@@ -3300,8 +3301,8 @@ document.addEventListener('change',e=>{const t=e.target;if(t.name==='title'&&t.f
   if(td){td.open=false;const ts=td.querySelector('summary');if(ts)ts.textContent=en?'Entourar não tem Técnico':'Selecione…'}
   if(tm)tm.value=en?'':evTeamCalc([...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value),'');
   const eq=document.getElementById('ev-eqv');if(eq)eq.innerHTML='Vai:&nbsp;<b>'+esc(en?'Entourar não tem Equipe':(tm.value||'Ninguém selecionado'))+'</b>'}if(t.dataset&&t.dataset.dimp&&ui.modal&&ui.modal.type==='diaimp'){ui.modal[t.dataset.dimp]=t.value;const L=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec);ui.modal.sel=L.filter(x=>!x.exists).map(x=>x.key);render();return}if((t.name==='tecs'||t.name==='hlp')&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tc2=[...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),hp=[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value);f.elements['team'].value=evTeamCalc(tc2,hp,'');
-  const ps=f.querySelector('.ev-prof>summary');if(ps)ps.textContent=tc2.length?evJoin(tc2):'Selecione…';
-  const ts=f.querySelector('.ev-tec>summary');if(ts)ts.textContent=hp.length?evJoin(hp.map(x=>tc(x))):'Selecione…';
+  const ps=f.querySelector('.ev-prof>summary');if(ps)ps.textContent=tc2.length?evJoin(tc2.map(firstName)):'Selecione…';
+  const ts=f.querySelector('.ev-tec>summary');if(ts)ts.textContent=hp.length?evJoin(hp.map(firstName)):'Selecione…';
   const eq=document.getElementById('ev-eqv');if(eq)eq.innerHTML='Vai:&nbsp;<b>'+esc(f.elements['team'].value||'Ninguém selecionado')+'</b>'}if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const c=t.form.elements['cat'];if(c){if(t.value==='Andrológico')c.value='Touros';else if(c.value==='Touros'){c.value=''}}}if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(false&&t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
   {
     const pend=S.lotes.find(l=>l.farm===t.value&&l.status!=='Agendado'&&String(l.name).toUpperCase()===(lo.options[1]||{}).value);
