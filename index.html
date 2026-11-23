@@ -1485,6 +1485,10 @@ document.addEventListener('dragover',e=>{const t=dragId&&e.target.closest&&e.tar
 document.addEventListener('drop',e=>{const t=dragId&&e.target.closest&&e.target.closest('[data-drop]');if(!t)return;e.preventDefault();
   const ev=S.eventos.find(x=>x.id===dragId);dragId=null;document.querySelectorAll('.ag-over,.ag-dragging').forEach(x=>x.classList.remove('ag-over','ag-dragging'));if(!ev)return;
   const [d,h]=t.dataset.drop.split('|'),diff=Math.round((Dt(d)-Dt(ev.date))/864e5),H=h===undefined?null:+h;
+  if(diff&&ev.lote&&evRel(ev).some(q=>q.date>ev.date)){ui.modal={type:'agmovm',id:ev.id,date:d,hour:H};render();return}
+  applyEvMove(ev,d,H)});
+function applyEvMove(ev,d,H){
+  const diff=Math.round((Dt(d)-Dt(ev.date))/864e5);
   let ch=false,nrel=0;
   if(diff){
     const origDate=ev.date,rel=ev.lote?evRel(ev).filter(q=>q.date>origDate):[];
@@ -1494,7 +1498,7 @@ document.addEventListener('drop',e=>{const t=dragId&&e.target.closest&&e.target.
   }
   if(H!==null&&!ev.allday){const dur=Math.max(30,tmin(ev.etime)-tmin(ev.start)),s0=H*60,e0=Math.min(1439,s0+dur);
     if(s0!==tmin(ev.start)){ev.start=pad2(H)+':00';ev.etime=pad2(Math.floor(e0/60))+':'+pad2(e0%60);ev.periodo=H<12?'Manhã':'Tarde';ch=true}}
-  if(ch){save();render();toast('Evento movido'+(diff?' para '+dt(d):'')+(nrel?' · '+nrel+(nrel>1?' eventos vinculados também movidos':' evento vinculado também movido'):'')+'.')}});
+  if(ch){save();render();toast('Evento movido'+(diff?' para '+dt(d):'')+(nrel?' · '+nrel+(nrel>1?' eventos vinculados também movidos':' evento vinculado também movido'):'')+'.')}}
 document.addEventListener('scroll',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('ag-scroll'))ui.agST=e.target.scrollTop},true);
 const iatfDone=l=>(l.ins!==undefined&&l.ins!==''&&l.ins!==null)||!!(l.ia&&l.ia<=today());
 const loteTemServico=l=>S.lancs.some(x=>x.lote===l.id)||S.eventos.some(e=>e.farm===l.farm&&e.lote&&nrm(e.lote)===nrm(l.name));
@@ -1891,6 +1895,15 @@ function modalHtml(){
     <form data-form="agdelm" data-id="${x.id}" novalidate><div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px">
     ${rel.map(e=>`<label style="display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink)"><input type="checkbox" name="rel" value="${e.id}" style="width:auto"> ${dt(e.date)} · ${esc(evLabel(e,true))}</label>`).join('')}</div>
     <div class="mf"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn" type="button" data-a="agDelAll">Marcar todos</button><button class="btn dng" type="submit">Mover para a Lixeira</button></div></form>`}
+  if(m.type==='agmovm'){const x=S.eventos.find(q=>q.id===m.id);if(!x){ui.modal=null}else{
+    const diff=Math.round((Dt(m.date)-Dt(x.date))/864e5),rel=evRel(x).filter(q=>q.date>x.date);
+    body=`<h3>Mover evento</h3>
+    <p style="margin:0 0 16px;font-size:15px;line-height:1.5"><b>${esc(evLabel(x,true))}</b> vai de <b>${dt(x.date)}</b> para <b>${dt(m.date)}</b>.</p>
+    <p style="margin:0 0 10px;font-size:15px"><b>Estes eventos vinculados (mesmo lote${x.lote?' '+esc(loteFmt(x.lote)):''}) também serão movidos:</b></p>
+    <div style="display:flex;flex-direction:column;max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:4px 14px">
+    ${rel.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 2px;border-bottom:1px solid var(--line)"><span style="font-size:15px;font-weight:600;color:var(--ink)">${esc(evLabel(e,true))}</span><span class="muted" style="font-size:14px">${dt(e.date)} &rarr; <b style="color:var(--ink);font-size:15px">${dt(addDays(e.date,diff))}</b></span></div>`).join('')}
+    </div>
+    <div class="mf" style="margin-top:20px"><button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="button" data-a="agMovConfirm">Mover os ${rel.length+1} eventos</button></div>`}}
   if(m.type==='evproto'){const ev=m.ev,sel=m.sel||{};
     body=`<h3>Protocolo IATF</h3>${err}<p style="margin:0 0 12px">Evento <b>${esc(evLabel(ev))}</b> salvo em ${dt(ev.date)}. Deseja criar os próximos eventos automaticamente?</p>
     <form data-form="evproto" data-im="${ev.date}" data-farm="${ev.farm}" novalidate><div class="form">
@@ -2284,7 +2297,7 @@ function modalHtml(){
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
   const DRW=m.type==='ev'||m.type==='prof'||m.type==='dia'||m.type==='proc';
-  return `<div class="ov${DRW?' drw':''}"><div class="modal${DRW?' drw':''}${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov${DRW?' drw':''}"><div class="modal${DRW?' drw':''}${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf','agmovm'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
@@ -3176,6 +3189,7 @@ document.addEventListener('click',e=>{
    case 'editProc':ui.modal={type:'proc',data:{...procDefs().find(x=>x.id===v)}};render();break
    case 'delProc':{const c=procDefs().find(x=>x.id===v);ask(`Excluir o procedimento ${c.name}?`,()=>{S.procs=S.procs.filter(x=>x.id!==v);done('Procedimento excluído.')});break}
    case 'agDelAll':document.querySelectorAll('form[data-form=agdelm] input[name=rel]').forEach(c=>c.checked=true);break
+   case 'agMovConfirm':{const m=ui.modal,x=S.eventos.find(q=>q.id===m.id);ui.modal=null;if(x)applyEvMove(x,m.date,m.hour);else render();break}
    case 'agTipE':{const e=S.eventos.find(x=>x.id===v);if(!e)break;if(matchMedia('(hover:none)').matches){ui.modal={type:'ev',data:{...e}};render()}else agTipShow(b,e);break}
    case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
    case 'agDel':{const x=S.eventos.find(q=>q.id===v);if(!x)break;
