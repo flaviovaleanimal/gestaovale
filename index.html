@@ -3342,7 +3342,6 @@ document.addEventListener('change',e=>{
   if(d.fi){ui.fi[d.fi]=t.value;
     if(d.fi==='farm'){ui.fi.rows=ui.fi.rows.map(r=>({...r,lote:'',total:''}));render()}}
   if(d.fs){const [i,k]=d.fs.split('.');const r=ui.fi.rows[+i];r[k]=t.value;
-    if(k==='lote'){const l=S.lotes.find(x=>x.id===t.value);if(l)r.total=l.total}
     if(d.r)render()}
   if(d.fm){const [i,k]=d.fm.split('.');ui.fi.mats[+i][k]=t.value;if(k==='item')render()}
   if(d.os==='farm'){ui.os.farm=t.value;ui.os.city=F(t.value).city||'';render()}
