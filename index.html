@@ -759,7 +759,7 @@ const farmTxt=f=>[f.name,segTxt(f),f.city,CIDADES.includes(f.city)?'MT':f.state,
 const FIN={diarias:{col:'diarias',title:'Diárias Técnicas',dl:'Data Serviço',ql:'Quantidade',btn:'Lançar diária',one:'diária técnica',pre:'d'},
   kms:{col:'kms',title:'Km Rodado',dl:'Data Viagem',ql:'Total Km',btn:'Lançar km rodado',one:'km rodado',pre:'k'}};
 const FTIT={'f-fatur':'Faturamento','f-diarias':'Diárias Técnicas','f-kms':'Km Rodado','f-comis':'Comissões Vendedores'};
-const CFGTIT={'cf-users':'Gerenciar usuários','cf-prof':'Profissionais','cf-diaristas':'Técnicos (Diaristas)'};
+const CFGTIT={'cf-users':'Gerenciar usuários','cf-prof':'Profissionais','cf-diaristas':'Técnicos (Diaristas)','cf-proc':'Lista de Procedimentos'};
 const SITS=['Aberta','Paga'];
 const brl=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const r2=n=>Math.round((Number(n)||0)*100)/100;
@@ -823,7 +823,10 @@ const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=
 const agFilList=()=>{const f=ui.ag.f;return [ui.ag.tecs.length&&'Profissional: '+ui.ag.tecs.map(firstName).join(', '),ui.ag.farms.length&&'Fazenda: '+ui.ag.farms.map(farmShort).join(', '),f.title&&'Procedimento: '+svn(f.title),f.periodo&&'Período: '+f.periodo,f.lote&&'Lote: '+f.lote,f.cat&&'Categoria: '+f.cat,f.q&&'Pesquisa: '+f.q].filter(Boolean)};
 const evTecIx=e=>{const i=profNames().findIndex(t=>(e.tecs||[]).length?e.tecs[0]===t:evTec(e,t));return i<0?99:i};
 const evOn=d=>S.eventos.filter(e=>e.date<=d&&(e.end||e.date)>=d&&(!ui.ag.tecs.length||ui.ag.tecs.some(t=>evTec(e,t)))&&agMatch(e)).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||evTecIx(a)-evTecIx(b)||(a.start||'').localeCompare(b.start||'')||farmShort(a.farm).localeCompare(farmShort(b.farm))||a.title.localeCompare(b.title));
-const EVTIT=['IM','AV + IM','RE','IA','DG','DG Final','RES','Entourar','Indução','AP','Andrológico'];
+const PROC_DEF=[['Implante','IM'],['Avaliação + Implante','AV + IM'],['Retirada','RE'],['Inseminação','IA'],['Diagnóstico','DG'],['Diagnóstico Final','DG Final'],['Ressincronização','RES'],['Entourar','Entourar'],['Indução','Indução'],['Aplicação','AP'],['Andrológico','Andrológico']];
+const PROC_ORDER=PROC_DEF.map(x=>x[1]);
+const procDefs=()=>{if(!S.procs)S.procs=[];if(!S.procs.length){S.procs=PROC_DEF.map(([name,sigla])=>({id:nid('pc'),name,sigla}));save()}return S.procs};
+const EVTIT=()=>{const sg=[...new Set(procDefs().map(p=>p.sigla).filter(Boolean))];return sg.sort((a,b)=>{const ia=PROC_ORDER.indexOf(a),ib=PROC_ORDER.indexOf(b);if(ia<0&&ib<0)return a.localeCompare(b);if(ia<0)return 1;if(ib<0)return -1;return ia-ib})};
 const AVCATS=['Novilhas Nelore','Novilhas Angus','Vacas Solteiras'];
 const NCATS=['Novilhas Nelore','Novilhas Angus','Vacas Primíparas','Vacas Secundíparas','Vacas Multíparas','Vacas Solteiras'];
 const catOpts=cur=>[...NCATS,...(cur&&!NCATS.includes(cur)?[cur]:[])].map(x=>[x,x]);
@@ -861,7 +864,7 @@ const evPlano=(im,p,n,farm)=>{const L=[];let ia=null,dom=[];const LT=i=>n>1?'ABC
   L.push(['DG',pertoDe(addDays(ia,30),x=>!isDom(x),farm),LT(n)]);L.dom=dom;return L};
 const farmShort=id=>tc(evFarm({farm:id}).replace(/^\s*fazenda\s+/i,''));
 const firstNames=t=>String(t||'').split(/[,;\/]|\se\s/i).map(x=>tc(x.trim().split(/\s+/)[0])).filter(Boolean).join(', ');
-const SVN={'AV + IM':'Avaliação + Implante','IM':'Implante','RE':'Retirada','IA':'Inseminação','RES':'Ressincronização','AP':'Aplicação','DG':'Diagnóstico','DG Final':'Diagnóstico Final'},svn=t=>SVN[t]||t;
+const SVN={'AV + IM':'Avaliação + Implante','IM':'Implante','RE':'Retirada','IA':'Inseminação','RES':'Ressincronização','AP':'Aplicação','DG':'Diagnóstico','DG Final':'Diagnóstico Final'},svn=t=>{const p=procDefs().find(x=>x.sigla===t);return p?p.name:(SVN[t]||t)};
 const evLabel=(e,full)=>[farmShort(e.farm),(full?svn(e.title||''):(e.title||''))+(e.lote?` (${loteFmt(e.lote)})`:''),firstNames((e.tecs||[]).join(', '))].filter(Boolean).join(' - ');
 const evpPrev=(im,p,n,farm)=>{p=Number(p)||0;n=Number(n)||0;if(!n||!p)return 'Escolha a quantidade de IATF e o protocolo para ver as datas.';const L=evPlano(im,p,n,farm);return L.map(([t,x])=>`${t}: <b>${dt(x)}</b> (${WDS[Dt(x).getDay()]})`).join(' · ')+(L.dom.length?`<br><b style="color:var(--dng,#b42318)">Aviso: ${L.dom.join(' e ')} cai no domingo. Você pode criar assim e ajustar a data depois, ou escolher outro protocolo.</b>`:'')};
 const evTime=e=>e.allday?'Dia inteiro':e.periodo||((e.start||'')+(e.etime?' – '+e.etime:''));
@@ -1792,7 +1795,7 @@ function modalHtml(){
     ${fldHtml('Cidade',`<select name="city">${opts(cityOpts(e.city),e.city,'Cidade da fazenda')}</select>`)}
     ${fldHtml('Início EM',`<input name="start" type="date" value="${e.start||''}" required>`)}
     ${fldHtml('Final EM',`<input name="end" type="date" value="${e.end||''}" required>`)}</div>${foot('Salvar')}</form>`}
-  if(m.type==='ev'){const e=m.data||{},lk=!!e.lock,per=e.id||e.periodo||e.allday!==undefined?perOf(e):'Dia Inteiro',tits=[...EVTIT,...(e.title&&!EVTIT.includes(e.title)?[e.title]:[])];
+  if(m.type==='ev'){const e=m.data||{},lk=!!e.lock,per=e.id||e.periodo||e.allday!==undefined?perOf(e):'Dia Inteiro',tits=[...EVTIT(),...(e.title&&!EVTIT().includes(e.title)?[e.title]:[])];
     const ent=e.title==='Entourar';
     const fFarm=lk?fldHtml('Fazenda',`<input type="hidden" name="farm" value="${esc(e.farm)}"><input value="${esc(F(e.farm).name)}" readonly>`):fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(e.farm).map(f=>[f.id,farmLbl(f)]),e.farm,FZC().length?'Selecione…':'Nenhum cliente ativo')}</select>`);
     const fDate=fldHtml('Data',`<input name="date" type="date" value="${esc(e.date||today())}" required><div id="ev-hint" class="muted" style="font-size:12px;margin-top:4px">${evHint(e.farm,e.date||today())}</div>`);
@@ -1827,7 +1830,7 @@ function modalHtml(){
     body=`<h3>Filtrar Calendário</h3><form data-form="agfil" novalidate><div class="form">
     ${fldHtml('Profissional',`<select name="tec"${ui.ag.farms.length?' disabled':''}>${opts(profNames().map(x=>[x,firstName(x)]),ui.ag.farms.length?'':(ui.ag.tecs[0]||''),'Todos')}</select>`)}
     ${fldHtml('Fazenda',`<select name="farm">${opts([...S.farms.filter(x=>!isVale(x)&&!x.nolote)].sort((a,b)=>farmLbl(a).localeCompare(farmLbl(b))).map(x=>[x.id,farmLbl(x)]),ui.ag.farms[0]||'','Todas')}</select>`)}
-    ${fldHtml('Procedimento',`<select name="title">${opts(EVTIT.map(x=>[x,svn(x)]),f.title,'Todos')}</select>`)}
+    ${fldHtml('Procedimento',`<select name="title">${opts(EVTIT().map(x=>[x,svn(x)]),f.title,'Todos')}</select>`)}
     ${fldHtml('Período',`<select name="periodo">${opts(PERIODOS.map(x=>[x,x]),f.periodo,'Todos')}</select>`)}
     ${fldHtml('Lote',`<input name="lote" value="${esc(f.lote)}" autocomplete="off" style="text-transform:uppercase">`)}
     ${fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),f.cat,'Todas')}</select>`)}
@@ -1996,14 +1999,14 @@ function modalHtml(){
   if(m.type==='lote'&&!(m.data||{}).id){
     body=`<h3>Agendar lote</h3>${err}<form data-form="lote" data-id="" data-multi="1" novalidate>
     <div class="form c2">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC().map(f=>[f.id,farmLbl(f)]),(m.data||{}).farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
-    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),'','Selecione…')}</select>`)}</div>
+    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT().map(x=>[x,svn(x)]),'','Selecione…')}</select>`)}</div>
     <div id="lrows">${loteRowHtml({},false)}</div>
     <button type="button" class="btn sm" data-a="loteAddRow" style="margin-top:12px">+ Adicionar outro lote</button>
     ${foot('Salvar')}</form>`}
   else if(m.type==='lote'){const l=m.data||{};
     body=`<h3>Editar lote</h3>${err}<form data-form="lote" data-id="${l.id||''}" novalidate>
     <div class="form c2">${fldHtml('Fazenda',`<select name="farm" required>${opts(FZC(l.farm).map(f=>[f.id,farmLbl(f)]),l.farm,FZC().length?'Selecione…':'Nenhuma fazenda cadastrada')}</select>`)}
-    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT.map(x=>[x,svn(x)]),l.proc,'Selecione…')}</select>`)}</div>
+    ${fldHtml('Procedimento',`<select name="proc">${opts(EVTIT().map(x=>[x,svn(x)]),l.proc,'Selecione…')}</select>`)}</div>
     <div id="lrows">${loteRowHtml(l,false)}</div>
     <div class="form c2" style="margin-top:12px">${fldHtml('Status',`<select name="status">${opts(['Aberto','Agendado'].map(x=>[x,x]),l.status||'Aberto')}</select>`)}</div>
     ${footX('Salvar',l.id?`<button class="btn dng" type="button" data-a="delLote" data-v="${l.id}">Excluir</button>`:'')}</form>`}
@@ -2086,6 +2089,14 @@ function modalHtml(){
     <div style="margin-top:10px">${fldHtml('Valor da diária',`<input name="valor" inputmode="decimal" value="${c.valor!=null?String(c.valor).replace('.',','):''}" placeholder="0,00">`)}</div>
     </div>
     <div class="mf">${c.id?`<button class="btn dng" type="button" data-a="delDia" data-v="${c.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Confirmar</button></div></form>`}
+  if(m.type==='proc'){const c=m.data||{};
+    body=`<form data-form="proc" data-id="${c.id||''}" class="drf" novalidate>
+    <div class="drh"><h3>${c.id?'EDITAR PROCEDIMENTO':'NOVO PROCEDIMENTO'}</h3><button type="button" class="drx" data-a="close" aria-label="Fechar">✕</button></div>
+    <div class="drb">${err}
+    ${fldHtml('Nome do procedimento',`<input name="name" value="${esc(c.name||'')}" required>`)}
+    <div style="margin-top:10px">${fldHtml('Sigla (aparece na Semana e na impressão)',`<input name="sigla" value="${esc(c.sigla||'')}" maxlength="10" style="max-width:160px" required>`)}</div>
+    </div>
+    <div class="mf">${c.id?`<button class="btn dng" type="button" data-a="delProc" data-v="${c.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Confirmar</button></div></form>`}
   if(m.type==='contact'){const c=m.data||{};
     body=`<h3>${c.id?'Editar contato':'Cadastrar contato'}</h3>${err}<form data-form="contact" data-id="${c.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name)}" required>`)}
@@ -2264,7 +2275,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  const DRW=m.type==='ev'||m.type==='prof'||m.type==='dia';
+  const DRW=m.type==='ev'||m.type==='prof'||m.type==='dia'||m.type==='proc';
   return `<div class="ov${DRW?' drw':''}"><div class="modal${DRW?' drw':''}${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
@@ -2559,6 +2570,14 @@ function vCfgDiaristas(){
   ${list.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.email||'—')}</td><td>${foneHtml(c.phone)}</td><td>${esc(c.role||'—')}</td><td>${brl(c.valor)}</td>
    <td><div class="acts"><button class="btn sm" data-a="editDia" data-v="${c.id}">Editar</button><button class="btn sm dng" data-a="delDia" data-v="${c.id}">Excluir</button></div></td></tr>`).join('')}
   </tbody></table>`:empty('Nenhum diarista cadastrado. Clique em Cadastrar diarista.')}</div></div>`}
+function vCfgProc(){
+  const list=procDefs().slice().sort((a,b)=>{const o=EVTIT();return o.indexOf(a.sigla)-o.indexOf(b.sigla)});
+  return `<div class="card"><div class="card-h"><h3>Lista de Procedimentos</h3><button class="btn pri" data-a="newProc">Cadastrar procedimento</button></div>
+  <p class="muted" style="margin:0 0 12px">Esses procedimentos aparecem para escolher no Calendário (Novo Agendamento) e na Agenda.</p>
+  <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>Sigla</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.sigla)}</td>
+   <td><div class="acts"><button class="btn sm" data-a="editProc" data-v="${c.id}">Editar</button><button class="btn sm dng" data-a="delProc" data-v="${c.id}">Excluir</button></div></td></tr>`).join('')}
+  </tbody></table>`:empty('Nenhum procedimento cadastrado. Clique em Cadastrar procedimento.')}</div></div>`}
 function vCfgUsers(){
   return `<div class="card"><div class="card-h"><h3>Gerenciar usuários</h3></div>
   <p class="muted" style="margin:0">Em breve. Hoje o sistema não tem login: qualquer pessoa com o link acessa o Gestão de Serviços.</p></div>`}
@@ -2643,7 +2662,8 @@ const NAV=[
  {id:'cfg',label:'Configurações',icon:'gear',kids:[
   {tab:'cf-users',label:'Gerenciar usuários',icon:'user',soon:true},
   {tab:'cf-prof',label:'Profissionais',icon:'user'},
-  {tab:'cf-diaristas',label:'Técnicos (Diaristas)',icon:'list'}]}];
+  {tab:'cf-diaristas',label:'Técnicos (Diaristas)',icon:'list'},
+  {tab:'cf-proc',label:'Lista de Procedimentos',icon:'list'}]}];
 const isMob=()=>matchMedia('(max-width:820px)').matches;
 const curTab=()=>ui.tab==='hist'?'botijoes':ui.tab;
 const isOn=n=>n.tab?(curTab()===n.tab&&(!n.msub||ui.msub===n.msub)):(n.kids||[]).some(isOn);
@@ -2889,7 +2909,7 @@ function render(){(S.negs||[]).forEach(x=>{if(x.st==='Proposta')x.st='Orçamento
   normData();
   {let s=document.getElementById('pg-land');const on=ui.modal&&['agpdf','orcpdf'].includes(ui.modal.type);if(on&&!s){s=document.createElement('style');s.id='pg-land';s.textContent='@media print{@page{size:A4 landscape;margin:10mm}}';document.head.appendChild(s)}else if(!on&&s)s.remove()}
   const _ap=document.getElementById('app'),_ov=document.querySelector('#modal-root .ov'),_sa=_ap?_ap.scrollTop:0,_so=_ov?_ov.scrollTop:0,_mk0=lastMK;if(_mk0==='tk'&&!(ui.modal&&ui.modal.type==='tk'))tkCommit();
-  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,'i-fdl':vFDL,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'e-mov':vEMov,'e-est':vEEst,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,prodserv:vPServ,'f-fatur':()=>ui.fatV?vNegFatPg():vTarefas(),'cf-prof':vCfgProf,'cf-diaristas':vCfgDiaristas,'cf-users':vCfgUsers,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
+  const view={painel:vPainel,'i-painel':vIatfPainel,'i-lotes':vLotes,'i-fichas':vFicha,'i-ordens':vOrdens,'i-estacao':vEstacao,'i-fdl':vFDL,inicio:vInicio,agenda:vAgenda,tarefas:vTarefas,'f-diarias':()=>vFin('diarias'),'f-kms':()=>vFin('kms'),'f-comis':vComis,'p-painel':vPPainel,'e-painel':vEPainel,'e-cad':vECad,'e-mov':vEMov,'e-est':vEEst,'p-cadastro':vPCadastro_,'p-estoque':vPEstoque,'p-movs':vPMovs,fazendas:vFazendas,contatos:vContatos,negociacoes:vNegoc,prodserv:vPServ,'f-fatur':()=>ui.fatV?vNegFatPg():vTarefas(),'cf-prof':vCfgProf,'cf-diaristas':vCfgDiaristas,'cf-proc':vCfgProc,'cf-users':vCfgUsers,cadastro:vCadastro,estoque:vEstoque,botijoes:vBotijoes,hist:vHist,movs:vMovs}[ui.tab]();
   const title=ui.tab==='tarefas'?'Tarefas':ui.tab==='hist'?'Estoque › Sêmen › Botijões › '+(ui.hist.kind==='abastecimento'?'Abastecimento':'Medição'):ui.tab.startsWith('i-')?ititle():ui.tab==='e-painel'?'Estoque › Painel':ui.tab==='e-cad'?'Estoque › Cadastro':ui.tab==='e-mov'?'Estoque › Movimentações':ui.tab==='e-est'?'Estoque › Por Fazenda':ui.tab.startsWith('p-')?ptitle():ui.tab==='inicio'?'Início':ui.tab==='agenda'?'Serviços › Calendário':ui.tab.startsWith('f-')?'Financeiro › '+FTIT[ui.tab]:ui.tab.startsWith('cf-')?'Configurações › '+CFGTIT[ui.tab]:ui.tab==='fazendas'?'CRM › Empresas':ui.tab==='contatos'?'CRM › Contatos':ui.tab==='negociacoes'?'CRM › Negociações':ui.tab==='prodserv'?'CRM › Produtos':'Estoque › '+(ui.tab==='painel'?'':'Sêmen › ')+LBL[ui.tab]+(ui.tab==='movs'&&ui.msub!=='hist'?' › '+SUBL[ui.msub]:'');
   const mini=ui.mini&&!isMob();
   const sh=document.getElementById('shell');
@@ -3129,6 +3149,9 @@ document.addEventListener('click',e=>{
    case 'newDia':ui.modal={type:'dia',data:{}};render();break
    case 'editDia':ui.modal={type:'dia',data:{...S.diaristas.find(x=>x.id===v)}};render();break
    case 'delDia':{const c=S.diaristas.find(x=>x.id===v);ask(`Excluir o diarista ${c.name}?`,()=>{S.diaristas=S.diaristas.filter(x=>x.id!==v);done('Diarista excluído.')});break}
+   case 'newProc':ui.modal={type:'proc',data:{}};render();break
+   case 'editProc':ui.modal={type:'proc',data:{...procDefs().find(x=>x.id===v)}};render();break
+   case 'delProc':{const c=procDefs().find(x=>x.id===v);ask(`Excluir o procedimento ${c.name}?`,()=>{S.procs=S.procs.filter(x=>x.id!==v);done('Procedimento excluído.')});break}
    case 'agDelAll':document.querySelectorAll('form[data-form=agdelm] input[name=rel]').forEach(c=>c.checked=true);break
    case 'agTipE':{const e=S.eventos.find(x=>x.id===v);if(!e)break;if(matchMedia('(hover:none)').matches){ui.modal={type:'ev',data:{...e}};render()}else agTipShow(b,e);break}
    case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
@@ -3598,6 +3621,15 @@ document.addEventListener('submit',e=>{
     if(id){const r=S.diaristas.find(x=>x.id===id);Object.assign(r,{name,email:fd.email||'',phone:fd.phone||'',role:fd.role||'',valor})}
     else S.diaristas.push({id:nid('di'),name,email:fd.email||'',phone:fd.phone||'',role:fd.role||'',valor});
     return done(id?'Diarista atualizado.':'Diarista cadastrado.')}
+  if(k==='proc'){
+    const name=tc(String(fd.name||'').trim()),sigla=String(fd.sigla||'').trim();
+    if(!name)return modalErr('Informe o nome do procedimento.');
+    if(!sigla)return modalErr('Informe a sigla do procedimento.');
+    const id=form.dataset.id;
+    if((S.procs||[]).some(x=>x.id!==id&&nrm(x.sigla)===nrm(sigla)))return modalErr('Já existe um procedimento com essa sigla.');
+    if(id){const r=S.procs.find(x=>x.id===id);Object.assign(r,{name,sigla})}
+    else S.procs.push({id:nid('pc'),name,sigla});
+    return done(id?'Procedimento atualizado.':'Procedimento cadastrado.')}
   if(k==='fin'){
     const kind=form.dataset.kind,c=FIN[kind],id=form.dataset.id,rows=finRead(form);
     ui.modal.rows=rows;
