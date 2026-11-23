@@ -814,7 +814,7 @@ const WDM=[...WDS.slice(1),WDS[0]],wdi=x=>(Dt(x).getDay()+6)%7;
 const weekStart=x=>addDays(x,-wdi(x));
 const tmin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[2]):0};
 const evFarm=e=>(S.farms.find(f=>f.id===e.farm)||{}).name||'';
-const AGTEC_DEF=['Flávio','Hiago','Erikson','Célio','Joaquim'];const profNames=()=>{if(!S.profs)S.profs=[];if(!S.profs.length){S.profs=AGTEC_DEF.map(n=>({id:nid('pf'),name:n}));save()}return S.profs.map(p=>p.name)};
+const AGTEC_DEF=['Flávio','Hiago','Erikson','Célio','Joaquim'];const profNames=()=>{if(!S.profs)S.profs=[];if(!S.profs.length){S.profs=AGTEC_DEF.map(n=>({id:nid('pf'),name:n}));save()}return [...new Set(S.profs.map(p=>firstName(p.name)).filter(Boolean))]};
 const evTec=(e,t)=>(e.tecs||[]).length?e.tecs.some(x=>nrm(x).includes(nrm(t))):nrm(e.team).includes(nrm(t));
 const agMatch=e=>{const f=ui.ag.f;return (!ui.ag.farms.length||ui.ag.farms.includes(e.farm))&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
