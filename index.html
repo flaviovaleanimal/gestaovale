@@ -844,7 +844,8 @@ const VIZ=[['COCALINHO','NOVA NAZARE','AGUA BOA'],['AGUA BOA','NOVA XAVANTINA'],
 const vizinhas=(a,b)=>{a=cKey(a);b=cKey(b);return !!a&&!!b&&(a===b||VIZ.some(g=>g.includes(a)&&g.includes(b)))};
 // pontuação de um dia para uma fazenda: 2 = já tem evento da mesma cidade, 1 = de cidade vizinha, -1 = só de cidade distante
 const agrup=(farm,x)=>{const c=(S.farms.find(f=>f.id===farm)||{}).city;let s=0;S.eventos.forEach(e=>{if(e.date!==x)return;const ce=(S.farms.find(f=>f.id===e.farm)||{}).city;if(cKey(ce)===cKey(c))s=Math.max(s,2);else if(vizinhas(c,ce))s=Math.max(s,1);else if(!s)s=-1});return s};
-const evRel=x=>S.eventos.filter(q=>q.id!==x.id&&q.farm===x.farm&&(x.lote?nrm(q.lote)===nrm(x.lote):Math.abs(Dt(q.date)-Dt(x.date))<=60*864e5)).sort((a,b)=>a.date.localeCompare(b.date));
+const loteBase=l=>nrm(l).replace(/([0-9])[a-z]$/,'$1');
+const evRel=x=>S.eventos.filter(q=>q.id!==x.id&&q.farm===x.farm&&(x.lote?loteBase(q.lote)===loteBase(x.lote):Math.abs(Dt(q.date)-Dt(x.date))<=60*864e5)).sort((a,b)=>a.date.localeCompare(b.date));
 const evTeamNames=t=>String(t||'').split(/\s*(?:,|;|\/|\+)\s*|\s+e\s+/i).map(x=>nrm(x.trim().split(/\s+/)[0])).filter(Boolean);
 const evJoin=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' e '+a[a.length-1];
 // Equipe automática: primeiro nome da Agenda Profissional marcada + quem vai junto + nomes digitados que não estão nas listas
@@ -1899,7 +1900,7 @@ function modalHtml(){
     const diff=Math.round((Dt(m.date)-Dt(x.date))/864e5),rel=evRel(x).filter(q=>q.date>x.date);
     body=`<h3>Mover evento</h3>
     <p style="margin:0 0 16px;font-size:15px;line-height:1.5"><b>${esc(evLabel(x,true))}</b> vai de <b>${dt(x.date)}</b> para <b>${dt(m.date)}</b>.</p>
-    <p style="margin:0 0 10px;font-size:15px"><b>Estes eventos vinculados (mesmo lote${x.lote?' '+esc(loteFmt(x.lote)):''}) também serão movidos:</b></p>
+    <p style="margin:0 0 10px;font-size:15px"><b>Estes eventos vinculados${x.lote?' ao lote '+esc(loteFmt(x.lote)):''} também serão movidos:</b></p>
     <div style="display:flex;flex-direction:column;max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:4px 14px">
     ${rel.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 2px;border-bottom:1px solid var(--line)"><span style="font-size:15px;font-weight:600;color:var(--ink)">${esc(evLabel(e,true))}</span><span class="muted" style="font-size:14px">${dt(e.date)} &rarr; <b style="color:var(--ink);font-size:15px">${dt(addDays(e.date,diff))}</b></span></div>`).join('')}
     </div>
