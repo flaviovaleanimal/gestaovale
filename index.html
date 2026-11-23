@@ -2299,7 +2299,7 @@ function modalHtml(){
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
   const DRW=m.type==='ev'||m.type==='prof'||m.type==='dia'||m.type==='proc';
-  return `<div class="ov${DRW?' drw':''}"><div class="modal${DRW?' drw':''}${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf','agmovm'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
+  return `<div class="ov${DRW?' drw':''}"><div class="modal${DRW?' drw':''}${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agmovm'].includes(m.type)?' big':''}${m.type==='agpdf'?' xl':''}${['entrada','saida','pentrada','psaida','lanc','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
 /* ---------- produtos ---------- */
