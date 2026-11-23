@@ -1485,11 +1485,16 @@ document.addEventListener('dragover',e=>{const t=dragId&&e.target.closest&&e.tar
 document.addEventListener('drop',e=>{const t=dragId&&e.target.closest&&e.target.closest('[data-drop]');if(!t)return;e.preventDefault();
   const ev=S.eventos.find(x=>x.id===dragId);dragId=null;document.querySelectorAll('.ag-over,.ag-dragging').forEach(x=>x.classList.remove('ag-over','ag-dragging'));if(!ev)return;
   const [d,h]=t.dataset.drop.split('|'),diff=Math.round((Dt(d)-Dt(ev.date))/864e5),H=h===undefined?null:+h;
-  let ch=false;
-  if(diff){ev.end=addDays(ev.end||ev.date,diff);ev.date=d;ch=true}
+  let ch=false,nrel=0;
+  if(diff){
+    const origDate=ev.date,rel=ev.lote?evRel(ev).filter(q=>q.date>origDate):[];
+    ev.end=addDays(ev.end||ev.date,diff);ev.date=d;ch=true;
+    rel.forEach(q=>{q.end=addDays(q.end||q.date,diff);q.date=addDays(q.date,diff)});
+    nrel=rel.length;
+  }
   if(H!==null&&!ev.allday){const dur=Math.max(30,tmin(ev.etime)-tmin(ev.start)),s0=H*60,e0=Math.min(1439,s0+dur);
     if(s0!==tmin(ev.start)){ev.start=pad2(H)+':00';ev.etime=pad2(Math.floor(e0/60))+':'+pad2(e0%60);ev.periodo=H<12?'Manhã':'Tarde';ch=true}}
-  if(ch){save();render();toast('Evento movido'+(diff?' para '+dt(d):'')+'.')}});
+  if(ch){save();render();toast('Evento movido'+(diff?' para '+dt(d):'')+(nrel?' · '+nrel+(nrel>1?' eventos vinculados também movidos':' evento vinculado também movido'):'')+'.')}});
 document.addEventListener('scroll',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('ag-scroll'))ui.agST=e.target.scrollTop},true);
 const iatfDone=l=>(l.ins!==undefined&&l.ins!==''&&l.ins!==null)||!!(l.ia&&l.ia<=today());
 const loteTemServico=l=>S.lancs.some(x=>x.lote===l.id)||S.eventos.some(e=>e.farm===l.farm&&e.lote&&nrm(e.lote)===nrm(l.name));
