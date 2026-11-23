@@ -1874,10 +1874,10 @@ function modalHtml(){
       ${Array.from({length:7},(_,i)=>{const x=addDays(a,i);return `<div style="min-height:300px;padding:2px 3px;min-width:0;overflow:hidden;border-right:${bd};border-bottom:${bd}">${evOn(x).map(e=>pc(e,true)).join('')}</div>`}).join('')}</div>`}
     body=`<h3>Calendário</h3>
     <div class="paper land"><div class="paper-h"><div><b>Vale Animal</b><br><span>${esc(per)}</span></div><span>Emitido em ${new Date().toLocaleString('pt-BR')}</span></div>
-    <div class="paper-b" style="font-size:12px">${cal}${cal&&view==='month'?'<div style="break-before:page;page-break-before:always;height:0"></div><div style="font-weight:700;margin:0 0 8px">Detalhamento dos eventos</div>':''}${(!cal||view==='month')?(rows.length?`<table><thead><tr><th>Data</th><th>Procedimento</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Fazenda</th></tr></thead><tbody>
+    <div class="paper-b" style="font-size:12px">${cal}${(!cal)?(rows.length?`<table><thead><tr><th>Data</th><th>Procedimento</th><th>Lote</th><th class="num">Total</th><th>Categoria</th><th>Fazenda</th></tr></thead><tbody>
     ${rows.map(([x,e])=>`<tr><td>${dt(x).slice(0,5)} ${WDS[Dt(x).getDay()]}</td><td>${esc(svn(e.title))}</td><td>${esc(loteFmt(e.lote)||'—')}</td><td class="num">${e.total===''||e.total===undefined?'—':fmt(e.total)}</td><td>${esc(e.cat||'—')}</td><td>${esc(evFarm(e)||'—')}</td></tr>`).join('')}
     </tbody><tfoot><tr><td colspan="6">${rows.length} ${rows.length===1?'evento':'eventos'}</td></tr></tfoot></table>`:'<p>Nenhum evento neste período.</p>'):''}</div></div>
-    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês (sem domingo) + lista detalhada na 2ª página':view==='week'?'semana (sem domingo)':view==='day'?'lista do dia':'lista'}.</p>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Prévia para impressão (folha na horizontal), no mesmo formato da tela da agenda: ${view==='month'?'calendário do mês (sem domingo)':view==='week'?'semana (sem domingo)':view==='day'?'lista do dia':'lista'}.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
   if(m.type==='diaimp'){const L=diaProp(m.from,m.to,m.tec),sel=m.sel||[],novas=L.filter(x=>!x.exists),all=novas.length&&novas.every(x=>sel.includes(x.key));
     const tot=r2(L.filter(x=>sel.includes(x.key)).reduce((s,x)=>s+x.unit,0));
