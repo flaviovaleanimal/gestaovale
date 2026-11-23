@@ -151,6 +151,18 @@ tfoot td{font-weight:600;background:var(--navy-soft);border-bottom:0}
 .modal.drw .dr-ck input{width:auto}
 .modal.drw .dr-ck label:has(input:checked){background:var(--navy);border-color:var(--navy);color:#fff}
 .modal.drw .dr-ck label:has(input:disabled){opacity:.5;cursor:default}
+.modal.drw .msel{position:relative}
+.modal.drw .msel>summary{list-style:none;height:34px;padding:0 10px;border:1px solid var(--line);background:var(--bg);border-radius:8px;display:flex;align-items:center;font-size:14px;color:var(--ink);cursor:pointer;user-select:none}
+.modal.drw .msel>summary::-webkit-details-marker{display:none}
+.modal.drw .msel>summary::after{content:'⌄';margin-left:auto;color:var(--muted);font-size:16px}
+.modal.drw .msel[open]>summary::after{content:'⌃'}
+.modal.drw .msel[data-dis]>summary{opacity:.6;pointer-events:none}
+.modal.drw .msel-pop{margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 8px rgba(8,14,30,.08);padding:4px;max-height:220px;overflow:auto}
+.modal.drw .msel-pop label{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:6px;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer}
+.modal.drw .msel-pop label:hover{background:var(--navy-soft)}
+.modal.drw .msel-pop input{width:auto}
+.modal.drw .eq-view{min-height:34px;display:flex;align-items:center;padding:0 10px;border:1px dashed var(--line);border-radius:8px;font-size:13px;color:var(--muted);background:var(--bg)}
+.modal.drw .eq-view b{color:var(--ink);font-weight:600}
 @media(max-width:520px){.modal.drw{width:100%;max-width:100%}}
 @media(max-width:400px){.modal.drw .form.dr3{grid-template-columns:1fr 1fr}}
 
@@ -879,6 +891,8 @@ const agTipIn=n=>!!(n&&n.closest&&(n.closest('#ag-tip')||(agTipEl&&agTipEl.conta
 document.addEventListener('mouseout',ev=>{if(!document.getElementById('ag-tip'))return;if(agTipIn(ev.relatedTarget))return;clearTimeout(agTipOut);agTipOut=setTimeout(agTipHide,250)});
 document.addEventListener('mouseover',ev=>{if(agTipIn(ev.target))clearTimeout(agTipOut)});
 document.addEventListener('click',ev=>{if(!(ev.target.closest&&ev.target.closest('#ag-tip')))agTipHide()},true);
+document.addEventListener('click',e=>{const op=e.target.closest&&e.target.closest('details.msel');document.querySelectorAll('details.msel[open]').forEach(d=>{if(d!==op)d.open=false})},true);
+document.addEventListener('toggle',e=>{const d=e.target;if(d.tagName==='DETAILS'&&d.classList.contains('msel')&&d.open){const f=d.closest('form');f&&f.querySelectorAll('details.msel').forEach(o=>{if(o!==d)o.open=false})}},true);
 document.addEventListener('dblclick',ev=>{const el=ev.target.closest&&ev.target.closest('.ag-chip,.ag-ev,.ag-li');if(!el||el.dataset.a!=='agTipE')return;if(ev.target.closest('.ag-x'))return;const e=S.eventos.find(x=>x.id===(el.dataset.ev||el.dataset.v));if(!e)return;agTipHide();ui.modal={type:'ev',data:{...e}};render()});
 window.addEventListener('scroll',agTipHide,true);
 function agMorePop(){const m=ui.agMore;if(!m||ui.ag.view!=='month')return '';
@@ -1783,8 +1797,12 @@ function modalHtml(){
     const fLote=lk?fldHtml('Lote',`<input name="lote" value="${esc(loteFmt(e.lote||''))}" readonly>`):fldHtml('Lote',`<input name="lote" value="${esc(loteFmt(e.lote||''))}" autocomplete="off">`);
     const fTot=lk?fldHtml('Total',`<input name="total" value="${e.total??''}" readonly>`):fldHtml('Total',`<input name="total" type="number" min="0" step="1" inputmode="numeric" value="${e.total??''}">`);
     const fCat=lk?fldHtml('Categoria',`<input name="cat" value="${esc(e.cat||'')}" readonly>`):fldHtml('Categoria',`<select name="cat">${opts(EVCATS.map(x=>[x,x]),e.cat||'','')}</select>`);
-    const fProf=fldHtml('Profissional',`<div class="dr-ck">${profNames().map(t=>`<label><input type="checkbox" name="tecs" value="${t}"${ent?' disabled':(e.tecs||[]).includes(t)?' checked':''}> ${t}</label>`).join('')}</div>`);
-    const fTec=fldHtml('Técnico',`<input name="team" value="${esc(ent?'':evTeamIni(e))}" autocomplete="off" placeholder="${ent?'Entourar não tem Técnico':'Marque o profissional acima'}"${ent?' readonly':''}>`+((S.diaristas||[]).length?`<div class="ev-hlp dr-ck" style="padding-top:7px${ent?';display:none':''}">${S.diaristas.map(d=>`<label><input type="checkbox" name="hlp" value="${esc(d.name)}"${evTeamNames(e.team).includes(nrm(d.name))?' checked':''}> ${esc(d.name)}</label>`).join('')}</div>`:''));
+    const profSel=ent?[]:(e.tecs||[]);
+    const diaSel=ent?[]:evTeamNames(e.team).filter(n=>(S.diaristas||[]).some(d=>nrm(d.name)===n));
+    const fProf=fldHtml('Profissional',`<details class="msel ev-prof"${ent?' data-dis="1"':''}><summary>${ent?'Entourar não tem Profissional':(profSel.length?esc(evJoin(profSel)):'Selecione…')}</summary><div class="msel-pop">${profNames().map(t=>`<label><input type="checkbox" name="tecs" value="${t}"${ent?' disabled':profSel.includes(t)?' checked':''}> ${t}</label>`).join('')}</div></details>`);
+    const fTec=fldHtml('Técnico',(S.diaristas||[]).length?`<details class="msel ev-tec"${ent?' data-dis="1"':''}><summary>${ent?'Entourar não tem Técnico':(diaSel.length?esc(evJoin(diaSel.map(n=>tc(n)))):'Selecione…')}</summary><div class="msel-pop">${S.diaristas.map(d=>`<label><input type="checkbox" name="hlp" value="${esc(d.name)}"${ent?' disabled':diaSel.includes(nrm(d.name))?' checked':''}> ${esc(d.name)}</label>`).join('')}</div></details>`:`<div class="muted" style="font-size:13px">Nenhum técnico cadastrado em Configurações.</div>`)
+      +`<input type="hidden" name="team" value="${esc(ent?'':evTeamIni(e))}">`;
+    const fEquipe=fldHtml('Equipe',`<div class="eq-view" id="ev-eqv">Vai:&nbsp;<b>${esc(evTeamIni(e)||'Ninguém selecionado')}</b></div>`);
     const fObs=fldHtml('Observação',`<textarea name="desc" rows="4" style="min-height:96px;resize:vertical">${esc(e.desc||'')}</textarea>`);
     body=`<form data-form="ev" data-id="${e.id||''}" class="drf" novalidate>
     <div class="drh"><h3>${e.id?'EDITAR AGENDAMENTO':'NOVO AGENDAMENTO'}</h3><button type="button" class="drx" data-a="close" aria-label="Fechar">✕</button></div>
@@ -1796,6 +1814,7 @@ function modalHtml(){
     <div class="form" style="margin-top:10px">${fCat}</div>
     <div class="form" style="margin-top:10px">${fProf}</div>
     <div class="form" style="margin-top:10px">${fTec}</div>
+    <div class="form" style="margin-top:10px">${fEquipe}</div>
     <div class="drs"></div>
     <div class="form">${fObs}</div>
     </div>
@@ -3274,9 +3293,16 @@ document.addEventListener('change',e=>{const t=e.target;if(t.name&&/^prest\.\d+$
   if(u&&d&&Number(d.valor)>0){const v=String(Number(d.valor));if(![...u.options].some(o=>o.value===v)){const o=document.createElement('option');o.value=v;o.textContent=brl(Number(d.valor));u.appendChild(o)}u.value=v;u.dispatchEvent(new Event('input',{bubbles:true}))}}
 });
 document.addEventListener('change',e=>{const t=e.target;if(t.name==='farm'&&t.form&&t.form.dataset.form==='agfil'){const s=t.form.elements['tec'];if(s){s.disabled=!!t.value;if(t.value)s.value=''}}});
-document.addEventListener('change',e=>{const t=e.target;if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tm=f.elements['team'],hl=f.querySelector('.ev-hlp'),en=t.value==='Entourar';
-  if(tm){tm.readOnly=en;tm.placeholder=en?'Entourar não tem Técnico':'Marque o profissional acima';if(en)tm.value='';else tm.value=evTeamCalc([...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value),'')}
-  if(hl)hl.style.display=en?'none':'flex';f.querySelectorAll('input[name=tecs]').forEach(c=>{c.disabled=en;if(en)c.checked=false})}if(t.dataset&&t.dataset.dimp&&ui.modal&&ui.modal.type==='diaimp'){ui.modal[t.dataset.dimp]=t.value;const L=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec);ui.modal.sel=L.filter(x=>!x.exists).map(x=>x.key);render();return}if((t.name==='tecs'||t.name==='hlp')&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tc2=[...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),hp=[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value);f.elements['team'].value=evTeamCalc(tc2,hp,f.elements['team'].value)}if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const c=t.form.elements['cat'];if(c){if(t.value==='Andrológico')c.value='Touros';else if(c.value==='Touros'){c.value=''}}}if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(false&&t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
+document.addEventListener('change',e=>{const t=e.target;if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tm=f.elements['team'],pd=f.querySelector('.ev-prof'),td=f.querySelector('.ev-tec'),en=t.value==='Entourar';
+  f.querySelectorAll('input[name=tecs]').forEach(c=>{c.disabled=en;if(en)c.checked=false});
+  f.querySelectorAll('input[name=hlp]').forEach(c=>{c.disabled=en;if(en)c.checked=false});
+  if(pd){pd.open=false;const ps=pd.querySelector('summary');if(ps)ps.textContent=en?'Entourar não tem Profissional':'Selecione…'}
+  if(td){td.open=false;const ts=td.querySelector('summary');if(ts)ts.textContent=en?'Entourar não tem Técnico':'Selecione…'}
+  if(tm)tm.value=en?'':evTeamCalc([...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value),'');
+  const eq=document.getElementById('ev-eqv');if(eq)eq.innerHTML='Vai:&nbsp;<b>'+esc(en?'Entourar não tem Equipe':(tm.value||'Ninguém selecionado'))+'</b>'}if(t.dataset&&t.dataset.dimp&&ui.modal&&ui.modal.type==='diaimp'){ui.modal[t.dataset.dimp]=t.value;const L=diaProp(ui.modal.from,ui.modal.to,ui.modal.tec);ui.modal.sel=L.filter(x=>!x.exists).map(x=>x.key);render();return}if((t.name==='tecs'||t.name==='hlp')&&t.form&&t.form.dataset.form==='ev'){const f=t.form,tc2=[...f.querySelectorAll('input[name=tecs]:checked')].map(x=>x.value),hp=[...f.querySelectorAll('input[name=hlp]:checked')].map(x=>x.value);f.elements['team'].value=evTeamCalc(tc2,hp,'');
+  const ps=f.querySelector('.ev-prof>summary');if(ps)ps.textContent=tc2.length?evJoin(tc2):'Selecione…';
+  const ts=f.querySelector('.ev-tec>summary');if(ts)ts.textContent=hp.length?evJoin(hp.map(x=>tc(x))):'Selecione…';
+  const eq=document.getElementById('ev-eqv');if(eq)eq.innerHTML='Vai:&nbsp;<b>'+esc(f.elements['team'].value||'Ninguém selecionado')+'</b>'}if(t.name==='title'&&t.form&&t.form.dataset.form==='ev'){const c=t.form.elements['cat'];if(c){if(t.value==='Andrológico')c.value='Touros';else if(c.value==='Touros'){c.value=''}}}if((t.name==='farm'||t.name==='date')&&t.form&&t.form.dataset.form==='ev'){const o=document.getElementById('ev-hint');if(o)o.innerHTML=evHint(t.form.elements['farm'].value,t.form.elements['date'].value)}if(false&&t.name==='farm'&&t.form&&t.form.dataset.form==='ev'){const lo=t.form.elements['lote'];lo.innerHTML=evLoteSel(t.value,'');lo.value='';
   {
     const pend=S.lotes.find(l=>l.farm===t.value&&l.status!=='Agendado'&&String(l.name).toUpperCase()===(lo.options[1]||{}).value);
     if(pend){lo.value=String(pend.name).toUpperCase();lo.dataset.auto='1';evLoteFill(t.form)}
