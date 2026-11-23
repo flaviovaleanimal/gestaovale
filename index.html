@@ -800,7 +800,7 @@ const WDM=[...WDS.slice(1),WDS[0]],wdi=x=>(Dt(x).getDay()+6)%7;
 const weekStart=x=>addDays(x,-wdi(x));
 const tmin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[2]):0};
 const evFarm=e=>(S.farms.find(f=>f.id===e.farm)||{}).name||'';
-const AGTEC_DEF=['Flávio','Hiago','Erikson','Célio','Joaquim'];const profNames=()=>(S.profs&&S.profs.length?S.profs.map(p=>p.name):AGTEC_DEF);
+const AGTEC_DEF=['Flávio','Hiago','Erikson','Célio','Joaquim'];const profNames=()=>{if(!S.profs)S.profs=[];if(!S.profs.length){S.profs=AGTEC_DEF.map(n=>({id:nid('pf'),name:n}));save()}return S.profs.map(p=>p.name)};
 const evTec=(e,t)=>(e.tecs||[]).length?e.tecs.some(x=>nrm(x).includes(nrm(t))):nrm(e.team).includes(nrm(t));
 const agMatch=e=>{const f=ui.ag.f;return (!ui.ag.farms.length||ui.ag.farms.includes(e.farm))&&(!f.title||e.title===f.title)&&(!f.cat||e.cat===f.cat)&&(!f.periodo||perOf(e)===f.periodo)&&(!f.lote||nrm(e.lote).includes(nrm(f.lote)))&&(!f.q||nrm([evLabel(e),e.desc,e.team,e.lote,e.cat].join(' ')).includes(nrm(f.q)))};
 const agFarms=()=>[...new Set(S.eventos.map(e=>e.farm).filter(Boolean))].map(id=>[id,farmShort(id)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1]));
@@ -2042,6 +2042,27 @@ function modalHtml(){
     ${fldHtml('Estado',`<select name="state"${CIDADES.includes(f.city)?' tabindex="-1" style="pointer-events:none;background:var(--navy-soft)"':''}>${opts(UFS.map(x=>[x,x]),CIDADES.includes(f.city)?'MT':f.state,'Selecione…')}</select>`)}
     ${fldHtml('Tipo de Empresa',`<select name="tipo" required>${opts(TIPOS.map(x=>[x,x]),tp)}</select>`)}
     </div>${foot('Salvar')}</form>`}
+  if(m.type==='prof'){const c=m.data||{};
+    body=`<form data-form="prof" data-id="${c.id||''}" class="drf" novalidate>
+    <div class="drh"><h3>${c.id?'EDITAR PROFISSIONAL':'NOVO PROFISSIONAL'}</h3><button type="button" class="drx" data-a="close" aria-label="Fechar">✕</button></div>
+    <div class="drb">${err}
+    ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name||'')}" required>`)}
+    <div style="margin-top:10px">${fldHtml('E-mail',`<input name="email" type="email" value="${esc(c.email||'')}" autocomplete="off">`)}</div>
+    <div style="margin-top:10px">${fldHtml('Telefone',`<input name="phone" type="tel" value="${esc(c.phone||'')}" inputmode="tel" placeholder="(66) 99999-9999">`)}</div>
+    <div style="margin-top:10px">${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}</div>
+    </div>
+    <div class="mf">${c.id?`<button class="btn dng" type="button" data-a="delProf" data-v="${c.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Confirmar</button></div></form>`}
+  if(m.type==='dia'){const c=m.data||{};
+    body=`<form data-form="dia" data-id="${c.id||''}" class="drf" novalidate>
+    <div class="drh"><h3>${c.id?'EDITAR DIARISTA':'NOVO DIARISTA'}</h3><button type="button" class="drx" data-a="close" aria-label="Fechar">✕</button></div>
+    <div class="drb">${err}
+    ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name||'')}" required>`)}
+    <div style="margin-top:10px">${fldHtml('E-mail',`<input name="email" type="email" value="${esc(c.email||'')}" autocomplete="off">`)}</div>
+    <div style="margin-top:10px">${fldHtml('Telefone',`<input name="phone" type="tel" value="${esc(c.phone||'')}" inputmode="tel" placeholder="(66) 99999-9999">`)}</div>
+    <div style="margin-top:10px">${fldHtml('Cargo',`<input name="role" value="${esc(c.role||'')}">`)}</div>
+    <div style="margin-top:10px">${fldHtml('Valor da diária',`<input name="valor" inputmode="decimal" value="${c.valor!=null?String(c.valor).replace('.',','):''}" placeholder="0,00">`)}</div>
+    </div>
+    <div class="mf">${c.id?`<button class="btn dng" type="button" data-a="delDia" data-v="${c.id}" style="margin-right:auto">Excluir</button>`:''}<button class="btn" type="button" data-a="close">Cancelar</button><button class="btn pri" type="submit">Confirmar</button></div></form>`}
   if(m.type==='contact'){const c=m.data||{};
     body=`<h3>${c.id?'Editar contato':'Cadastrar contato'}</h3>${err}<form data-form="contact" data-id="${c.id||''}" novalidate><div class="form">
     ${fldHtml('Nome do contato',`<input name="name" value="${esc(c.name)}" required>`)}
@@ -2220,7 +2241,7 @@ function modalHtml(){
     </tbody><tfoot><tr><td colspan="3">Total de entradas · saídas · em estoque</td><td class="num">${fmt(te)}</td><td class="num">${fmt(ts)}</td><td class="num">${fmt(te-ts)}</td></tr></tfoot></table>`:'<p>Nenhum sêmen em estoque.</p>'}</div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e, na janela do navegador, escolha Salvar como PDF. O relatório respeita a fazenda e os filtros escolhidos.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
-  const DRW=m.type==='ev';
+  const DRW=m.type==='ev'||m.type==='prof'||m.type==='dia';
   return `<div class="ov${DRW?' drw':''}"><div class="modal${DRW?' drw':''}${['lanc','gpdf','pdf','pdfhist','pdfmov','ppdf','ppdfmov','fpdf','lpdf','opdf','epdf','finpdf','agpdf'].includes(m.type)?' big':''}${['entrada','saida','pentrada','psaida','lanc','diaimp'].includes(m.type)||m.type==='lote'?' xl':''}${m.type==='neg'||m.type==='ngtask'||m.type==='pserv'?' ng-m':''}${m.type==='orcpdf'?' big':''}" role="dialog" aria-modal="true">${body}</div></div>`;
 }
 
@@ -2498,27 +2519,23 @@ function ficMats(mats=ui.fi.mats){
   return mats.map(m=>{const it=all.find(x=>x.v===m.item);
     return it?{label:it.label,qty:num(m.qty),out:num(m.out),saldo:num(m.bal)}:{label:''}});
 }
-const profRead=()=>{const f=document.querySelector('form[data-form=cfprof]');if(!f)return[];const n=[...f.querySelectorAll('input[name=pn]')],old=(ui.cfProf&&ui.cfProf.rows)||[];return n.map((x,i)=>({...(old[i]||{}),name:x.value}))};
-const cfDiaRead=()=>{const f=document.querySelector('form[data-form=cfdia]');if(!f)return[];const n=[...f.querySelectorAll('input[name=cdn]')],v=[...f.querySelectorAll('input[name=cdv]')],old=(ui.cfDia&&ui.cfDia.rows)||[];return n.map((x,i)=>({...(old[i]||{}),name:x.value,valor:v[i].value}))};
 function vCfgProf(){
-  if(!ui.cfProf)ui.cfProf={rows:(S.profs&&S.profs.length?S.profs.map(p=>({...p})):AGTEC_DEF.map(n=>({name:n})))};
-  const rows=ui.cfProf.rows;
-  return `<div class="card"><div class="card-h"><h3>Profissionais</h3></div>
+  profNames();
+  const list=S.profs.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  return `<div class="card"><div class="card-h"><h3>Profissionais</h3><button class="btn pri" data-a="newProf">Cadastrar profissional</button></div>
   <p class="muted" style="margin:0 0 12px">Quem constar nesta lista aparece na Agenda Profissional do Calendário e nos filtros do sistema.</p>
-  <form data-form="cfprof" novalidate><div style="display:flex;flex-direction:column;gap:8px">
-  ${rows.map((r,i)=>`<div style="display:flex;gap:8px;align-items:center"><input name="pn" value="${esc(r.name||'')}" placeholder="Nome do profissional" style="flex:1;min-width:0;max-width:320px"><button type="button" class="btn sm dng" data-a="profDel" data-v="${i}">Remover</button></div>`).join('')||'<div class="muted">Nenhum profissional cadastrado.</div>'}
-  </div><div style="margin-top:10px"><button type="button" class="btn sm" data-a="profAdd">+ Adicionar profissional</button></div>
-  <div class="mf"><button class="btn pri" type="submit">Salvar</button></div></form></div>`}
+  <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Cargo</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.email||'—')}</td><td>${foneHtml(c.phone)}</td><td>${esc(c.role||'—')}</td>
+   <td><div class="acts"><button class="btn sm" data-a="editProf" data-v="${c.id}">Editar</button><button class="btn sm dng" data-a="delProf" data-v="${c.id}">Excluir</button></div></td></tr>`).join('')}
+  </tbody></table>`:empty('Nenhum profissional cadastrado. Clique em Cadastrar profissional.')}</div></div>`}
 function vCfgDiaristas(){
-  if(!ui.cfDia)ui.cfDia={rows:(S.diaristas||[]).map(d=>({...d}))};
-  const rows=ui.cfDia.rows;
-  return `<div class="card"><div class="card-h"><h3>Técnicos (Diaristas)</h3></div>
-  <p class="muted" style="margin:0 0 12px">Quem constar nesta lista aparece na opção “Vai junto” do Técnico, no evento do Calendário. As diárias são lançadas à mão, em Financeiro › Diárias Técnicas.</p>
-  ${errBox('cfdia')}
-  <form data-form="cfdia" novalidate><div style="display:flex;flex-direction:column;gap:8px">
-  ${rows.map((r,i)=>`<div style="display:flex;gap:8px;align-items:center"><input name="cdn" value="${esc(r.name||'')}" placeholder="Primeiro nome (ex.: Danilo)" style="flex:1;min-width:0;max-width:260px"><input name="cdv" value="${esc(r.valor??'')}" inputmode="decimal" placeholder="Valor da diária" style="width:130px"><button type="button" class="btn sm dng" data-a="cfDiaDel" data-v="${i}">Remover</button></div>`).join('')||'<div class="muted">Nenhum diarista cadastrado.</div>'}
-  </div><div style="margin-top:10px"><button type="button" class="btn sm" data-a="cfDiaAdd">+ Adicionar diarista</button></div>
-  <div class="mf"><button class="btn pri" type="submit">Salvar</button></div></form></div>`}
+  const list=(S.diaristas||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));
+  return `<div class="card"><div class="card-h"><h3>Técnicos (Diaristas)</h3><button class="btn pri" data-a="newDia">Cadastrar diarista</button></div>
+  <p class="muted" style="margin:0 0 12px">Quem constar nesta lista aparece na opção “Vai junto” do Técnico, no evento do Calendário.</p>
+  <div class="tw">${list.length?`<table><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Cargo</th><th>Valor da diária</th><th>Ações</th></tr></thead><tbody>
+  ${list.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.email||'—')}</td><td>${foneHtml(c.phone)}</td><td>${esc(c.role||'—')}</td><td>${brl(c.valor)}</td>
+   <td><div class="acts"><button class="btn sm" data-a="editDia" data-v="${c.id}">Editar</button><button class="btn sm dng" data-a="delDia" data-v="${c.id}">Excluir</button></div></td></tr>`).join('')}
+  </tbody></table>`:empty('Nenhum diarista cadastrado. Clique em Cadastrar diarista.')}</div></div>`}
 function vCfgUsers(){
   return `<div class="card"><div class="card-h"><h3>Gerenciar usuários</h3></div>
   <p class="muted" style="margin:0">Em breve. Hoje o sistema não tem login: qualquer pessoa com o link acessa o Gestão de Serviços.</p></div>`}
@@ -2912,7 +2929,7 @@ document.addEventListener('click',e=>{
        if(x.kind==='fat'&&(c.fatNova||(c.fatNeg&&(S.negs||[]).some(y=>y.id===c.fatNeg)))){ui.fatV=c.id}else{ui.fatV='';const u=tkU();u.snap=JSON.stringify(c);u.cOpen=false;u.menu=false;u.editDesc=false;u.draft=null;u.editMsg=null;u.delMsg=null;u.pop='';u.showChk=false;u.sel=c.id;ui.modal={type:'tk'}}}
      render();break}
    case 'tab':if(v==='agenda'&&ui.tab!=='agenda'){ui.miniPrev=!!ui.mini;ui.mini=true}else if(v!=='agenda'&&ui.tab==='agenda'&&ui.miniPrev!==undefined){ui.mini=ui.miniPrev;ui.miniPrev=undefined}ui.ngV=null;ui.ngPg='';ui.tab=v;if(v==='e-mov'&&b.dataset.s)ui.emT=b.dataset.s;if(v==='movs')ui.msub='hist';if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;render();document.getElementById('app').scrollTop=0;break;
-   case 'go':ui.ngV=null;ui.ngPg='';ui.tab=v;ui.rv=null;if(v==='cf-prof')ui.cfProf={rows:(S.profs&&S.profs.length?S.profs.map(p=>({...p})):AGTEC_DEF.map(n=>({name:n})))};if(v==='cf-diaristas')ui.cfDia={rows:(S.diaristas||[]).map(d=>({...d}))};if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;if(!isMob()){ui.mini=true;try{localStorage.setItem('gv_mini','1')}catch(e){}}render();document.getElementById('app').scrollTop=0;break;
+   case 'go':ui.ngV=null;ui.ngPg='';ui.tab=v;ui.rv=null;if(v==='i-lotes')ui.lf.status='Aberto';if(v==='i-estacao')ui.est.id=null;if(b.dataset.sub)ui.msub=b.dataset.sub;if(v==='estoque')ui.farm=null;if(v==='p-estoque')ui.pfarm=null;ui.drawer=false;if(!isMob()){ui.mini=true;try{localStorage.setItem('gv_mini','1')}catch(e){}}render();document.getElementById('app').scrollTop=0;break;
    case 'grp':{const g=b.dataset.home;
      const goHome=g&&!(curTab()===g&&(g!=='movs'||ui.msub==='hist'));
      if(ui.mini&&!isMob()){ui.mini=false;ui.nav[v]=true;if(g){ui.tab=g;if(g==='movs')ui.msub='hist'}navOnly(v)}
@@ -3084,10 +3101,12 @@ document.addEventListener('click',e=>{
    case 'diaristas':ui.modal={type:'diaristas',rows:S.diaristas.map(d=>({...d}))};render();break
    case 'diaAdd':{const r=diaRead();r.push({name:'',valor:''});ui.modal.rows=r;render();break}
    case 'diaDel':{const r=diaRead();r.splice(+v,1);ui.modal.rows=r;render();break}
-   case 'profAdd':{const r=profRead();r.push({name:''});ui.cfProf.rows=r;render();break}
-   case 'profDel':{const r=profRead();r.splice(+v,1);ui.cfProf.rows=r;render();break}
-   case 'cfDiaAdd':{const r=cfDiaRead();r.push({name:'',valor:''});ui.cfDia.rows=r;render();break}
-   case 'cfDiaDel':{const r=cfDiaRead();r.splice(+v,1);ui.cfDia.rows=r;render();break}
+   case 'newProf':ui.modal={type:'prof',data:{}};render();break
+   case 'editProf':ui.modal={type:'prof',data:{...S.profs.find(x=>x.id===v)}};render();break
+   case 'delProf':{const c=S.profs.find(x=>x.id===v);ask(`Excluir o profissional ${c.name}?`,()=>{S.profs=S.profs.filter(x=>x.id!==v);done('Profissional excluído.')});break}
+   case 'newDia':ui.modal={type:'dia',data:{}};render();break
+   case 'editDia':ui.modal={type:'dia',data:{...S.diaristas.find(x=>x.id===v)}};render();break
+   case 'delDia':{const c=S.diaristas.find(x=>x.id===v);ask(`Excluir o diarista ${c.name}?`,()=>{S.diaristas=S.diaristas.filter(x=>x.id!==v);done('Diarista excluído.')});break}
    case 'agDelAll':document.querySelectorAll('form[data-form=agdelm] input[name=rel]').forEach(c=>c.checked=true);break
    case 'agTipE':{const e=S.eventos.find(x=>x.id===v);if(!e)break;if(matchMedia('(hover:none)').matches){ui.modal={type:'ev',data:{...e}};render()}else agTipShow(b,e);break}
    case 'agEdit':ui.modal={type:'ev',data:{...S.eventos.find(x=>x.id===v)}};render();break;
@@ -3536,16 +3555,21 @@ document.addEventListener('submit',e=>{
     for(const r of rows)if(!(r.valor>=0))return modalErr('Informe o valor da diária de '+r.name+'.');
     S.diaristas=rows.map(r=>({id:r.id||nid('di'),name:r.name,valor:r.valor}));
     return done('Diaristas salvos.')}
-  if(k==='cfprof'){
-    const rows=profRead().map(r=>({...r,name:tc(String(r.name||'').trim())})).filter(r=>r.name);
-    S.profs=rows.map(r=>({id:r.id||nid('pf'),name:r.name}));
-    ui.cfProf=null;save();render();toast('Profissionais salvos.')}
-  if(k==='cfdia'){
-    const rows=cfDiaRead().map(r=>({...r,name:tc(String(r.name||'').trim()),valor:Number(String(r.valor).replace(',','.'))})).filter(r=>r.name);
-    for(const r of rows)if(!(r.valor>=0)){ui.cfDia.rows=rows;ui.err.cfdia='Informe o valor da diária de '+r.name+'.';render();return}
-    ui.err.cfdia='';
-    S.diaristas=rows.map(r=>({id:r.id||nid('di'),name:r.name,valor:r.valor}));
-    ui.cfDia=null;save();render();toast('Diaristas salvos.')}
+  if(k==='prof'){
+    const name=tc(String(fd.name||'').trim());
+    if(!name)return modalErr('Informe o nome do profissional.');
+    const id=form.dataset.id;
+    if(id){const r=S.profs.find(x=>x.id===id);Object.assign(r,{name,email:fd.email||'',phone:fd.phone||'',role:fd.role||''})}
+    else S.profs.push({id:nid('pf'),name,email:fd.email||'',phone:fd.phone||'',role:fd.role||''});
+    return done(id?'Profissional atualizado.':'Profissional cadastrado.')}
+  if(k==='dia'){
+    const name=tc(String(fd.name||'').trim()),valor=Number(String(fd.valor||'').replace(',','.'));
+    if(!name)return modalErr('Informe o nome do diarista.');
+    if(!(valor>=0))return modalErr('Informe o valor da diária.');
+    const id=form.dataset.id;
+    if(id){const r=S.diaristas.find(x=>x.id===id);Object.assign(r,{name,email:fd.email||'',phone:fd.phone||'',role:fd.role||'',valor})}
+    else S.diaristas.push({id:nid('di'),name,email:fd.email||'',phone:fd.phone||'',role:fd.role||'',valor});
+    return done(id?'Diarista atualizado.':'Diarista cadastrado.')}
   if(k==='fin'){
     const kind=form.dataset.kind,c=FIN[kind],id=form.dataset.id,rows=finRead(form);
     ui.modal.rows=rows;
