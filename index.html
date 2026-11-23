@@ -617,7 +617,7 @@ const cityOpts=cur=>[...CIDADES,...(cur&&!CIDADES.includes(cur)?[cur]:[])].map(x
 const loteFmt=v=>String(v==null?'':v).replace(/[A-Za-zÀ-ÿ]+/g,w=>w.length>3&&w===w.toUpperCase()?w.charAt(0)+w.slice(1).toLowerCase():w);
 const loteTxt=v=>{const l=S.lotes.find(x=>x.id===v);return String(l?l.name:(v||'')).toUpperCase()};
 const newOs=()=>({id:'',date:'',farm:'',tech:'',city:'',svcs:[{}],trips:[{}],obs:''});
-const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',rows:[{}],mats:[{}]});
+const newFi=()=>({id:'',from:'',to:'',farm:'',tech:'',obs:'',rows:[{}],mats:[{}]});
 const ui={brInat:false,ecT:'',eft:'',efz:null,emT:'',emItem:'',ag:{view:'month',date:today(),tec:'',tecs:[],farms:[],fs:'',side:innerWidth>900,lf:'',lt:'',f:{farm:'',title:'',cat:'',periodo:'',lote:'',q:''}},fa:{diarias:'a',kms:'a'},ff:{diarias:{q:'',from:'',to:'',sit:'',prest:'',farm:''},kms:{q:'',from:'',to:'',sit:'',prest:'',farm:''}},ef:{seg:'',city:'',tipo:''},q:{fz:'',ct:'',br:'',pr:'',bj:'',ec:'',lt:''},cf:{farm:''},os:newOs(),est:{id:null,tab:'1'},fi:newFi(),lf:{status:'Aberto',farm:''},pfarm:null,pcat:'',pm:{from:'',to:'',type:'',farm:'',product:''},mini:false,drawer:false,nav:{},tab:'inicio',msub:'hist',farm:null,fBreed:'',fInd:'',open:{},modal:null,confirm:null,
   hist:{tank:'',farm:'',kind:''},hm:{from:'',to:'',type:'',farm:'',breeder:''},
   err:{},f:{entrada:{date:today()},saida:{date:today()},pentrada:{date:today()},psaida:{date:today()}}};
@@ -2240,6 +2240,7 @@ function modalHtml(){
      <h4 style="margin:16px 0 6px">Materiais utilizados</h4>
      ${mats.length?`<table><thead><tr><th>Produto</th><th class="num">Quantidade</th><th class="num">Saída</th><th class="num">Saldo</th></tr></thead><tbody>
      ${mats.map(x=>`<tr><td>${esc(x.label)}</td><td class="num">${x.qty===''?'':fmt(x.qty)}</td><td class="num">${x.out===''?'':fmt(x.out)}</td><td class="num"><b>${x.saldo===''?'':fmt(x.saldo)}</b></td></tr>`).join('')}</tbody></table>`:'<p>Nenhum material lançado.</p>'}
+     ${f.obs?`<h4 style="margin:16px 0 6px">Observação</h4><p style="white-space:pre-wrap;margin:0">${esc(f.obs)}</p>`:''}
     </div></div>
     <p class="muted" style="margin:12px 0 0;font-size:13px">Clique em Imprimir e escolha Salvar como PDF.</p>
     <div class="mf"><button class="btn" data-a="close">Fechar</button><button class="btn pri" data-a="print">Imprimir / Salvar como PDF</button></div>`}
@@ -2633,7 +2634,8 @@ function vFicha(){
   </div>
   <h3 style="margin:0 0 8px">Procedimentos</h3>${svc}
   <h3 style="margin:16px 0 8px">Materiais utilizados</h3>${mat}
-  <p class="muted" style="font-size:13px">Quantidade, Saída e Saldo são digitados na ficha; nada é lido nem lançado no estoque.</p></div>
+  <p class="muted" style="font-size:13px">Quantidade, Saída e Saldo são digitados na ficha; nada é lido nem lançado no estoque.</p>
+  <div class="form" style="margin-top:16px">${fldHtml('Observação',`<textarea data-fi="obs" rows="3" style="resize:vertical">${esc(f.obs||'')}</textarea>`,'wide')}</div></div>
   <div class="card" style="margin-top:16px"><div class="card-h"><h3>Histórico Ficha Saída</h3></div>
   <div class="tw">${S.fichas.length?`<table><thead><tr><th>Data Inicial</th><th>Fazenda</th><th>Técnico Responsável</th><th>Ações</th></tr></thead><tbody>
   ${[...S.fichas].sort((a,b)=>b.from.localeCompare(a.from)).map(x=>`<tr><td>${dt(x.from)}</td><td>${esc(F(x.farm).name)}</td><td>${esc(x.tech)}</td>
@@ -3076,12 +3078,12 @@ document.addEventListener('click',e=>{
    case 'fSave':{const f=ui.fi;
      if(!f.from||!f.farm||!f.tech.trim()){toast('Preencha a data inicial, a fazenda e o técnico responsável.');break}
      if(f.to&&f.to<f.from){toast('A data final não pode ser antes da inicial.');break}
-     const rec={from:f.from,to:f.to||'',farm:f.farm,tech:f.tech.trim(),
+     const rec={from:f.from,to:f.to||'',farm:f.farm,tech:f.tech.trim(),obs:(f.obs||'').trim(),
        rows:f.rows.filter(r=>r.date||r.proc||r.lote||r.etapa||r.total).map(r=>({...r})),
        mats:f.mats.filter(m=>m.item).map(m=>({...m}))};
      if(f.id)Object.assign(S.fichas.find(x=>x.id===f.id),rec);else S.fichas.push({id:nid('fs'),...rec});
      ui.fi=newFi();done('Ficha salva.');break}
-   case 'editFicha':{const x=S.fichas.find(q=>q.id===v);ui.fi=JSON.parse(JSON.stringify({id:x.id,from:x.from,to:x.to,farm:x.farm,tech:x.tech,rows:x.rows.length?x.rows:[{}],mats:x.mats.length?x.mats:[{}]}));render();window.scrollTo(0,0);const m=document.querySelector('main,#app');if(m)m.scrollTop=0;break}
+   case 'editFicha':{const x=S.fichas.find(q=>q.id===v);ui.fi=JSON.parse(JSON.stringify({id:x.id,from:x.from,to:x.to,farm:x.farm,tech:x.tech,obs:x.obs||'',rows:x.rows.length?x.rows:[{}],mats:x.mats.length?x.mats:[{}]}));render();window.scrollTo(0,0);const m=document.querySelector('main,#app');if(m)m.scrollTop=0;break}
    case 'cancelFicha':ui.fi=newFi();render();break;
    case 'delFicha':{const x=S.fichas.find(q=>q.id===v);ask(`Excluir a ficha de ${F(x.farm).name} (${dt(x.from)})?`,()=>{S.fichas=S.fichas.filter(q=>q.id!==v);if(ui.fi.id===v)ui.fi=newFi();done('Ficha excluída.')});break}
    case 'fPdf':ui.modal={type:'fpdf'};render();break;
