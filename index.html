@@ -602,6 +602,7 @@ function softRender(){
 document.addEventListener('focusout',()=>{if(needRender)setTimeout(()=>{const a=document.activeElement;if(!(a&&a.closest&&a.closest('#modal-root')))softRender()},60)});
 async function init(){
   try{if(window.GS_CLOUD&&GS_CLOUD.enabled)DB=await GS_CLOUD.connect();else if(window.claude&&window.claude.use)DB=await window.claude.use('db')}catch(e){DB=null}
+  if(RESTR_COLS[(window.GS_EMAIL||'').trim().toLowerCase()])ui.tab='inicio';
   if(!DB){dbState='local';const l=loadLocal();if(l)S=Object.assign(emptyS(),l);render();return}
   slowT=setTimeout(()=>{if(dbState!=='ok'){dbState='lento';render()}},10000);
   Object.keys(synced).forEach(c=>DB.collection(c).onSnapshot(sn=>onSnap(c,sn),e=>{dbState=(e&&e.code==='unavailable')?'lento':'erro';render()}));
