@@ -1725,10 +1725,11 @@ function vEEst(){
   const t=ui.eft||'p';
   const seg=(v,l)=>`<button class="btn sm${t===v?' pri':''}" data-a="eft" data-v="${v}" aria-pressed="${t===v}">${l}</button>`;
   if(!ui.efz||!FZV().some(f=>f.id===ui.efz)){
+    const comEst=FZV().map(f=>({f,ns:bItems(f.id).length,np:pItems(f.id).length,d:farmTotal(f.id)})).filter(x=>x.ns+x.np>0);
     return `<div class="card"><div class="card-h"><h3>Estoque por fazenda</h3></div>
-    ${FZV().length?FZV().map(f=>{const ns=bItems(f.id).length,np=pItems(f.id).length,d=farmTotal(f.id),n=ns+np;
-      return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'item':'itens'} · ${fmt(d)} doses de sêmen</div></div><button class="btn" data-a="efz" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty('Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}${FZV().length?`<div class="farm-row" style="border-top:2px solid var(--line,#ddd);margin-top:4px;font-weight:700"><div><b>Total</b><div class="muted">${fmt(FZV().reduce((n,f)=>n+bItems(f.id).length+pItems(f.id).length,0))} itens · ${fmt(FZV().reduce((n,f)=>n+farmTotal(f.id),0))} doses de sêmen</div></div></div>`:''}
-    <p class="muted" style="margin:12px 0 0">O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
+    ${comEst.length?comEst.map(({f,ns,np,d})=>{const n=ns+np;
+      return `<div class="farm-row"><div><b>${esc(f.name)}</b><div class="muted">${fmt(n)} ${n===1?'item':'itens'} · ${fmt(d)} doses de sêmen</div></div><button class="btn" data-a="efz" data-v="${f.id}">Ver estoque</button></div>`}).join(''):empty(FZV().length?'Nenhuma fazenda com estoque no momento.':'Nenhuma fazenda cadastrada. Cadastre em CRM › Empresas.')}${comEst.length?`<div class="farm-row" style="border-top:2px solid var(--line,#ddd);margin-top:4px;font-weight:700"><div><b>Total</b><div class="muted">${fmt(comEst.reduce((n,x)=>n+x.ns+x.np,0))} itens · ${fmt(comEst.reduce((n,x)=>n+x.d,0))} doses de sêmen</div></div></div>`:''}
+    <p class="muted" style="margin:12px 0 0">Mostrando só fazendas com estoque. O estoque é só para consulta. Entradas e saídas são lançadas em Movimentações.</p></div>`;
   }
   const f=F(ui.efz);
   const sem=t==='p'?[]:(()=>{const m={};items(ui.efz,t==='s'?{breed:ui.fBreed,ind:ui.fInd}:{}).forEach(o=>{const g=m[o.b]||(m[o.b]={k:'s',b:o.b,name:o.name,cat:o.breed,un:'Dose',ent:0,sai:0,bal:0,tanks:{}});g.ent+=o.ent;g.sai+=o.sai;g.bal+=o.bal;Object.entries(o.tanks).forEach(([tk,q])=>{g.tanks[tk]=(g.tanks[tk]||0)+q})});return Object.values(m)})();
