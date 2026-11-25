@@ -1017,7 +1017,7 @@ const TK_TEAM=['Flávio Alves','Bina Alves','Isabella Galdioli'],TK_OLD={'Flávi
 const tkA=()=>ui.tab==='f-fatur'?'fat':'';
 const inA=x=>(x.area||'')===tkA();
 const tkU=()=>{const K=tkA()?'fk':'tk';if(!ui[K])ui[K]={modo:'quadro',resp:'Todos',per:'todos',st:'todos',de:'',ate:'',col:'',q:'',semResp:false,anx:false,fp:false,sel:null};return ui[K]};
-const tkCols=()=>S.tcols.filter(inA).sort((a,b)=>(a.ord||0)-(b.ord||0));
+const tkCols=()=>{const rc=restrCols();return S.tcols.filter(inA).filter(c=>!rc||rc.includes(c.id)).sort((a,b)=>(a.ord||0)-(b.ord||0))};
 const tkDoneCol=()=>{const c=tkCols();return c.length?c[c.length-1].id:''};
 const tkLate=t=>t.area!=='fat'&&!!t.prazo&&!t.feito&&!tkNaArq(t)&&(t.prazo<today()||(t.prazo===today()&&!!t.hora&&t.hora<new Date().toTimeString().slice(0,5)));
 const TKI={arq:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/>',clip:'<path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15 9"/>',msg:'<path d="M4 4h16v12H9l-5 4z"/><path d="M8 8.5h8M8 12h5"/>',chk:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>'};
@@ -1032,6 +1032,7 @@ const tkPerOk=t=>{const u=tkU(),p=u.per;if(p==='todos')return true;if(!t.prazo)r
  if(p==='custom')return (!u.de||d>=u.de)&&(!u.ate||d<=u.ate);
  const n=+p;return d>=addDays(td,-n)&&d<=td};
 const tkOk=t=>{const u=tkU();
+ {const rc=restrCols();if(rc&&!rc.includes(t.col))return false}
  if(u.resp!=='Todos'&&!(t.membros||[]).includes(u.resp))return false;
  if(!tkPerOk(t))return false;
  if(u.col&&t.col!==u.col)return false;
@@ -1045,9 +1046,9 @@ const tkOk=t=>{const u=tkU();
  if(u.st==='emdia')return !t.feito&&!tkNaArq(t)&&!tkLate(t);
  if(u.st==='conc')return tkSt(t)[0]==='Concluída';
  return true};
-const tkArqRows=()=>{const u=tkU(),A=tkA();const termo=nrm(u.aq||'').split(/\s+/).filter(Boolean);
+const tkArqRows=()=>{const u=tkU(),A=tkA();const termo=nrm(u.aq||'').split(/\s+/).filter(Boolean),rc=restrCols();
  return S.tarefas.filter(t=>t.feito&&(A?t.area===A:!t.area)).filter(t=>{
-  if(isRestr()&&!(t.membros||[]).includes(tkMe()))return false;
+  if(rc&&!rc.includes(t.col))return false;
   if(u.ade&&(!t.concluidaEm||t.concluidaEm<u.ade))return false;
   if(u.aate&&(!t.concluidaEm||t.concluidaEm>u.aate))return false;
   if(termo.length){const hay=nrm([t.titulo,t.desc,(t.membros||[]).join(' ')].join(' '));if(!termo.every(w=>hay.includes(w)))return false}
@@ -1055,13 +1056,13 @@ const tkArqRows=()=>{const u=tkU(),A=tkA();const termo=nrm(u.aq||'').split(/\s+/
 const tkArqBody=()=>{const u=tkU(),rows=tkArqRows(),PG=50,sg=rows.length+'|'+(rows[0]?rows[0].id:'')+'|'+(u.aq||'')+u.ade+u.aate;
  if(u.arqSig!==sg){u.arqSig=sg;u.arqPg=0}
  const np=Math.max(1,Math.ceil(rows.length/PG));if((u.arqPg||0)>=np)u.arqPg=np-1;const pg=u.arqPg||0,pr=rows.slice(pg*PG,pg*PG+PG);
- const selA=isRestr()?[]:(u.selArq||[]).filter(id=>rows.some(r=>r.id===id)),allA=pr.length>0&&pr.every(r=>selA.includes(r.id));
+ const selA=restrCols()?[]:(u.selArq||[]).filter(id=>rows.some(r=>r.id===id)),allA=pr.length>0&&pr.every(r=>selA.includes(r.id));
  const nav=np>1?`<button class="btn sm" data-tk="arqpg" data-v="${pg-1}"${pg?'':' disabled'}>‹ Anterior</button><button class="btn sm" data-tk="arqpg" data-v="${pg+1}"${pg<np-1?'':' disabled'}>Próxima ›</button>`:'';
  return `${selA.length?`<div class="tk-bulk"><b>${selA.length} ${selA.length===1?'selecionada':'selecionadas'}</b>${selA.length<rows.length?`<button class="btn sm" data-tk="selarqfull">Selecionar todas as ${rows.length} arquivadas</button>`:''}<button class="btn sm" data-tk="bmemb" aria-expanded="${u.bmemb?'true':'false'}">Membros ▾</button><button class="btn sm dng" data-tk="arqdel">Excluir</button><button class="btn sm" data-tk="arqclr">Limpar seleção</button></div>${u.bmemb?tkBulkMemb(selA):''}`:''}
  <div class="tk-arl">${rows.length?`<div class="tk-ar tk-arh"><span class="tk-ck" data-tk="selarqall" data-ids="${pr.map(r=>r.id).join(',')}"><input type="checkbox"${allA?' checked':''} tabindex="-1" aria-label="Selecionar todas desta página"></span><span>Concluída</span><span>Tarefa</span><span>Responsável</span></div>${pr.map(t=>`<div class="tk-ar tk-row${selA.includes(t.id)?' sel':''}" data-tk="open" data-v="${t.id}"><span class="tk-ck" data-tk="selarq" data-v="${t.id}"><input type="checkbox"${selA.includes(t.id)?' checked':''} tabindex="-1" aria-label="Selecionar tarefa"></span><span class="muted">${t.concluidaEm?dt(t.concluidaEm):'—'}</span><b>${esc(t.titulo)}</b><span class="muted">${esc((t.membros||[]).join(', ')||'—')}</span></div>`).join('')}`:'<p class="muted" style="padding:20px">Nenhum cartão encontrado.</p>'}</div>
  <div class="tk-arf"><span>${rows.length} ${rows.length===1?'cartão':'cartões'}${np>1?' · mostrando '+(pg*PG+1)+'–'+(pg*PG+pr.length):''}</span>${nav}</div>`};
 const tkArqHtml=(total)=>{const u=tkU();if(!u.arqOpen)return '';
- return `<div class="tk-dov" data-tk="arqClose"></div><aside class="tk-drw" role="dialog" aria-label="Arquivados"><div class="tk-drh">${tkIc('arq')}<div class="tk-drt"><b>Arquivados · ${tkA()?'Faturamento':'Tarefas'}</b><small>${isRestr()?tkArqRows().length+' com o seu nome':total+' '+(total===1?'cartão arquivado':'cartões arquivados')}</small></div><button type="button" class="tk-x" data-tk="arqClose" aria-label="Fechar">✕</button></div>
+ return `<div class="tk-dov" data-tk="arqClose"></div><aside class="tk-drw" role="dialog" aria-label="Arquivados"><div class="tk-drh">${tkIc('arq')}<div class="tk-drt"><b>Arquivados · ${tkA()?'Faturamento':'Tarefas'}</b><small>${restrCols()?tkArqRows().length+' nas suas colunas':total+' '+(total===1?'cartão arquivado':'cartões arquivados')}</small></div><button type="button" class="tk-x" data-tk="arqClose" aria-label="Fechar">✕</button></div>
  <div class="tk-drf"><label class="tk-search tk-drs"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="text" data-tkf="aq" value="${esc(u.aq||'')}" placeholder="Buscar por fazenda ou título…" autocomplete="off" aria-label="Buscar nos arquivados"></label>
  <div class="tk-drd"><label>Concluída de<input type="date" data-tkf="ade" value="${esc(u.ade||'')}"></label><label>até<input type="date" data-tkf="aate" value="${esc(u.aate||'')}"></label><button type="button" class="btn sm" data-tk="arqclrf">Limpar filtros</button></div></div>
  <div class="tk-drb" id="tk-arqbody">${tkArqBody()}</div></aside>`};
@@ -1530,7 +1531,7 @@ function vInicio(){
   abertos.sort((a,b)=>(loteTemServico(a)?1:0)-(loteTemServico(b)?1:0)||(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));pend.sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.name.localeCompare(b.name));
   const faltaDg=S.lancs.filter(l=>l.ia&&!l.dg&&addDays(l.ia,28)<=td).map(l=>{const es=S.estacoes.find(x=>x.id===l.est)||{},lt=S.lotes.find(x=>x.id===l.lote),prev=addDays(l.ia,28);return {l,farm:es.farm,lt,prev,atraso:Math.round((new Date(td+'T12:00:00')-new Date(prev+'T12:00:00'))/864e5)}}).sort((a,b)=>a.prev.localeCompare(b.prev));
   const hoje=S.eventos.filter(e=>e.date<=td&&(e.end||e.date)>=td).sort((a,b)=>(b.allday?1:0)-(a.allday?1:0)||(a.start||'').localeCompare(b.start||''));
-  const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkHoje=S.tarefas.filter(t=>!t.area&&!t.feito&&t.prazo&&t.prazo<=td&&(t.membros||[]).includes(tkEu)).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
+  const tkEu=tkMe(),tkSo=TK_TEAM.includes(tkEu),tkRc=restrCols(),tkHoje=S.tarefas.filter(t=>!t.area&&!t.feito&&t.prazo&&t.prazo<=td&&(t.membros||[]).includes(tkEu)&&(!tkRc||tkRc.includes(t.col))).sort((a,b)=>a.prazo.localeCompare(b.prazo)||(a.hora||'99').localeCompare(b.hora||'99')||a.titulo.localeCompare(b.titulo));
   const _h=new Date().getHours(),_sd=_h<12?'Bom dia':_h<18?'Boa tarde':'Boa noite',_dh=dd.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   return `<div class="ini-hi"><h2>${_sd}, ${esc(tkMe().split(' ')[0])}</h2><p>${esc(_dh.charAt(0).toUpperCase()+_dh.slice(1))}</p></div>
   <div class="ini-grid">
@@ -1540,7 +1541,7 @@ function vInicio(){
    <div class="kpi kc kc4"><div class="k-n">${fmt(pend.length)}</div><div class="k-l">Lotes para agendar serviço</div></div>
   </div>
   <div class="card" style="margin-bottom:14px"><div class="card-h"><h3>Minhas tarefas de hoje <small class="muted">(${tkHoje.length})${tkHoje.length>5?' · mostrando 5':''}</small></h3><button class="btn sm" data-a="go" data-v="tarefas">Abrir Tarefas</button></div>
-   ${tkHoje.length?tkHoje.slice(0,5).map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty(isRestr()?'Nenhuma tarefa sua para hoje.':'Nenhuma tarefa para hoje.')}</div>
+   ${tkHoje.length?tkHoje.slice(0,5).map(t=>{const c=S.tcols.find(x=>x.id===t.col);return `<div class="ini-row tk-ir" data-tk="open" data-v="${t.id}" role="button" tabindex="0"><div><b>${esc(t.titulo)}</b><small>${t.prazo<td?'Prazo '+dt(t.prazo):(t.hora?'Hoje às '+esc(t.hora):'Hoje')}${c?' · '+esc(c.nome):''}${(t.membros||[]).length?' · '+esc(t.membros.join(', ')):''}</small></div><span class="tk-b tkst-${tkSt(t)[1]}">${tkSt(t)[0]}</span></div>`}).join(''):empty(tkRc?'Nenhuma tarefa sua para hoje.':'Nenhuma tarefa para hoje.')}</div>
   <div class="ini-two">
    <div class="card"><div class="card-h"><h3>Eventos de hoje${hoje.length>10?` <small class="muted">(${hoje.length} · mostrando 10)</small>`:''}</h3><button class="btn sm" data-a="go" data-v="agenda">Abrir Calendário</button></div>
     ${hoje.length?hoje.slice(0,10).map(e=>`<button type="button" class="ini-ev" data-a="agEdit" data-v="${e.id}"><i style="background:${evCol(e)}"></i><span><b>${esc(evLabel(e,true))}</b><small>${esc([perOf(e),e.total?'Total: '+e.total:'',e.cat].filter(Boolean).join(' · '))}</small></span></button>`).join(''):empty('Nenhum evento para hoje.')}</div>
@@ -2943,6 +2944,9 @@ let lastMK='';
 const ADM_ACTS=['wipe','import','delFarm','delBreeder','delProduct','delTank','delContact','delEst'];
 const isAdm=()=>window.GS_ADMIN!==false;
 const RESTR=['isabellavaleanimal@gmail.com'],isRestr=()=>RESTR.includes((window.GS_EMAIL||'').trim().toLowerCase());
+// Em Tarefas (não Faturamento), cada e-mail abaixo só enxerga estas colunas (ids de S.tcols).
+const RESTR_COLS={'isabellavaleanimal@gmail.com':['tc4','tc5'],'atendimentovaleanimal@gmail.com':['tc3','tc5']};
+const restrCols=()=>tkA()?null:(RESTR_COLS[(window.GS_EMAIL||'').trim().toLowerCase()]||null);
 function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelectorAll('[data-a="'+a+'"]').forEach(x=>x.remove()))}
 function render(){(S.negs||[]).forEach(x=>{if(x.st==='Proposta')x.st='Orçamento'});
   normData();
