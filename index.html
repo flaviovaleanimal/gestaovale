@@ -1033,7 +1033,7 @@ const tkPerOk=t=>{const u=tkU(),p=u.per;if(p==='todos')return true;if(!t.prazo)r
  if(p==='custom')return (!u.de||d>=u.de)&&(!u.ate||d<=u.ate);
  const n=+p;return d>=addDays(td,-n)&&d<=td};
 const tkOk=t=>{const u=tkU();
- {const rc=restrCols();if(rc&&!rc.includes(t.col))return false}
+ {const rc=restrCols();if(rc&&!rc.includes(t.col))return false;if(rc&&t.col===RESTR_SHARED_COL&&!(t.membros||[]).includes(tkMe()))return false}
  if(u.resp!=='Todos'&&!(t.membros||[]).includes(u.resp))return false;
  if(!tkPerOk(t))return false;
  if(u.col&&t.col!==u.col)return false;
@@ -1050,6 +1050,7 @@ const tkOk=t=>{const u=tkU();
 const tkArqRows=()=>{const u=tkU(),A=tkA();const termo=nrm(u.aq||'').split(/\s+/).filter(Boolean),rc=restrCols();
  return S.tarefas.filter(t=>t.feito&&(A?t.area===A:!t.area)).filter(t=>{
   if(rc&&!rc.includes(t.col))return false;
+  if(rc&&t.col===RESTR_SHARED_COL&&!(t.membros||[]).includes(tkMe()))return false;
   if(u.ade&&(!t.concluidaEm||t.concluidaEm<u.ade))return false;
   if(u.aate&&(!t.concluidaEm||t.concluidaEm>u.aate))return false;
   if(termo.length){const hay=nrm([t.titulo,t.desc,(t.membros||[]).join(' ')].join(' '));if(!termo.every(w=>hay.includes(w)))return false}
@@ -2948,6 +2949,8 @@ const RESTR=['isabellavaleanimal@gmail.com'],isRestr=()=>RESTR.includes((window.
 // Em Tarefas (não Faturamento), cada e-mail abaixo só enxerga estas colunas (ids de S.tcols).
 const RESTR_COLS={'isabellavaleanimal@gmail.com':['tc4','tc5'],'atendimentovaleanimal@gmail.com':['tc3','tc5']};
 const restrCols=()=>tkA()?null:(RESTR_COLS[(window.GS_EMAIL||'').trim().toLowerCase()]||null);
+// A coluna "tc5" (CONCLUÍDO) é compartilhada por todos; dentro dela, mostrar a cada um só os cartões com o seu nome.
+const RESTR_SHARED_COL='tc5';
 function admStrip(){if(isAdm())return;ADM_ACTS.forEach(a=>document.querySelectorAll('[data-a="'+a+'"]').forEach(x=>x.remove()))}
 function render(){(S.negs||[]).forEach(x=>{if(x.st==='Proposta')x.st='Orçamento'});
   normData();
@@ -2961,7 +2964,7 @@ function render(){(S.negs||[]).forEach(x=>{if(x.st==='Proposta')x.st='Orçamento
   sh.style.setProperty('--sw',mini?'0px':'252px');
   const sd=document.getElementById('side');
   sd.className='side'+(mini?' mini':'');
-  sd.innerHTML=ui.tab.startsWith('cf-')?cfgNavHtml():`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 11:20</div>`;
+  sd.innerHTML=ui.tab.startsWith('cf-')?cfgNavHtml():`<div class="brand"><span class="logo">VA</span><span class="brand-t"><small>Vale Animal</small>Gestão de Serviços</span></div>${navHtml(isRestr()?NAV.filter(n=>n.id!=='fin'&&n.id!=='crm'):NAV,0)}<div class="muted" style="padding:14px 16px;font-size:11px;opacity:.7">Versão: 15/11/2026 11:20</div>`;
   document.getElementById('hdr').innerHTML=`<button class="hb" data-a="toggleSide" aria-label="Recolher ou abrir o menu">${ic('menu')}</button>
    <div class="ht"><span class="hs">Gestão de Serviços · ${modName()}</span><b>${title}</b></div>${bellHtml()}<div class="um"><button class="hu" data-a="umenu" aria-haspopup="menu" aria-expanded="${ui.umenu?'true':'false'}"><i class="ud ${dbState==='ok'?'ok':dbState==='conectando'?'':'bad'}"></i>Vale Animal ▾</button>${ui.umenu?`<div class="um-m" role="menu">${window.GS_CLOUD&&GS_CLOUD.enabled?`<button role="menuitem" data-a="pushToggle">${pushUi.on?'Desativar notificações neste aparelho':'Ativar notificações neste aparelho'}</button><hr>`:''}<button role="menuitem" data-a="export">Exportar dados</button><button role="menuitem" data-a="import">Importar dados</button>${window.GS_CLOUD&&GS_CLOUD.enabled?'<button role=menuitem data-a=logout>Sair</button>':''}<hr><button role="menuitem" class="danger" data-a="wipe">Zerar dados</button></div>`:''}</div>`;
   const _fa=document.activeElement,_fq=_fa&&_fa.dataset&&_fa.dataset.tkf==='fqtop'?[_fa.selectionStart,_fa.selectionEnd]:null;
@@ -3756,7 +3759,7 @@ try{ui.mini=localStorage.getItem('gv_mini')==='1'}catch(e){}
 let pendCard=null;try{const n=JSON.parse(sessionStorage.getItem(NAVKEY)||'null');if(n&&n.card)pendCard=n.card}catch(e){}
 try{const m=(location.hash||'').match(/^#cartao=([A-Za-z0-9_-]+)/);if(m){pendCard=m[1];try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}}catch(e){}let pendNeg=null;try{const m=(location.hash||'').match(/^#neg=([A-Za-z0-9_-]+)/);if(m){pendNeg=m[1];try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}}catch(e){}
 const saveNav=()=>{try{const K=ui.tab==='f-fatur'?'fk':'tk',sel=ui.modal&&ui.modal.type==='tk'&&ui[K]?ui[K].sel:null;if(pendCard&&!sel)return;sessionStorage.setItem(NAVKEY,JSON.stringify({tab:ui.tab,tk:ui.tk&&ui.tk.modo,fk:ui.fk&&ui.fk.modo,card:sel||null}))}catch(e){}};
-const _r0=render;render=function(){if(isRestr()&&typeof ui.tab==='string'&&ui.tab.startsWith('f-'))ui.tab='inicio';const r=_r0.apply(this,arguments);document.querySelectorAll('textarea.tk-cn').forEach(e=>{e.style.height='auto';e.style.height=(e.scrollHeight+2)+'px'});if(pendCard){const id=pendCard,c=(S.tarefas||[]).find(x=>x.id===id);if(c){pendCard=null;const want=c.area==='fat'?'f-fatur':'tarefas';if(ui.tab!==want)ui.tab=want;const b=document.createElement('button');b.dataset.tk='open';b.dataset.v=id;b.style.display='none';document.body.appendChild(b);b.click();b.remove();return r}else if(dbState==='ok'&&S.tarefas&&S.tarefas.length)pendCard=null}if(pendNeg&&dbState==='ok'&&S.negs&&S.negs.length){const id=pendNeg;pendNeg=null;setTimeout(()=>pushGo('#neg='+id),0)}saveNav();return r};
+const _r0=render;render=function(){if(isRestr()&&typeof ui.tab==='string'&&(ui.tab.startsWith('f-')||['fazendas','contatos','negociacoes','prodserv'].includes(ui.tab)))ui.tab='inicio';const r=_r0.apply(this,arguments);document.querySelectorAll('textarea.tk-cn').forEach(e=>{e.style.height='auto';e.style.height=(e.scrollHeight+2)+'px'});if(pendCard){const id=pendCard,c=(S.tarefas||[]).find(x=>x.id===id);if(c){pendCard=null;const want=c.area==='fat'?'f-fatur':'tarefas';if(ui.tab!==want)ui.tab=want;const b=document.createElement('button');b.dataset.tk='open';b.dataset.v=id;b.style.display='none';document.body.appendChild(b);b.click();b.remove();return r}else if(dbState==='ok'&&S.tarefas&&S.tarefas.length)pendCard=null}if(pendNeg&&dbState==='ok'&&S.negs&&S.negs.length){const id=pendNeg;pendNeg=null;setTimeout(()=>pushGo('#neg='+id),0)}saveNav();return r};
 render();
 init();
 </script>
